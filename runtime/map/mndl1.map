@@ -1,0 +1,48 @@
+* MNDL - The Mandelbrot fractal.
+* Based on 'CONS1'.
+MAP MNDL1 SIZE 24x80
+  FIELD AT 0,0    LEN 30 PROT BRIGHT COLOR=BLUE   "MNDL - The Mandelbrot Fractal."
+  INPUT TERMID    AT 0,65  LEN 8  PROT COLOR=BLUE
+  FIELD AT 0,60   LEN 5  PROT COLOR=BLUE          "TERM="
+  FIELD AT 2,0    LEN 5  PROT                     "Zoom:"
+  INPUT NZOOM     AT 2,20  LEN 18 UNDERSCORE COLOR=GREEN NUMERIC
+  STOP            AT 2,39
+  FIELD AT 2,40   LEN 6  PROT                     "Scale:"
+  INPUT NSCALE    AT 2,47  LEN 5  UNDERSCORE COLOR=GREEN NUMERIC
+  STOP            AT 2,53
+  FIELD AT 2,54   LEN 14 PROT COLOR=WHITE         "(Try 1.5 or 5)"
+  FIELD AT 3,0    LEN 14 PROT                     "Center (Real):"
+  INPUT NCREAL    AT 3,20  LEN 18 UNDERSCORE COLOR=GREEN NUMERIC
+  STOP            AT 3,39
+  FIELD AT 4,0    LEN 19 PROT                     "Center (Imaginary):"
+  INPUT NCIMAG    AT 4,20  LEN 18 UNDERSCORE COLOR=GREEN NUMERIC
+  STOP            AT 4,39
+  FIELD AT 5,0    LEN 11 PROT                     "Iterations:"
+  INPUT NMITER    AT 5,20  LEN 3  UNDERSCORE COLOR=GREEN NUMERIC
+  STOP            AT 5,25
+  FIELD AT 6,0    LEN 11 PROT                     "Characters:"
+  INPUT NCHARS    AT 6,20  LEN 40 UNDERSCORE COLOR=GREEN NUMERIC
+  STOP            AT 6,62
+  FIELD AT 7,0    LEN 20 PROT COLOR=WHITE         "Save settings"
+  FIELD AT 8,0    LEN 5  PROT                     "Name:"
+  INPUT NNAME     AT 9,20  LEN 16 UNDERSCORE COLOR=GREEN
+  STOP            AT 9,37
+  FIELD AT 10,0   LEN 18 PROT                     "Note:"
+  INPUT NNOTE     AT 10,20 LEN 55 UNDERSCORE COLOR=GREEN
+  STOP            AT 10,77
+  INPUT MSG       AT 13,0  LEN 78 PROT BRIGHT COLOR=RED
+  FIELD AT 15,0  LEN 8  PROT COLOR=WHITE          "Fractal:"
+  FIELD AT 15,10 LEN 39 PROT                      "PF1=Center on Cursor PF5=Julia at cursor"
+  FIELD AT 16,0   LEN 40 PROT COLOR=WHITE         "Scroll and Zoom work from the Mandelbrot Fractal."
+  FIELD AT 18,0   LEN 7  PROT COLOR=WHITE         "Scroll:"
+  FIELD AT 18,10  LEN 39 PROT                     "PF9=Left  PF10=Right  PF11=Up     PF12=Down"
+  FIELD AT 18,56  LEN 22 PROT COLOR=WHITE         "(By 1/4 of the screen)"
+  FIELD AT 19,0   LEN 10 PROT COLOR=WHITE         "Zoom:"
+  FIELD AT 19,10  LEN 20 PROT COLOR=BLUE          "PF7=Out   PF8=In"
+  FIELD AT 19,48  LEN 20 PROT COLOR=WHITE         "(Multiply and divide by Scale)"
+  FIELD AT 20,0   LEN 10 PROT COLOR=WHITE         "Settings:"
+  FIELD AT 20,10  LEN 30 PROT COLOR=BLUE          "PF6=Save  PF5=Load    PF2=Delete  PF1=Reset Default Settings"
+  FIELD AT 21,10  LEN 30 PROT COLOR=BLUE          "                                  PF4=Shuffle Saved Settings"
+  FIELD AT 22,10  LEN 30 PROT COLOR=BLUE          "PF3=Exit  ENTER=Draw              PF16=Shuffle & Draw"
+  CURSOR         AT NZOOM
+ENDMAP

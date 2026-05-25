@@ -1,0 +1,5 @@
+Defaults|50|>=<;:9876543210/.-,+*)('&%$#"!|-0.6|0.0|1|3|Default settings for the shuffle.
+PaulZoom1|50|>=<;:9876543210/.-,+*)('&%$#"!|-0.170337|1.0650668|625|2|Zoom 1 from https://paulbourke.net/fractals/mandelbrot/
+PaulZoom2|50|>=<;:9876543210/.-,+*)('&%$#"!|0.42884|0.231345|25|2|Zoom 2 from https://paulbourke.net/fractals/mandelbrot/
+PaulZoom3|50|>=<;:9876543210/.-,+*)('&%$#"!|-1.62917|0.0203968|243|2|Zoom 3 from https://paulbourke.net/fractals/mandelbrot/
+PaulZoom4|50|>=<;:9876543210/.-,+*)('&%$#"!|-0.761574|0.0847596|5|2|Zoom 4 from https://paulbourke.net/fractals/mandelbrot/
