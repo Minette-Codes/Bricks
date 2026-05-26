@@ -93,3 +93,9 @@ BRDS:rexx:brds.rexx:USERS
 Browsing the saved settings for `MNDL`.
 
 ![Main Menu](Screenshots/BRDS.png)
+
+## Go Script
+
+The script `./go` will start Bricks. It figures out which binary to run. Update the variable `BricksPath` to the path Brick lives.
+
+I keep Bricks as a submodule in my Bricks GIT repository.
