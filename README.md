@@ -11,7 +11,7 @@ Some stuff I wrote for Bricks. \
 
 ## Mandelbrot
 
-Generates a mandelbrot set.
+Generates a Mandelbrot set.
 
 Use `MNDL` to generate a Mandelbrot fractal in ASCII. You can zoom in/out, scroll the fractal, re-center at the cursor, generate a Julia set with the cursor and save settings. You can also rotate through the saved settings, even while displaying the fractal.
 
@@ -82,9 +82,11 @@ Showing the overlay with helpful information, help for the AID keys and a marker
 
 ## KSDS Browser
 
-A simply utility I wrote to hel when developing `MNDL` and `MNDU`.
+A simply utility I wrote to help when developing `MNDL` and `MNDU`.
 
-`BRDS` prompts for a **KSDS** file then displays each record with a cursor. Nothing fancy, just a way to look at what is in the database. The record is truncated, because I'm lazy.
+`BRDS` prompts for a **KSDS** file then displays each record using a cursor. Nothing fancy, just a way to look at what is in the database. The record is truncated, because I'm lazy.
+
+You can give `BRDS` the file and key from the command line. For example: `BRDS mandelbrot Defaults`
 
 ### Files
 
@@ -108,6 +110,7 @@ Browsing the saved settings for `MNDL`.
 ## Changes
 
 * 2026-05-25 - Initial release.
+* 2026-05-26 - Read the file and starting key from the command line. Handle going past the last record more gracefully. The cursor is re-opened and the last record re-read so you can keep scrolling through the data.
 
 ## Go Script
 
