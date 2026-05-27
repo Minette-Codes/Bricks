@@ -56,6 +56,8 @@ DO FOREVER
       CALL CURSOROPEN TYPED SKEY
     END
     FNM = TYPED
+    LREC = ''
+    LKEY = ''
   END
   ELSE DO
     SCR.MSG = 'Type a file name and press ENTER. PF3 exits.'
@@ -63,30 +65,37 @@ DO FOREVER
   END
   IF FNM = '' THEN ITERATE
 
-  /* Default ENTER: consume the next item via the cursor.    */
-  IF DIR = 'BACK' THEN DO
+  /* Consume the next item via the cursor.    */
+  REC = ''
+  IF DIR = 'BACK' THEN
     EXEC CICS READPREV FILE(FNM) INTO(REC) RIDFLD(LKEY) END-EXEC
-    DROP DIR
-  END
   ELSE
     EXEC CICS READNEXT FILE(FNM) INTO(REC) RIDFLD(LKEY) END-EXEC
 
   SELECT
     WHEN EIBRESP = 0 THEN DO
-      LREC = LEFT(REC, 60)
+      LREC = LEFT(REC,79)
     END
     WHEN EIBRESP = 20 THEN DO        /* ENDFILE -- Past the last key. */
-      LKEY = '(end)'
-      LREC = ''
-      SCR.MSG = 'Last record read.'
+      SCR.MSG = 'Last record read. / File not found.'
+      /* Reset the cursor and re-read the last record. */
+      /* This lets the user go backwards from the last record. */
+      CALL CURSORRESET FNM LKEY
+      REC = ''
+      IF DIR = 'BACK' THEN
+        EXEC CICS READNEXT FILE(FNM) INTO(REC) RIDFLD(LKEY) END-EXEC
+      ELSE
+        EXEC CICS READPREV FILE(FNM) INTO(REC) RIDFLD(LKEY) END-EXEC
+      LREC = LEFT(REC,79)
     END
     WHEN EIBRESP = 17 THEN DO        /* IOERR -- Underlying store error. */
-      LKEY = '(ioerr)'
+      LKEY = ''
       LREC = ''
       SCR.MSG = 'IO ERROR.'
     END
     OTHERWISE NOP
   END
+  DROP DIR
 END
 
 EXIT
