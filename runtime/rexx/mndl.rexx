@@ -14,12 +14,12 @@ EXEC CICS ASSIGN SCREENHT(TERM_HEIGHT) SCREENWD(TERM_WIDTH) TERMID(TRM)  END-EXE
 NUMERIC DIGITS 15
 
 /* Default settings. */
-DFTL_MAXITER = 50
-DFLT_CHARS = '>=<;:9876543210/.-,+*)(''&%$#"!'
+DFTL_MAXITER    = 50
+DFLT_CHARS      = '>=<;:9876543210/.-,+*)(''&%$#"!'
 DFLT_CENTERREAL = -0.6
 DFLT_CENTERIMAG = 0.0
-DFLT_ZOOM = 1
-DFLT_SCALE = 3
+DFLT_ZOOM       = 1
+DFLT_SCALE      = 3
 
 /* I keep way to much in SCR. :shrugs: */
 SCR = ''
@@ -31,11 +31,11 @@ SCR.CURSOR_OPEN = 'NO'
 /* The settings used to draw the Mandelbrot set. */
 MNDL = ''
 MNDL.HEIGHT    = TERM_HEIGHT
-MNDL.WIDTH     = TERM_WIDTH - 1
+MNDL.WIDTH     = TERM_WIDTH - 1 /* The width of the draw area. This excludes column 0. */
 MNDL.HCENTER   = INT(MNDL.HEIGHT / 2)
 MNDL.WCENTER   = INT(MNDL.WIDTH / 2)
 MNDL.CENTER    = MNDL.HCENTER * (MNDL.WIDTH + 1) + MNDL.WCENTER + 1
-MNDL.OVRL      = NO   /* Overlay showing details of the fractal. */
+MNDL.SHOW_OVRL = NO   /* Overlay showing details of the fractal. */
 MNDL.FRACTAL   = ''   /* The Mandelbrot set output. */
 MNDL.DRAW_TIME = 0    /* How long in ms it took to draw the fractal. */
 MNDL.OVER_TEXT = ''   /* Text for the overlay. */
@@ -102,15 +102,17 @@ SHOW_FRACTAL: PROCEDURE EXPOSE MNDL. SCR.
     ELSE
       CALL MANDELBROT
 
-      OUTPUT = MNDL.FRACTAL
-    IF MNDL.OVRL = 'YES' THEN DO
+    OUTPUT = MNDL.FRACTAL
+    IF MNDL.SHOW_OVRL = 'YES' THEN DO
       /* Information in the upper left. */
-      OUTPUT = OVERLAY('Real:' LEFT(MNDL.CENTERREAL, 18) || ' ',     OUTPUT)
-      OUTPUT = OVERLAY('Imag:' LEFT(MNDL.CENTERIMAG, 18) || ' ',     OUTPUT, (1) * (MNDL.WIDTH + 1)+ 1)
-      OUTPUT = OVERLAY('Zoom:' LEFT(SCR.NZOOM, 18) || ' ',           OUTPUT, (2) * (MNDL.WIDTH + 1)+ 1)
-      OUTPUT = OVERLAY('Time:' LEFT(MNDL.DRAW_TIME 'ms', 18) || ' ', OUTPUT, (3) * (MNDL.WIDTH + 1)+ 1)
+      OUTPUT = OVERLAY('Real:' LEFT(MNDL.CENTERREAL, 18),     OUTPUT, 0,                       25)
+      OUTPUT = OVERLAY('Imag:' LEFT(MNDL.CENTERIMAG, 18),     OUTPUT, 1 * (MNDL.WIDTH + 1)+ 1, 25)
+      OUTPUT = OVERLAY('Zoom:' LEFT(SCR.NZOOM, 18),           OUTPUT, 2 * (MNDL.WIDTH + 1)+ 1, 25)
+      OUTPUT = OVERLAY('Time:' LEFT(MNDL.DRAW_TIME 'ms', 18), OUTPUT, 3 * (MNDL.WIDTH + 1)+ 1, 25)
+      IF SCR.NNAME \= '' THEN
+      OUTPUT = OVERLAY('Save:' LEFT(SCR.NNAME, 18),           OUTPUT, 4 * (MNDL.WIDTH + 1)+ 1, 25)
 
-      /* Cross hairs in the center. */
+      /* Crosshair in the center. */
       OUTPUT = OVERLAY('[', OUTPUT, MNDL.CENTER - 2)
       OUTPUT = OVERLAY(']', OUTPUT, MNDL.CENTER + 3)
 
@@ -121,13 +123,13 @@ SHOW_FRACTAL: PROCEDURE EXPOSE MNDL. SCR.
 
     EXEC CICS SEND TEXT FROM(OUTPUT) END-EXEC
 
-    CALL AID_DRAW C2X(EIBAID)
+    CALL AID_FRACTAL C2X(EIBAID)
   END
   RETURN
 
 /* Generate the Mandelbrot set using the settings in MNDL. */
 MANDELBROT: PROCEDURE EXPOSE MNDL. SCR.
-  MNDL.FRACTAL = ''
+  OUTPUT = ''
   EXEC CICS ASKTIME ABSTIME(START_TIME) END-EXEC
   DO ROW = 0 TO MNDL.HEIGHT - 1
     /* Map the row into the imaginary part. */
@@ -150,21 +152,27 @@ MANDELBROT: PROCEDURE EXPOSE MNDL. SCR.
       END
 
       /* "Shade" the pixel. */
-      IF ROW = MNDL.HCENTER & COL = MNDL.WCENTER THEN
-        MNDL.FRACTAL =  MNDL.FRACTAL || X2C(13)
       IF I > MNDL.MAXITER THEN
-        MNDL.FRACTAL = MNDL.FRACTAL || ' '
+        OUTPUT = OUTPUT || ' '
       ELSE
-        MNDL.FRACTAL = MNDL.FRACTAL || SUBSTR(MNDL.CHARS, MOD(I, MNDL.NUMCHARS + 1), 1)
+        OUTPUT = OUTPUT || SUBSTR(MNDL.CHARS, MOD(I, MNDL.NUMCHARS + 1), 1)
     END
+
     /* Pad the last column or odd things happen with the output. */
-    IF ROW \= MNDL.HCENTER THEN
-      MNDL.FRACTAL = MNDL.FRACTAL || ' '
+    OUTPUT = OUTPUT || ' '
   END
 
   EXEC CICS ASKTIME ABSTIME(END_TIME) END-EXEC
   MNDL.DRAW_TIME = (END_TIME - START_TIME)
   SCR.MSG = 'Draw time:' MNDL.DRAW_TIME 'Milliseconds'
+
+  /* Add the cursor marker to the center of the middle line. */
+  /* Also remove the padding space from the end of the middle line. */
+  MNDL.FRACTAL =,
+    SUBSTR(OUTPUT, 1, MNDL.CENTER - 1) ||,
+    X2C(13) ||,
+    SUBSTR(OUTPUT, MNDL.CENTER - 1, MNDL.WCENTER + 1) ||,
+    SUBSTR(OUTPUT, MNDL.CENTER + MNDL.WCENTER + 2)
   RETURN
 
 /* Generate the Julia set using the settings in MNDL. */
@@ -209,7 +217,8 @@ JULIA: PROCEDURE EXPOSE MNDL. SCR.
       ELSE
         OUTPUT = OUTPUT || SUBSTR(MNDL.CHARS, MOD(I, MNDL.NUMCHARS + 1), 1)
     END
-    /* Padd the last column or odd things happen with the output. */
+
+    /* Pad the last column or odd things happen with the output. */
     OUTPUT = OUTPUT || ' '
   END
 
@@ -217,8 +226,8 @@ JULIA: PROCEDURE EXPOSE MNDL. SCR.
   EXEC CICS SEND TEXT FROM(OUTPUT) END-EXEC
   RETURN
 
-/* Handle the AID keys on the draw screen. */
-AID_DRAW: PROCEDURE EXPOSE MNDL. SCR. EIBCPOSN 
+/* Handle the AID keys on the fractal screen. */
+AID_FRACTAL: PROCEDURE EXPOSE MNDL. SCR. EIBCPOSN 
   PARSE ARG AID
   SELECT
     /* Center on the cursor. */
@@ -232,10 +241,10 @@ AID_DRAW: PROCEDURE EXPOSE MNDL. SCR. EIBCPOSN
     /* Toggle overlay. */
     WHEN AID = 'F4' THEN DO
       MNDL.SKIP_DRAW = 'YES'
-      IF MNDL.OVRL = 'YES' THEN
-        MNDL.OVRL = 'NO'
+      IF MNDL.SHOW_OVRL = 'YES' THEN
+        MNDL.SHOW_OVRL = 'NO'
       ELSE
-        MNDL.OVRL = 'YES'
+        MNDL.SHOW_OVRL = 'YES'
     END
     /* Show the Julia set for the current point. */
     WHEN AID = 'F5' THEN DO
@@ -364,6 +373,7 @@ SETTTINGS_UPDATE: PROCEDURE EXPOSE MNDL. SCR.
   MNDL.CENTERREAL = SCR.NCREAL
   MNDL.CENTERIMAG = SCR.NCIMAG
   MNDL.ZOOM       = SCR.NZOOM
+  MNDL.NUMCHARS   = LENGTH(MNDL.CHARS)
 
   /* Correct the aspect ratio. */
   MNDL.XRANGE = MNDL.XASPECT / MNDL.ZOOM
@@ -374,8 +384,6 @@ SETTTINGS_UPDATE: PROCEDURE EXPOSE MNDL. SCR.
   MNDL.YMAX  = MNDL.CENTERIMAG + (MNDL.YRANGE / 2)
   MNDL.XSTEP = MNDL.XRANGE / (MNDL.WIDTH - 1)
   MNDL.YSTEP = MNDL.YRANGE / (MNDL.HEIGHT - 1)
-  
-  MNDL.NUMCHARS = LENGTH(MNDL.CHARS)
   RETURN
 
 /* Save the settings to the save file. */
@@ -462,6 +470,7 @@ CURSOR_CLOSE: PROCEDURE EXPOSE SCR.
 CUSROR_READ: PROCEDURE EXPOSE SCR.
   PARSE ARG KEY
   EXEC CICS READNEXT FILE(SCR.SAVE_FILE) INTO(REC) RIDFLD(SCR.NNAME) END-EXEC
+  /* Nothing was found. Probably past the last record. Try again. */
   IF EIBRESP = 20 THEN DO
     CALL CURSOR_RESET
     EXEC CICS READNEXT FILE(SCR.SAVE_FILE) INTO(REC) RIDFLD(SCR.NNAME) END-EXEC
