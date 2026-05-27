@@ -59,6 +59,11 @@ The Mandelbrot fractal generated from the details settings.
 
 ![Default Mandelbrot](Screenshots/MNDL_Default.png)
 
+Showing the overlay with helpful information, help for the AID keys and a marker in the center. This also shows that the cursor is positioned in the center now.
+
+![Overlay](Screenshots/MNDL_Overlay.png)
+
+
 
 ### Fun thing to try
 
@@ -68,6 +73,11 @@ The Mandelbrot fractal generated from the details settings.
 * Wait.....
 
 ![Big Mandelbrot](Screenshots/MNDL_Big.png)
+
+## Changes
+
+* 2026-05-25 - Initial release.
+* 2026-05-26 - Added an overlay with useful information. Also position the cursor in the center.
 
 ## KSDS Browser
 
@@ -94,8 +104,16 @@ Browsing the saved settings for `MNDL`.
 
 ![Main Menu](Screenshots/BRDS.png)
 
+## Changes
+
+* 2026-05-25 - Initial release.
+
 ## Go Script
 
 The script `./go` will start Bricks. It figures out which binary to run. Update the variable `BricksPath` to the path Brick lives.
 
 I keep Bricks as a submodule in my Bricks GIT repository.
+
+## Changes
+
+* 2026-05-25 - Initial release.

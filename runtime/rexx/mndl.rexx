@@ -28,10 +28,22 @@ SCR.SAVE_FILE   = 'mandelbrot'
 SCR.VARS_SET    = 'NO'
 SCR.CURSOR_OPEN = 'NO'
 
-/* The settings used to draw the Mandelbrot fractal. */
+/* The settings used to draw the Mandelbrot set. */
 MNDL = ''
-MNDL.HEIGHT = TERM_HEIGHT
-MNDL.WIDTH  = TERM_WIDTH - 1
+MNDL.HEIGHT    = TERM_HEIGHT
+MNDL.WIDTH     = TERM_WIDTH - 1
+MNDL.HCENTER   = INT(MNDL.HEIGHT / 2)
+MNDL.WCENTER   = INT(MNDL.WIDTH / 2)
+MNDL.CENTER    = MNDL.HCENTER * (MNDL.WIDTH + 1) + MNDL.WCENTER + 1
+MNDL.OVRL      = NO   /* Overlay showing details of the fractal. */
+MNDL.FRACTAL   = ''   /* The Mandelbrot set output. */
+MNDL.DRAW_TIME = 0    /* How long in ms it took to draw the fractal. */
+MNDL.OVER_TEXT = ''   /* Text for the overlay. */
+MNDL.SKIP_DRAW = 'NO' /* Skip drawing the fractal for one round. */
+
+/* AID text for the overlay. */
+MNDL.OVER_AID1 = 'PF1=Center  PF5=Julia   PF7=Out     PF8=In      PF4=Toggle Overlay '
+MNDL.OVER_AID2 = 'PF9=Left    PF10=Right  PF11=Up     PF12=Down   PF16=Shuffle Saves '
 
 /* Change the aspect ratio. To accommodate characters being taller than wider. */
 MNDL.XASPECT = 3.0
@@ -55,13 +67,13 @@ DO FOREVER
   EXEC CICS CONVERSE MAP('MNDL1') FROM(SCR.) INTO(SCR.) ERASE END-EXEC
   SCR.MSG = ''
 
-  /* Do we draw the Mandelbrot fractal or not. */
-  SCR.DO_DRAW = 'YES'
+  /* Do we display the Mandelbrot set or not. */
+  SCR.SHOW_MNDL = 'YES'
 
   /* Make sure '|'' does not end up in the draw characters. */
   /* Because I'm lazy and I use '|'' as the field separator. */
   IF POS('|', SCR.NCHARS) \= 0 THEN DO
-      SCR.DO_DRAW = 'NO'
+      SCR.SHOW_MNDL = 'NO'
       SCR.MSG = 'Do not use "|" in the character list.'
   END
 
@@ -71,42 +83,113 @@ DO FOREVER
   /* Handle special keys. */
   CALL AID_MAIN_MENU C2X(EIBAID)
 
-  IF SCR.DO_DRAW = 'NO' THEN ITERATE
+  IF SCR.SHOW_MNDL = 'NO' THEN ITERATE
 
-  /* Draw loop. Lets the user scroll and zoom. */
-  DO WHILE SCR.DO_DRAW = 'YES'
-    CALL SETTTINGS_UPDATE
-    CALL MANDELBROT
-  END
+  /* Display the Mandelbrot set. */
+  CALL SHOW_FRACTAL
 END
 
 /* End of program. */
 EXIT
 
-/* Generate the Julia set. */
-/* Draws using the settings in MNDL. */
+/* Displays the Mandelbrot set and handles AID. */
+SHOW_FRACTAL: PROCEDURE EXPOSE MNDL. SCR.
+  DO WHILE SCR.SHOW_MNDL = 'YES'
+    CALL SETTTINGS_UPDATE
+
+    IF MNDL.SKIP_DRAW = 'YES' THEN
+      MNDL.SKIP_DRAW = 'NO'
+    ELSE
+      CALL MANDELBROT
+
+      OUTPUT = MNDL.FRACTAL
+    IF MNDL.OVRL = 'YES' THEN DO
+      /* Information in the upper left. */
+      OUTPUT = OVERLAY('Real:' LEFT(MNDL.CENTERREAL, 18) || ' ',     OUTPUT)
+      OUTPUT = OVERLAY('Imag:' LEFT(MNDL.CENTERIMAG, 18) || ' ',     OUTPUT, (1) * (MNDL.WIDTH + 1)+ 1)
+      OUTPUT = OVERLAY('Zoom:' LEFT(SCR.NZOOM, 18) || ' ',           OUTPUT, (2) * (MNDL.WIDTH + 1)+ 1)
+      OUTPUT = OVERLAY('Time:' LEFT(MNDL.DRAW_TIME 'ms', 18) || ' ', OUTPUT, (3) * (MNDL.WIDTH + 1)+ 1)
+
+      /* Cross hairs in the center. */
+      OUTPUT = OVERLAY('[', OUTPUT, MNDL.CENTER - 2)
+      OUTPUT = OVERLAY(']', OUTPUT, MNDL.CENTER + 3)
+
+      /* AID help in the lower left. */
+      OUTPUT = OVERLAY(MNDL.OVER_AID1, OUTPUT, (MNDL.HEIGHT - 2) * (MNDL.WIDTH + 1))
+      OUTPUT = OVERLAY(MNDL.OVER_AID2, OUTPUT, (MNDL.HEIGHT - 1) * (MNDL.WIDTH + 1))
+    END
+
+    EXEC CICS SEND TEXT FROM(OUTPUT) END-EXEC
+
+    CALL AID_DRAW C2X(EIBAID)
+  END
+  RETURN
+
+/* Generate the Mandelbrot set using the settings in MNDL. */
+MANDELBROT: PROCEDURE EXPOSE MNDL. SCR.
+  MNDL.FRACTAL = ''
+  EXEC CICS ASKTIME ABSTIME(START_TIME) END-EXEC
+  DO ROW = 0 TO MNDL.HEIGHT - 1
+    /* Map the row into the imaginary part. */
+    IMAG = MNDL.YMAX - (ROW * MNDL.YSTEP)
+
+    DO COL = 0 TO MNDL.WIDTH - 1
+    /* Map the column into the real part. */
+      REAL = MNDL.XMIN + (COL * MNDL.XSTEP)
+
+      /* Iterate over the current point. */
+      ZR = 0
+      ZI = 0
+      DO I = 0 TO MNDL.MAXITER
+        /* Has the point escaped into infinity? */
+        IF (ZR * ZR + ZI * ZI) > 4 THEN LEAVE
+        ZR2 = ZR * ZR
+        ZI2 = ZI * ZI
+        ZI = 2 * ZR * ZI + IMAG
+        ZR = ZR2 - ZI2 + REAL
+      END
+
+      /* "Shade" the pixel. */
+      IF ROW = MNDL.HCENTER & COL = MNDL.WCENTER THEN
+        MNDL.FRACTAL =  MNDL.FRACTAL || X2C(13)
+      IF I > MNDL.MAXITER THEN
+        MNDL.FRACTAL = MNDL.FRACTAL || ' '
+      ELSE
+        MNDL.FRACTAL = MNDL.FRACTAL || SUBSTR(MNDL.CHARS, MOD(I, MNDL.NUMCHARS + 1), 1)
+    END
+    /* Pad the last column or odd things happen with the output. */
+    IF ROW \= MNDL.HCENTER THEN
+      MNDL.FRACTAL = MNDL.FRACTAL || ' '
+  END
+
+  EXEC CICS ASKTIME ABSTIME(END_TIME) END-EXEC
+  MNDL.DRAW_TIME = (END_TIME - START_TIME)
+  SCR.MSG = 'Draw time:' MNDL.DRAW_TIME 'Milliseconds'
+  RETURN
+
+/* Generate the Julia set using the settings in MNDL. */
+/* Does NOT handle AID. Just renders then leaves. */
 JULIA: PROCEDURE EXPOSE MNDL. SCR.
   PARSE ARG CENTERIMAG CENTERREAL
   OUTPUT = ''
 
-  /* Correct the aspect ratio. */
-  /* The Julia set has a different X-range. */
-  JUL.XRANGE = (MNDL.XASPECT + 1) /* / MNDL.ZOOM */
-  JUL.YRANGE = MNDL.YASPECT       /* / MNDL.ZOOM */
+  /* The Julia set has a different range. */
+  XRANGE = 4
+  YRANGE = 2
 
   /* Set the bounds and steps. */
-  JUL.XMIN  = 0 - (JUL.XRANGE / 2)
-  JUL.YMAX  = 0 + (JUL.YRANGE / 2)
-  JUL.XSTEP = JUL.XRANGE / (MNDL.WIDTH - 1)
-  JUL.YSTEP = JUL.YRANGE / (MNDL.HEIGHT - 1)
+  XMIN  = 0 - (XRANGE / 2)
+  YMAX  = 0 + (YRANGE / 2)
+  XSTEP = XRANGE / (MNDL.WIDTH - 1)
+  YSTEP = YRANGE / (MNDL.HEIGHT - 1)
 
   DO ROW = 0 TO MNDL.HEIGHT - 1
     /* Map the row into the imaginary part. */
-    IMAG = JUL.YMAX - (ROW * JUL.YSTEP)
+    IMAG = YMAX - (ROW * YSTEP)
 
     DO COL = 0 TO MNDL.WIDTH - 1
     /* Map the column into the real part. */
-      REAL = JUL.XMIN + (COL * JUL.XSTEP)
+      REAL = XMIN + (COL * XSTEP)
 
       /* Iterate over the current point. */
       ZR = REAL
@@ -134,51 +217,6 @@ JULIA: PROCEDURE EXPOSE MNDL. SCR.
   EXEC CICS SEND TEXT FROM(OUTPUT) END-EXEC
   RETURN
 
-/* Generate the Mandelbrot fractal. */
-/* Draws using the settings in MNDL. */
-MANDELBROT: PROCEDURE EXPOSE MNDL. SCR.
-  OUTPUT = ''
-  EXEC CICS ASKTIME ABSTIME(START_TIME) END-EXEC
-  DO ROW = 0 TO MNDL.HEIGHT - 1
-    /* Map the row into the imaginary part. */
-    IMAG = MNDL.YMAX - (ROW * MNDL.YSTEP)
-
-    DO COL = 0 TO MNDL.WIDTH - 1
-    /* Map the column into the real part. */
-      REAL = MNDL.XMIN + (COL * MNDL.XSTEP)
-
-      /* Iterate over the current point. */
-      ZR = 0
-      ZI = 0
-      DO I = 0 TO MNDL.MAXITER
-        /* Has the point escaped into infinity? */
-        IF (ZR * ZR + ZI * ZI) > 4 THEN LEAVE
-        ZR2 = ZR * ZR
-        ZI2 = ZI * ZI
-        ZI = 2 * ZR * ZI + IMAG
-        ZR = ZR2 - ZI2 + REAL
-      END
-
-      /* "Shade" the pixel. */
-      IF I > MNDL.MAXITER THEN
-        OUTPUT = OUTPUT || ' '
-      ELSE
-        OUTPUT = OUTPUT || SUBSTR(MNDL.CHARS, MOD(I, MNDL.NUMCHARS + 1), 1)
-    END
-    /* Padd the last column or odd things happen with the output. */
-    OUTPUT = OUTPUT || ' '
-  END
-
-  EXEC CICS ASKTIME ABSTIME(END_TIME) END-EXEC
-  SCR.MSG = 'Draw time:' (END_TIME - START_TIME) 'Milliseconds'
-
-  /* Send the fractal. */
-  EXEC CICS SEND TEXT FROM(OUTPUT) END-EXEC
-
-  /* If this CALL isn't right here it doesn't get the key. */
-  CALL AID_DRAW C2X(EIBAID)
-  RETURN
-
 /* Handle the AID keys on the draw screen. */
 AID_DRAW: PROCEDURE EXPOSE MNDL. SCR. EIBCPOSN 
   PARSE ARG AID
@@ -191,8 +229,17 @@ AID_DRAW: PROCEDURE EXPOSE MNDL. SCR. EIBCPOSN
       SCR.NCIMAG = MNDL.YMAX - (ROW * MNDL.YSTEP)
       SCR.NCREAL = MNDL.XMIN + (COL * MNDL.XSTEP)
     END
+    /* Toggle overlay. */
+    WHEN AID = 'F4' THEN DO
+      MNDL.SKIP_DRAW = 'YES'
+      IF MNDL.OVRL = 'YES' THEN
+        MNDL.OVRL = 'NO'
+      ELSE
+        MNDL.OVRL = 'YES'
+    END
     /* Show the Julia set for the current point. */
     WHEN AID = 'F5' THEN DO
+      MNDL.SKIP_DRAW = 'YES'
       COL = (EIBCPOSN // (MNDL.WIDTH + 1)) - 2
       ROW = INT(EIBCPOSN / (MNDL.WIDTH + 1))
       REAL = MNDL.YMAX - (ROW * MNDL.YSTEP)
@@ -232,7 +279,11 @@ AID_DRAW: PROCEDURE EXPOSE MNDL. SCR. EIBCPOSN
       CALL CUSROR_READ
     END
     OTHERWISE DO
-      SCR.DO_DRAW = 'NO'
+      SCR.SHOW_MNDL = 'NO'
+    END
+    /* Generate the Mandelbrot set again. */
+    WHEN AID = '6D' THEN DO /* Clear */
+      RETURN
     END
   END
   RETURN
@@ -243,12 +294,12 @@ AID_DRAW: PROCEDURE EXPOSE MNDL. SCR. EIBCPOSN
   SELECT
     /* Load the defaults. */
     WHEN AID = 'F1' THEN DO
-      SCR.DO_DRAW = 'NO'
+      SCR.SHOW_MNDL = 'NO'
       DROP SCR.VARS_SET
     END
     /* Delete a save. */
     WHEN AID = 'F2' THEN DO
-      SCR.DO_DRAW = 'NO'
+      SCR.SHOW_MNDL = 'NO'
       CALL SETTTINGS_DELETE
     END
     /* Exit. */
@@ -259,7 +310,7 @@ AID_DRAW: PROCEDURE EXPOSE MNDL. SCR. EIBCPOSN
     END
     /* Shuffle through saves. */
     WHEN AID = 'F4' | AID = 'C4' THEN DO /* PF4 & PF16 */
-      IF AID = 'F4' THEN SCR.DO_DRAW = 'NO'
+      IF AID = 'F4' THEN SCR.SHOW_MNDL = 'NO'
       IF SCR.CURSOR_OPEN \= 'YES' THEN DO
         CALL CURSOR_OPEN
       END
@@ -271,7 +322,7 @@ AID_DRAW: PROCEDURE EXPOSE MNDL. SCR. EIBCPOSN
     END
     /* Save settings. */
     WHEN AID = 'F6' THEN DO
-      SCR.DO_DRAW = 'NO'
+      SCR.SHOW_MNDL = 'NO'
       CALL SETTTINGS_SAVE KEY
     END
     /* Zoom out. */
@@ -300,7 +351,7 @@ AID_DRAW: PROCEDURE EXPOSE MNDL. SCR. EIBCPOSN
       SCR.NCIMAG = SCR.NCIMAG - (MNDL.YRANGE / 4)
     END
     WHEN AID = '6D' THEN DO /* Clear */
-      SCR.DO_DRAW = 'NO'
+      SCR.SHOW_MNDL = 'NO'
     END
     OTHERWISE NOP
   END
@@ -348,7 +399,7 @@ SETTTINGS_SAVE: PROCEDURE EXPOSE SCR.
 /* Load the settings from the save file. */
 SETTTINGS_LOAD: PROCEDURE EXPOSE SCR.
   PARSE ARG KEY
-  SCR.DO_DRAW = 'NO'
+  SCR.SHOW_MNDL = 'NO'
   KEY  = STRIP(SCR.NNAME)
   IF KEY = '' THEN
     SCR.MSG = 'Name required when loading.'

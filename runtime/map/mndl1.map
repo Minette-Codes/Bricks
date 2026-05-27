@@ -31,8 +31,8 @@ MAP MNDL1 SIZE 24x80
   INPUT NNOTE     AT 10,20 LEN 55 UNDERSCORE COLOR=GREEN
   STOP            AT 10,77
   INPUT MSG       AT 13,0  LEN 78 PROT BRIGHT COLOR=RED
-  FIELD AT 15,0  LEN 8  PROT COLOR=WHITE          "Fractal:"
-  FIELD AT 15,10 LEN 39 PROT                      "PF1=Center on Cursor PF5=Julia at cursor"
+  FIELD AT 15,0   LEN 8  PROT COLOR=WHITE          "Fractal:"
+  FIELD AT 15,10  LEN 62 PROT                      "PF1=Center on Cursor PF4=Show/Hide Overlay PF5=Julia at cursor"
   FIELD AT 16,0   LEN 40 PROT COLOR=WHITE         "Scroll and Zoom work from the Mandelbrot Fractal."
   FIELD AT 18,0   LEN 7  PROT COLOR=WHITE         "Scroll:"
   FIELD AT 18,10  LEN 39 PROT                     "PF9=Left  PF10=Right  PF11=Up     PF12=Down"
