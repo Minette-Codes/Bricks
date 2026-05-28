@@ -29,7 +29,7 @@ DO FOREVER
     SCR.RELOAD = 'NO'
   END
 
-  /* Save the saves for the current page into SCR. */
+  /* Copy the current page of save data into SCR. */
   CALL SAVES_SCR_PAGE
 
   SCR.NIMPORT = IMPORT_FILE
@@ -60,15 +60,15 @@ DO FOREVER
     END
     /* Previous page. */
     WHEN AID = 'F7' THEN DO
-      SCR.PAGE = SCR.PAGE + 1
-      IF SCR.PAGE > SCR.NPAGES THEN
-        SCR.PAGE = SCR.NPAGES
+      SCR.PAGE = SCR.PAGE - 1
+      IF SCR.PAGE < 0 THEN
+        SCR.PAGE = 1
     END
     /* Next page. */
     WHEN AID = 'F8' THEN DO
       SCR.PAGE = SCR.PAGE + 1
-      IF SCR.PAGE < 0 THEN
-        SCR.PAGE = 1
+      IF SCR.PAGE > SCR.NPAGES THEN
+        SCR.PAGE = SCR.NPAGES
     END
     /* Export saves. */
     WHEN AID = 'F9' THEN DO
@@ -123,6 +123,7 @@ SAVES_SCR_PAGE: PROCEDURE EXPOSE KEYS. RECS. SCR.
       LINE = LEFT(KEY,16) LEFT(NOTE,55)
     END
     CALL VALUE 'SCR.ROW' || J, LINE
+    SCR.STATUS = 'Saves:' SCR.TOTAL 'Page:' SCR.PAGE 'of' SCR.NPAGES
   END
   RETURN
 

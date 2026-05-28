@@ -79,6 +79,7 @@ Showing the overlay with helpful information, help for the AID keys and a marker
 * 2026-05-25 - Initial release.
 * 2026-05-26 - Added an overlay with useful information. Also position the cursor in the center.
 * 2026-05-26 - A new save for the Antenna, the long part on the left. Keep zooming.
+* 2026-05-27 - Fix the page handling code. It was backwards, and didn't update the current page number.
 
 ## KSDS Browser
 
@@ -110,7 +111,7 @@ Browsing the saved settings for `MNDL`.
 ## Changes
 
 * 2026-05-25 - Initial release.
-* 2026-05-26 - Read the file and starting key from the command line. Handle going past the last record more gracefully. The cursor is re-opened and the last record re-read so you can keep scrolling through the data.
+* 2026-05-27 - Read the file and starting key from the command line. Handle going past the last record more gracefully. The cursor is re-opened and the last record re-read so you can keep scrolling through the data.
 
 ## Go Script
 
