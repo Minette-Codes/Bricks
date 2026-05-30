@@ -11,17 +11,16 @@
 
 /* Another magic trick! */
 /* If DFHCOMMAREA is not empty is is treated as command line options. */
-/* Make sure to include the TID. You can present a different TID if desired. */
 /* Example: */
-/*   ARGS = 'BRDS -s ~ BRDSTEST ReallyBig Press F3 to return.' */
-/*   EXEC CICS LINK PROGRAM(SET.TID) COMMAREA(ARGS) END-EXEC */
+/*   ARGS = '-s ~ BRDSTEST ReallyBig Press F3 to return.' */
+/*   EXEC CICS LINK PROGRAM('BRDS'') COMMAREA(ARGS) END-EXEC */
 
 /* Pressing PF24 will demonstrate everything BRDS can do. */
 /* This will load test data into the file BRDSTEST. */
 /* There are examples for each field separator along with really big text records. */
 
 /* Pressing PF23 will LINK BRDS with COMMAREA set to the following: */
-/*   TID "-s ~ BRDSTEST ReallyBig This is a message." */
+/*   -s ~ BRDSTEST ReallyBig This is a message. */
 
 /* For developers, press PF13 to show all of the tails from the STEMS: SET. SCR. FIELDS. */
 
@@ -159,7 +158,7 @@ DO FOREVER
     /* Starts another copy of BRDS with test data. */
     WHEN AID = '4B' THEN DO /* PF23 */
       CALL TEST_DATA_LOAD
-      ARGS = SET.TID '-s ~ BRDSTEST ReallyBig Press F3 to return.'
+      ARGS = '-s ~ BRDSTEST ReallyBig Press F3 to return.'
       EXEC CICS LINK PROGRAM(SET.TID) COMMAREA(ARGS) END-EXEC
       SKIP = 'YES'
     END
@@ -225,18 +224,19 @@ END
 
 EXIT
 
-/* FIELDS. is here so it gets passed on to procedure calls. */
+/* FIELDS. is here so it gets passed through to procedure calls. */
 COMMAND_LINE_PARSE: PROCEDURE EXPOSE DFHCOMMAREA FIELDS. SCR. SET.
   /* Check for anything in DFHCOMMAREA. */
   /* Use the contents as if they were from the command line. */
-  IF DFHCOMMAREA \= '' THEN
-    BUF = STRIP(DFHCOMMAREA)
-  ELSE
+  IF DFHCOMMAREA \= '' THEN DO
+    CKEY = STRIP(DFHCOMMAREA)
+  END
+  ELSE DO
+    /* Parse the actual command line. */
     EXEC CICS RECEIVE INTO(BUF) END-EXEC
-
-  /* Parse the command line. */
-  PARSE VAR BUF SET.TID CKEY
-  SCR.TRANSID = SET.TID
+    PARSE VAR BUF SET.TID CKEY
+    SCR.TRANSID = SET.TID
+  END
 
   /* Do they need help? */
   IF        CKEY        = '-?'   |,

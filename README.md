@@ -107,7 +107,7 @@ If the number of rows exceeds the display height then the list can be scrolled u
   * `FIELDS.` containing the parsed fields or the text of the record split into rows.
 
   *(This key is not noted anywhere else. It is only intended for development and bug hunting.)*
-* **PF23** - A demonstration of using **LINK** to call `BRDS`. **DFHCOMMAREA** contains `BRDS -s ~ BRDSTEST ReallyBig Press F3 to return.`. Test data will be created in the file **BRDSTEST** before the call is made.
+* **PF23** - A demonstration of using **LINK** to call `BRDS`. **DFHCOMMAREA** contains `-s ~ BRDSTEST ReallyBig Press F3 to return.`. Test data will be created in the file **BRDSTEST** before the call is made.
 
   *(This key is not noted anywhere else. It is only intended for developers calling `BRDS`)*
 * **PF24** - BRDS demo. Creates test data in the file **BRDSTEST** then browses the file.
@@ -128,7 +128,7 @@ BRDS MANDELBROT Defaults
 BRDS BRDSTEST ReallyBig This is a message the user will see in RED.
 ```
 
-You can **CICS** **LINK** to `BRDS` passing command line options via **DFHCOMMAREA**. *If using LINK make sure to include the transaction ID in DFHCOMMAREA! DFHCOMMAREA has to be exactly like a command line.*
+You can **CICS** **LINK** to `BRDS` passing command line options via **DFHCOMMAREA**. for example `COMMAREA = '-s | MANDELBROT Paul'`
 
 ### Files
 
@@ -169,7 +169,8 @@ Viewing a rather large record on the enormous Model 5 terminal.
 
 * 2026-05-25 - Initial release.
 * 2026-05-27 - Read the file and starting key from the command line. Handle going past the last record more gracefully. The cursor is re-opened and the last record re-read so you can keep scrolling through the data.
-* 2026-05-26 - Complete overhaul. Better interface. Show all of a record. Split records into fields by a separator. Test data for demonstration. Help text. And bugs fixed.
+* 2026-05-29 - Complete overhaul. Better interface. Show all of a record. Split records into fields by a separator. Test data for demonstration. Help text. And bugs fixed.
+* 2026-05-30 - Removed the requirement for the transaction ID to be in COMMAREA.
 
 ## Go Script
 
