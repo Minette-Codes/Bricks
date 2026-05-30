@@ -1,0 +1,3 @@
+BRDS:rexx:brds.rexx:USERS
+MNDL:rexx:mndl.rexx:USERS
+MNDU:rexx:mndu.rexx:USERS
