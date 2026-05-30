@@ -60,7 +60,7 @@ MAP BRDS1M SIZE 32x80
   FIELD TRUNC17   AT 24,0   LEN 1   PROT COLOR=RED
   FIELD TRUNC18   AT 25,0   LEN 1   PROT COLOR=RED
   INPUT MSG       AT 28,0   LEN 79  PROT BRIGHT COLOR=RED
-  FIELD           AT 29,53  LEN 25  PROT COLOR=BLUE         "Scroll: PF9=Up  PF10=Down"
-  FIELD           AT 30,0   LEN 78  PROT COLOR=BLUE         "ENTER=Read  PF1=Help  PF3=Exit  PF5=Reset  PF6=Sep     PF7=Previous   PF8=Next"
+  FIELD           AT 29,0   LEN 25  PROT COLOR=BLUE         "ENTER=Next Record     PF7=Previous Record         PF8=Next Record"
+  FIELD           AT 30,0   LEN 78  PROT COLOR=BLUE         "PF1=Help   PF3=Exit   PF5=Reset   PF6=Separator   PF9=Page Up  PF10=Page Down"
   CURSOR          AT FNAME
 ENDMAP

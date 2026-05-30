@@ -360,8 +360,8 @@ FIELDS_LOAD: PROCEDURE EXPOSE FIELDS. SCR. SET. TRUNC.
       SCR.PAGES = SCR.PAGES || 'Fields:'
     SCR.PAGES = SCR.PAGES FIELDS.0 'Page:' SET.PAGE 'of' SET.PAGES
     /* Add a note on scrolling through the pages. */
-    PADD = COPIES(' ', 44 - LENGTH(SCR.PAGES))
-    SCR.PAGES = SCR.PAGES || PADD || 'PF9=Page up PF10=Page Down'
+    PADD = COPIES(' ', SET.WIDTH - LENGTH(SCR.PAGES) - 37)
+    SCR.PAGES = SCR.PAGES || PADD 'PF9=Page up PF10=Page Down'
   END
 RETURN
 
@@ -429,25 +429,28 @@ NEXT_SEPARATOR: PROCEDURE EXPOSE SET.
 
 /* Send some help text. */
 SEND_HELP: PROCEDURE EXPOSE SET.
+  BLANK_LINE = LEFT('', SET.WIDTH)
   HELP_TEXT = LEFT('BRDS - Browse KSDS file records.', SET.WIDTH) ||,
-  LEFT('', SET.WIDTH) ||,
+  BLANK_LINE ||,
   LEFT('Usage:' SET.TID '[-h] [-s SEPARATOR] [FILE_NAME [START_KEY]]', SET.WIDTH) ||,
-  LEFT('', SET.WIDTH) || ,
+  BLANK_LINE || ,
   LEFT('Displays the records for a given KSDS file. Starting at the optional key.', SET.WIDTH) ||,
   LEFT('The record is parsed into fields by SEPARATOR.', SET.WIDTH) ||,
   LEFT('If SEPARATOR is blank the record is wrapped into multiple rows.', SET.WIDTH) ||,
-  LEFT('', SET.WIDTH) ||,
+  BLANK_LINE ||,
   LEFT('Wide fields will be truncated and a red "T" will mark the field.', SET.WIDTH) ||,
-  LEFT('', SET.WIDTH) ||,
+  BLANK_LINE ||,
+  LEFT('PF4 rotates the separator through: "" "|" "," ";" ":" "!"', SET.WIDTH) ||,
+  BLANK_LINE ||,
+  LEFT('PF7 and PF8 read the Previous and Next record.', SET.WIDTH) ||,
+  BLANK_LINE ||,
+  LEFT('PF9 and PF10 scroll Up and Down through the record fields/rows.', SET.WIDTH) ||,
+  BLANK_LINE ||,
+  LEFT('Press PF24 for a demonstration with test data.', SET.WIDTH) ||,
+  BLANK_LINE ||,
   LEFT('Example: BRDS -s | mandelbrot Defaults', SET.WIDTH) ||,
   LEFT('(Requires the Mandelbrot saves be loaded using MNDU.)', SET.WIDTH) ||,
-  LEFT('', SET.WIDTH) ||,
-  LEFT('PF4 rotates the separator through: "" "|" "," ";" ":" "!"', SET.WIDTH) ||,
-  LEFT('', SET.WIDTH) ||,
-  LEFT('PF9 and PF10 scroll up and down through the parsed fields.', SET.WIDTH) ||,
-  LEFT('', SET.WIDTH) ||,
-  LEFT('Press PF24 for a demonstration with test data.', SET.WIDTH) ||,
-  LEFT('', SET.WIDTH) || X2C(13)
+  BLANK_LINE || X2C(13)
   EXEC CICS SEND TEXT FROM(HELP_TEXT) ERASE END-EXEC
   RETURN
 

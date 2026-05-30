@@ -54,6 +54,6 @@ MAP BRDS1W SIZE 27x132
   FIELD TRUNC14   AT 20,0   LEN 1   PROT COLOR=RED
   FIELD TRUNC15   AT 19,0   LEN 1   PROT COLOR=RED
   INPUT MSG       AT 23,0   LEN 79  PROT BRIGHT COLOR=RED
-  FIELD           AT 25,0   LEN 130 PROT COLOR=BLUE         "ENTER=Read   PF1=Help   PF3=Exit   PF5=Reset   PF6=Separator   PF7=Previous   PF8=Next   Scroll: PF9=Up   PF10=Down      PF23=Demo"
+  FIELD           AT 25,0   LEN 130 PROT COLOR=BLUE         "PF1=Help   PF3=Exit   PF5=Reset   PF6=Separator     PF7=Previous Record   ENTER & PF8=Next Record     PF9=Page Up   PF10=Page Down"
   CURSOR          AT FNAME
 ENDMAP

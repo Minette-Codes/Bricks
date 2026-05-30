@@ -176,6 +176,7 @@ Viewing a rather large record on the enormous Model 5 terminal.
 * 2026-05-29 - Complete overhaul. Better interface. Show all of a record. Split records into fields by a separator. Test data for demonstration. Help text. And bugs fixed.
 * 2026-05-30 - Removed the requirement for the transaction ID to be in COMMAREA.
 * 2026-05-30 - Properly handle DFHCOMMAREA. I didn't understand it...
+* 2026-05-30 - Made the AID keys for scrolling through the displayed data more prominent.
 
 ## Go Script
 
