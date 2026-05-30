@@ -84,6 +84,8 @@ If no separator is provided the record is displayed as plain text. In this mode 
 
 If the number of rows exceeds the display height then the list can be scrolled using **PF9** and **PF10**. Markers indicate where there is more data up or down and if at the top or bottom of the list. The current page and the total number of pages are displayed.
 
+When `BRDS` exits it sets **DFHCOMMAREA** to the current file, key and field separator. This is intended to allow other programs to **LINK** to `BRDS` to pick a record to be returned. This has the added bonus that **DFHCOMMAREA** persists in your session, so it acts like a place holder. When you start `BRDS` again it will pick up where you left off.
+
 ### Fields:
 
 * File: The **KSDS** file to browse. REQUIRED.
@@ -128,7 +130,7 @@ BRDS MANDELBROT Defaults
 BRDS BRDSTEST ReallyBig This is a message the user will see in RED.
 ```
 
-You can **CICS** **LINK** to `BRDS` passing command line options via **DFHCOMMAREA**. for example `COMMAREA = '-s | MANDELBROT Paul'`
+You can **CICS** **LINK** to `BRDS` passing command line options via **DFHCOMMAREA**. for example `COMMAREA = '-s | MANDELBROT Paul'` When BRDS returns it will set **DFHCOMMAREA** to the current file, key and field separator.
 
 ### Files
 
@@ -171,6 +173,7 @@ Viewing a rather large record on the enormous Model 5 terminal.
 * 2026-05-27 - Read the file and starting key from the command line. Handle going past the last record more gracefully. The cursor is re-opened and the last record re-read so you can keep scrolling through the data.
 * 2026-05-29 - Complete overhaul. Better interface. Show all of a record. Split records into fields by a separator. Test data for demonstration. Help text. And bugs fixed.
 * 2026-05-30 - Removed the requirement for the transaction ID to be in COMMAREA.
+* 2026-05-30 - Properly handle DFHCOMMAREA. I didn't understand it...
 
 ## Go Script
 
