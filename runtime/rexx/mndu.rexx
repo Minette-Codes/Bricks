@@ -61,7 +61,7 @@ DO FOREVER
     /* Previous page. */
     WHEN AID = 'F7' THEN DO
       SCR.PAGE = SCR.PAGE - 1
-      IF SCR.PAGE < 0 THEN
+      IF SCR.PAGE <= 0 THEN
         SCR.PAGE = 1
     END
     /* Next page. */

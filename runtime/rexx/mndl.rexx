@@ -22,19 +22,20 @@ DFLT_ZOOM       = 1
 DFLT_SCALE      = 3
 
 /* I keep way to much in SCR. :shrugs: */
-SCR = ''
+SCR. = ''
 SCR.TERMID      = TRM
 SCR.SAVE_FILE   = 'mandelbrot'
 SCR.VARS_SET    = 'NO'
 SCR.CURSOR_OPEN = 'NO'
 
 /* The settings used to draw the Mandelbrot set. */
-MNDL = ''
+MNDL. = ''
 MNDL.HEIGHT    = TERM_HEIGHT
-MNDL.WIDTH     = TERM_WIDTH - 1 /* The width of the draw area. This excludes column 0. */
+MNDL.WIDTH     = TERM_WIDTH  - 1 /* The width of the draw area. This excludes column 0. */
+MNDL.TWIDTH    = TERM_WIDTH /* This value is used in a few places. Make the code cleaner. */
 MNDL.HCENTER   = INT(MNDL.HEIGHT / 2)
 MNDL.WCENTER   = INT(MNDL.WIDTH / 2)
-MNDL.CENTER    = MNDL.HCENTER * (MNDL.WIDTH + 1) + MNDL.WCENTER + 1
+MNDL.CENTER    = MNDL.HCENTER * MNDL.TWIDTH + MNDL.WCENTER + 1
 MNDL.SHOW_OVRL = NO   /* Overlay showing details of the fractal. */
 MNDL.FRACTAL   = ''   /* The Mandelbrot set output. */
 MNDL.DRAW_TIME = 0    /* How long in ms it took to draw the fractal. */
@@ -106,19 +107,19 @@ SHOW_FRACTAL: PROCEDURE EXPOSE MNDL. SCR.
     IF MNDL.SHOW_OVRL = 'YES' THEN DO
       /* Information in the upper left. */
       OUTPUT = OVERLAY('Real:' LEFT(MNDL.CENTERREAL, 18),     OUTPUT, 0,                       25)
-      OUTPUT = OVERLAY('Imag:' LEFT(MNDL.CENTERIMAG, 18),     OUTPUT, 1 * (MNDL.WIDTH + 1)+ 1, 25)
-      OUTPUT = OVERLAY('Zoom:' LEFT(SCR.NZOOM, 18),           OUTPUT, 2 * (MNDL.WIDTH + 1)+ 1, 25)
-      OUTPUT = OVERLAY('Time:' LEFT(MNDL.DRAW_TIME 'ms', 18), OUTPUT, 3 * (MNDL.WIDTH + 1)+ 1, 25)
+      OUTPUT = OVERLAY('Imag:' LEFT(MNDL.CENTERIMAG, 18),     OUTPUT, 1 * MNDL.TWIDTH + 1, 25)
+      OUTPUT = OVERLAY('Zoom:' LEFT(SCR.NZOOM, 18),           OUTPUT, 2 * MNDL.TWIDTH + 1, 25)
+      OUTPUT = OVERLAY('Time:' LEFT(MNDL.DRAW_TIME 'ms', 18), OUTPUT, 3 * MNDL.TWIDTH + 1, 25)
       IF SCR.NNAME \= '' THEN
-      OUTPUT = OVERLAY('Save:' LEFT(SCR.NNAME, 18),           OUTPUT, 4 * (MNDL.WIDTH + 1)+ 1, 25)
+      OUTPUT = OVERLAY('Save:' LEFT(SCR.NNAME, 18),           OUTPUT, 4 * MNDL.TWIDTH + 1, 25)
 
       /* Crosshair in the center. */
       OUTPUT = OVERLAY('[', OUTPUT, MNDL.CENTER - 2)
       OUTPUT = OVERLAY(']', OUTPUT, MNDL.CENTER + 3)
 
       /* AID help in the lower left. */
-      OUTPUT = OVERLAY(MNDL.OVER_AID1, OUTPUT, (MNDL.HEIGHT - 2) * (MNDL.WIDTH + 1))
-      OUTPUT = OVERLAY(MNDL.OVER_AID2, OUTPUT, (MNDL.HEIGHT - 1) * (MNDL.WIDTH + 1))
+      OUTPUT = OVERLAY(MNDL.OVER_AID1, OUTPUT, (MNDL.HEIGHT - 2) * MNDL.TWIDTH)
+      OUTPUT = OVERLAY(MNDL.OVER_AID2, OUTPUT, (MNDL.HEIGHT - 1) * MNDL.TWIDTH)
     END
 
     EXEC CICS SEND TEXT FROM(OUTPUT) END-EXEC
@@ -233,8 +234,8 @@ AID_FRACTAL: PROCEDURE EXPOSE MNDL. SCR. EIBCPOSN
     /* Center on the cursor. */
     WHEN AID = 'F1' THEN DO
       /* Translate the cursor position. */
-      COL = (EIBCPOSN // (MNDL.WIDTH + 1)) - 2
-      ROW = INT(EIBCPOSN / (MNDL.WIDTH + 1))
+      COL = (EIBCPOSN // MNDL.TWIDTH) - 2
+      ROW = INT(EIBCPOSN / MNDL.TWIDTH)
       SCR.NCIMAG = MNDL.YMAX - (ROW * MNDL.YSTEP)
       SCR.NCREAL = MNDL.XMIN + (COL * MNDL.XSTEP)
     END
@@ -249,8 +250,8 @@ AID_FRACTAL: PROCEDURE EXPOSE MNDL. SCR. EIBCPOSN
     /* Show the Julia set for the current point. */
     WHEN AID = 'F5' THEN DO
       MNDL.SKIP_DRAW = 'YES'
-      COL = (EIBCPOSN // (MNDL.WIDTH + 1)) - 2
-      ROW = INT(EIBCPOSN / (MNDL.WIDTH + 1))
+      COL = (EIBCPOSN // MNDL.TWIDTH) - 2
+      ROW = INT(EIBCPOSN / MNDL.TWIDTH)
       REAL = MNDL.YMAX - (ROW * MNDL.YSTEP)
       IMAG = MNDL.XMIN + (COL * MNDL.XSTEP)
       CALL JULIA REAL IMAG
