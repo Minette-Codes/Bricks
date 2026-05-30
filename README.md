@@ -252,3 +252,11 @@ Update from Github, **REPLACE ALL FILES**:\
 (cd BRICKS_TS/; git pull; /bin/cp -rv *.* data/ runtime/ ../)
 (cd Minette; git pull; /bin/cp -rv go runtime/ ../)
 ```
+
+## License
+
+I claim no copyright on anything here. I have copied copious amounts of code from [Bricks](https://github.com/moshix/bricks_ts) examples and documentation. If I actually wrote it, consider it public domain and do whatever you please with it. But that does make YOU legally responsible for copyright violations of other peoples code.
+
+Do not use this production, I claim no legal liability for misusing this for mission critical workloads, keep away from governments and children, blah blah blah, the usual don't blame me...
+
+And don't blame Moshix for my insanity.
