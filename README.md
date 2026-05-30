@@ -3,11 +3,6 @@
 Some stuff I wrote for Bricks. \
 <https://github.com/moshix/bricks_ts>.
 
-## Installation
-
-* First you need to get [Bricks](https://github.com/moshix/bricks_ts) running. Follow the readme.
-* Copy the contents of `runtime/` over top of your Bricks directory. No files should be overwritten.
-* Add the desired transactions to your file `runtime/transactions.conf`.
 ## MNDL - Mandelbrot Set Viewer
 
 Use `MNDL` to generate a Mandelbrot set fractal in plain text. You can zoom in/out, scroll the window, re-center at the cursor, generate a Julia set at the cursor and save/load settings. You can also rotate through the saved settings, even while displaying the fractal.
@@ -185,3 +180,75 @@ I keep Bricks as a submodule in my Bricks GIT repository.
 ## Changes
 
 * 2026-05-25 - Initial release.
+
+## Installation
+
+* First you need to get [Bricks](https://github.com/moshix/bricks_ts) running. Follow the file `README.md`.
+* Copy the contents of `runtime/` from this repository over top of your Bricks directory. No files should be overwritten unless you are replacing an old copy.
+* Add the desired transactions to your file `runtime/transactions.conf`. Noted in the **Transactions** sections below.
+
+### Installing everything?
+
+Copy the `runtime/` files:
+
+```
+cp -r runtime/* PATH_TO_BRICKS
+```
+
+Add these transactions to the file `runtime/transactions.conf`:\
+(These can also be found in the file `transactions.txt`.)
+
+```
+BRDS:rexx:brds.rexx:USERS
+MNDL:rexx:mndl.rexx:USERS
+MNDU:rexx:mndu.rexx:USERS
+```
+
+### Alternate setup
+
+An alternate setup to make your life easier would be checkout this repository and [Bricks](https://github.com/moshix/bricks_ts) into a shared directory. Then copy the required files from both repositories into the shared parent directory.
+
+The result would look like this:
+* `MyBricks/`
+  * `BRICKS_TS/` - The [Bricks](https://github.com/moshix/bricks_ts) repository.
+  * `Minette/` - This repository.
+  * `runtime/ ` - The combined runtime files from both repositories.
+  * `data/` - The `data/` directory from the [Bricks](https://github.com/moshix/bricks_ts) repository.
+  * `go` - The script to start [Bricks](https://github.com/moshix/bricks_ts) from this repository. This scripts runs the Bricks binary for the current computer architecture and OS.
+  * All of the other files from the [Bricks](https://github.com/moshix/bricks_ts) repository top level.
+
+This setup would provide a directory to experiment with [Bricks](https://github.com/moshix/bricks_ts) and not interfere with either of the repositories. It can get messy quick when you `git pull` if any files are new or different.
+
+Setup the shared directory:
+
+```
+mkdir Bricks
+cd Bricks
+git clone https://github.com/moshix/BRICKS_TS.git
+git clone https://github.com/Minette-Codes/Bricks.git Minette
+(cd BRICKS_TS/; cp *.* ../; cp -rv data/ runtime/ ../)
+(cd Minette; cp -rv go runtime/ ../)
+cat Minette/transactions.txt >> runtime/transactions.conf
+```
+
+Run [Bricks](https://github.com/moshix/bricks_ts):
+
+```
+./go
+```
+
+Update from Github, **DO NOT** replace any files:\
+(This is the sensible choice. New files will be copied. You can decide what to do with changed files.)
+
+```
+(cd BRICKS_TS/; git pull; cp -nrv *.* data/ runtime/ ../)
+(cd Minette; git pull; cp -nrv go runtime/ ../)
+```
+
+Update from Github, **REPLACE ALL FILES**:\
+**(DON'T do this if you intend to make changes to the files. You WILL loose your changes!)**
+
+```
+(cd BRICKS_TS/; git pull; /bin/cp -rv *.* data/ runtime/ ../)
+(cd Minette; git pull; /bin/cp -rv go runtime/ ../)
+```
