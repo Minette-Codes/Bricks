@@ -3,6 +3,8 @@
 Some stuff I wrote for Bricks. \
 <https://github.com/moshix/bricks_ts>.
 
+`MNDL` and `BRDS` are now included in the [Bricks](https://github.com/moshix/bricks_ts) repository. No need to futz around, just go install [Bricks](https://github.com/moshix/bricks_ts)!
+
 ## MNDL - Mandelbrot Set Viewer
 
 Use `MNDL` to generate a Mandelbrot set fractal in plain text. You can zoom in/out, scroll the window, re-center at the cursor, generate a Julia set at the cursor and save/load settings. You can also rotate through the saved settings, even while displaying the fractal.
@@ -186,6 +188,10 @@ I keep Bricks as a submodule in my Bricks GIT repository.
 * 2026-05-25 - Initial release.
 
 ## Installation
+
+**NOTE:** `MNDL` and `BRDS` are now included in the [Bricks](https://github.com/moshix/bricks_ts) repository. The only reason to use this repository is to grab changes Moshix hasn't included or to send me pull requests. Save yourself the hassle, just go run [Bricks](https://github.com/moshix/bricks_ts).
+
+Basic steps:
 
 * First you need to get [Bricks](https://github.com/moshix/bricks_ts) running. Follow the file `README.md`.
 * Copy the contents of `runtime/` from this repository over top of your Bricks directory. No files should be overwritten unless you are replacing an old copy.
