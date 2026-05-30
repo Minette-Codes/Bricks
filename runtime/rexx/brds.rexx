@@ -14,6 +14,9 @@
 /* Example: */
 /*   ARGS = '-s ~ BRDSTEST ReallyBig Press F3 to return.' */
 /*   EXEC CICS LINK PROGRAM('BRDS'') COMMAREA(ARGS) END-EXEC */
+/* When BRDS returns it will set DFHCOMMAREA to: SET.FILE SET.KEY SET.SEP */
+/*   The file name, the current key, the field separator. */
+/* This has the fun sideeffect of saving your place when you exit BRDS. */
 
 /* Pressing PF24 will demonstrate everything BRDS can do. */
 /* This will load test data into the file BRDSTEST. */
@@ -22,7 +25,8 @@
 /* Pressing PF23 will LINK BRDS with COMMAREA set to the following: */
 /*   -s ~ BRDSTEST ReallyBig This is a message. */
 
-/* For developers, press PF13 to show all of the tails from the STEMS: SET. SCR. FIELDS. */
+/* For developers, press PF13 to show all of the tails from the STEMS: */
+/*   SET. SCR. FIELDS. */
 
 ADDRESS CICS
 
@@ -107,9 +111,7 @@ DO FOREVER
     END
     /* Exit. */
     WHEN AID = 'F3' THEN DO
-      /* TODO: This doesn't seem to work. Or more likely I don't understand. :shrug: */
-      /* COMMAREA = SET.TID '-s' SET.SEP SET.FILE SET.KEY */
-      /* EXEC CICS RETURN COMMAREA(COMMAREA) END-EXEC */
+      DFHCOMMAREA = SET.FILE SET.KEY SET.SEP
       EXEC CICS RETURN END-EXEC
     END
     /* Reset the cursor. */
@@ -158,21 +160,30 @@ DO FOREVER
     /* Starts another copy of BRDS with test data. */
     WHEN AID = '4B' THEN DO /* PF23 */
       CALL TEST_DATA_LOAD
-      ARGS = '-s ~ BRDSTEST ReallyBig Press F3 to return.'
-      EXEC CICS LINK PROGRAM(SET.TID) COMMAREA(ARGS) END-EXEC
-      SKIP = 'YES'
+      COMMAREA = '-s ~ BRDSTEST ReallyBig Press F3 to return.'
+      EXEC CICS LINK PROGRAM(SET.TID) COMMAREA(COMMAREA) END-EXEC
+      IF COMMAREA \= '' THEN DO
+        IF SET.FILE \= '' THEN
+          CALL CURSOR_CLOSE SET.FILE
+        PARSE VAR COMMAREA MAP.FNAME SET.START_KEY SET.SEP
+        MAP.STARTKEY = SET.START_KEY
+        MAP.FIELDSEP = SET.SEP
+        SET.FILE = '' /* Make it look like the user entered a new file name. */
+      END
+      ELSE
+        SKIP = 'YES'
     END
     /* Test data. SSSHHH! TOP SECRET!! */
     WHEN AID = '4C' THEN DO /* PF24 */
-      CALL CURSOR_CLOSE SET.FILE
+      IF SET.FILE \= '' THEN
+        CALL CURSOR_CLOSE SET.FILE
       CALL TEST_DATA_LOAD
-      SET.FILE = 'BRDSTEST'
-      MAP.FNAME = SET.FILE
+      MAP.FNAME = 'BRDSTEST'
       SET.START_KEY = ''
-      SET.SEP = ''
       MAP.STARTKEY = SET.START_KEY
-      CALL CURSOR_OPEN SET.FILE SET.START_KEY
-      CALL CURSOR_LOAD
+      SET.SEP = ''
+      MAP.FIELDSEP = SET.SEP
+      SET.FILE = '' /* Make it look like the user entered a new file name. */
     END
     OTHERWISE NOP
   END
@@ -348,6 +359,9 @@ FIELDS_LOAD: PROCEDURE EXPOSE FIELDS. SCR. SET. TRUNC.
     ELSE
       SCR.PAGES = SCR.PAGES || 'Fields:'
     SCR.PAGES = SCR.PAGES FIELDS.0 'Page:' SET.PAGE 'of' SET.PAGES
+    /* Add a note on scrolling through the pages. */
+    PADD = COPIES(' ', 44 - LENGTH(SCR.PAGES))
+    SCR.PAGES = SCR.PAGES || PADD || 'PF9=Page up PF10=Page Down'
   END
 RETURN
 
