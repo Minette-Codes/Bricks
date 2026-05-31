@@ -116,7 +116,8 @@ DO FOREVER
     END
     /* Reset the cursor. */
     WHEN AID = 'F5' & SET.FILE \= '' THEN DO
-      CALL CURSOR_RESET SET.FILE SET.START_KEY
+      CALL CURSOR_CLOSE SET.FILE
+      CALL CURSOR_OPEN SET.FILE SET.START_KEY
     END
     /* Toggle the field separator. */
     WHEN AID = 'F6' THEN DO
@@ -207,7 +208,7 @@ DO FOREVER
   END
 
   /* Skip fetching a new record, if the file name has not changed. */
-  IF SKIP = 'YES' & SET.FILE = MAP.FNAME THEN
+  IF SKIP = 'YES' & SET.FILE = UPPER(MAP.FNAME) THEN
     ITERATE
 
   /* Did the file name changed. */
@@ -216,7 +217,7 @@ DO FOREVER
       CALL CURSOR_CLOSE SET.FILE
     /* IF SET.FILE \= MAP.FNAME THEN */
       CALL CURSOR_OPEN MAP.FNAME SET.START_KEY
-    SET.FILE = MAP.FNAME
+    SET.FILE = UPPER(MAP.FNAME)
     SET.REC = ''
     SET.KEY = ''
   END
@@ -268,6 +269,7 @@ COMMAND_LINE_PARSE: PROCEDURE EXPOSE DFHCOMMAREA FIELDS. SCR. SET.
   /* If a file is given open it and read a record. */
   IF CKEY \= '' THEN DO
     PARSE VAR CKEY SET.FILE SET.START_KEY
+    SET.FILE = UPPER(SET.FILE)
 
     /* Check for a message to display. */
     PARSE VAR SET.START_KEY NEW_KEY MESSAGE
@@ -439,6 +441,8 @@ SEND_HELP: PROCEDURE EXPOSE SET.
   LEFT('If SEPARATOR is blank the record is wrapped into multiple rows.', SET.WIDTH) ||,
   BLANK_LINE ||,
   LEFT('Wide fields will be truncated and a red "T" will mark the field.', SET.WIDTH) ||,
+  BLANK_LINE ||,
+  LEFT('PF5 closes the cursor then opens a new one. New records will be seen.', SET.WIDTH) ||,
   BLANK_LINE ||,
   LEFT('PF4 rotates the separator through: "" "|" "," ";" ":" "!"', SET.WIDTH) ||,
   BLANK_LINE ||,
