@@ -50,15 +50,20 @@ MNDL.OVER_AID2 = 'PF9=Left    PF10=Right  PF11=Up     PF12=Down   PF16=Shuffle S
 MNDL.XASPECT = 3.0
 MNDL.YASPECT = 2.25
 
-/* Was a save passed on the command line? */
+/* Was a save passed on the command line or in DFHCOMMAREA? */
 EXEC CICS RECEIVE INTO(BUF) END-EXEC
 PARSE VAR BUF TID CKEY
+IF CKEY = '' & DFHCOMMAREA \= '' THEN
+  CKEY = DFHCOMMAREA
 IF CKEY \= '' THEN DO
   SCR.NNAME = CKEY
-  SCR.VARS_SET = 'YES'
   CALL SETTTINGS_LOAD
-  SCR.SHOW_MNDL = 'YES'
-  CALL SHOW_FRACTAL
+  IF RESULT = 0 THEN DO
+    /* If something loaded draw the fractal. */
+    SCR.SHOW_MNDL = 'YES'
+    SCR.VARS_SET = 'YES'
+    CALL SHOW_FRACTAL
+  END
 END
 
 /* Main loop. */
@@ -433,7 +438,7 @@ SETTTINGS_LOAD: PROCEDURE EXPOSE SCR.
     ELSE
       SCR.MSG = 'Error loading the save.'
   END
-  RETURN
+  RETURN EIBRESP
 
 /* Load saved settings from a record. */
 SETTTINGS_RECORD: PROCEDURE EXPOSE SCR.
