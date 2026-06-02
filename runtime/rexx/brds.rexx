@@ -47,7 +47,7 @@ SET.MAP = ''        /* The map to show the user. */
 SET.REC = ''        /* The record read from KSDS. */
 SET.PAGES = 0       /* The number of pages if more than one screen of data. */
 SET.PAGE = 1        /* The current page. */
-SET.PER_PAGE = 10   /* Rows per page, adjusted for terminal model. */
+SET.PER_PAGE = 12   /* Rows per page, adjusted for terminal model. */
 SET.ROW_WIDTH = 76  /* row width for normal width terminals. */
 SET.SEP = ''        /* Field separator. Empty means treat the record as text. */
 SET.START_KEY = ''  /* Starting key. */
@@ -60,16 +60,16 @@ TEST_DATA_FILE = 'BRDSTEST'
 MAPBASE = 'BRDS1'                       /* Model 2 - 24x80 */
 SUFFIX = ''
 IF SCRH >= 43 THEN DO                   /* Model 4 - 43x80 */
-  SET.PER_PAGE = 30
+  SET.PER_PAGE = 31
   SUFFIX = 'L'
 END
 ELSE IF SCRH >= 32 THEN DO              /* Model 3 - 32x80 */
-  SET.PER_PAGE = 18
+  SET.PER_PAGE = 20
   SUFFIX = 'M'
 END
 ELSE IF SCRH >= 27 & SCRW = 132 THEN DO /* Model 5 - 27x132 */
   SET.ROW_WIDTH = 128
-  SET.PER_PAGE = 15
+  SET.PER_PAGE = 17
   SUFFIX = 'W'
 END
 SET.MAP = MAPBASE || SUFFIX

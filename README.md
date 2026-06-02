@@ -177,6 +177,7 @@ Viewing a rather large record on the enormous Model 5 terminal.
 * 2026-05-30 - Removed the requirement for the transaction ID to be in COMMAREA.
 * 2026-05-30 - Properly handle DFHCOMMAREA. I didn't understand it...
 * 2026-05-30 - Made the AID keys for scrolling through the displayed data more prominent.
+* 2026-06-01 - Adjusted the maps to add more rows of data.
 
 ## Go Script
 
