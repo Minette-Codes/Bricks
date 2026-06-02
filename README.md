@@ -7,7 +7,7 @@ Some stuff I wrote for Bricks. \
 
 ## MNDL - Mandelbrot Set Viewer
 
-Use `MNDL` to generate a Mandelbrot set fractal in plain text. You can zoom in/out, scroll the window, re-center at the cursor, generate a Julia set at the cursor and save/load settings. You can also rotate through the saved settings, even while displaying the fractal.
+Use `MNDL` to generate a Mandelbrot set fractal in plain text. You can zoom in/out, scroll the window, re-center at the cursor, generate a Julia set at the cursor and save/load settings. You can also rotate through the saved settings, even while displaying the fractal. If a save name is passed on the command line it will be rendered immediately.
 
 Use the included utility `MNDU` to import, export and delete saves. The included `runtime/tmp/mndl_import.txt` includes some saves. When importing any existing saves are NOT overwritten.
 
@@ -76,6 +76,7 @@ Showing the overlay with helpful information, help for the AID keys and a marker
 * 2026-05-26 - A new save for the Antenna, the long part on the left. Keep zooming.
 * 2026-05-27 - Fix the page handling code. It was backwards, and didn't update the current page number.
 * 2026-06-01 - Adjusted the maps a bit to be more clear.
+* 2026-06-02 - If a save is passed on the command line render it immediately.
 
 ## BRDS - KSDS File Browser
 

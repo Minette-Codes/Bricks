@@ -50,6 +50,17 @@ MNDL.OVER_AID2 = 'PF9=Left    PF10=Right  PF11=Up     PF12=Down   PF16=Shuffle S
 MNDL.XASPECT = 3.0
 MNDL.YASPECT = 2.25
 
+/* Was a save passed on the command line? */
+EXEC CICS RECEIVE INTO(BUF) END-EXEC
+PARSE VAR BUF TID CKEY
+IF CKEY \= '' THEN DO
+  SCR.NNAME = CKEY
+  SCR.VARS_SET = 'YES'
+  CALL SETTTINGS_LOAD
+  SCR.SHOW_MNDL = 'YES'
+  CALL SHOW_FRACTAL
+END
+
 /* Main loop. */
 DO FOREVER
   /* Do it this here so the user can restore default settings. */
@@ -407,9 +418,8 @@ SETTTINGS_SAVE: PROCEDURE EXPOSE SCR.
 
 /* Load the settings from the save file. */
 SETTTINGS_LOAD: PROCEDURE EXPOSE SCR.
-  PARSE ARG KEY
   SCR.SHOW_MNDL = 'NO'
-  KEY  = STRIP(SCR.NNAME)
+  KEY  = SCR.NNAME
   IF KEY = '' THEN
     SCR.MSG = 'Name required when loading.'
   ELSE DO
