@@ -37,8 +37,8 @@ MAP MNDU1 SIZE 24x80
 
   INPUT MSG      AT 18,0  LEN 78 PROT BRIGHT COLOR=RED
   FIELD AT 20,0  LEN 34 PROT COLOR=RED           "THERE IS NO DELETION CONFIRMATION!"
-  FIELD AT 21,0  LEN 34 PROT COLOR=BLUE          "PF9=Export Saves PF10=Import Saves"
-  FIELD AT 21,35 LEN 37 PROT COLOR=WHITE         "(Existing saves are NOT overwritten.)"
-  FIELD AT 22,0  LEN 40 PROT COLOR=BLUE          "ENTER=Apply D=Delete Save PF3=Exit PF5=Reload PF7=Back PF8=Foward"
+  FIELD AT 22,0  LEN 34 PROT COLOR=BLUE          "PF9=Export Saves PF10=Import Saves"
+  FIELD AT 22,35 LEN 37 PROT COLOR=WHITE         "(Existing saves are NOT overwritten.)"
+  FIELD AT 23,0  LEN 40 PROT COLOR=BLUE          "ENTER=Apply D=Delete Save PF3=Exit PF5=Reload PF7=Back PF8=Foward"
   CURSOR         AT NIMPORT
 ENDMAP

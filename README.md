@@ -75,6 +75,7 @@ Showing the overlay with helpful information, help for the AID keys and a marker
 * 2026-05-26 - Added an overlay with useful information. Also position the cursor in the center.
 * 2026-05-26 - A new save for the Antenna, the long part on the left. Keep zooming.
 * 2026-05-27 - Fix the page handling code. It was backwards, and didn't update the current page number.
+* 2026-06-01 - Adjusted the maps a bit to be more clear.
 
 ## BRDS - KSDS File Browser
 
