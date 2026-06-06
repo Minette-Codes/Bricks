@@ -79,10 +79,11 @@ CALL COMMAND_LINE_PARSE
 /* Main loop. */
 DO FOREVER
   SKIP         = 'NO' /* Don't fetch a new record if YES. */
+  SCR.FIELDSEP = SET.SEP
   SCR.FNAME    = SET.FILE
   SCR.LASTKEY  = SET.KEY
   SCR.STARTKEY = SET.START_KEY
-  SCR.FIELDSEP = SET.SEP
+  SCR.TRANSID   = SET.TID
 
   EXEC CICS CONVERSE MAP(SET.MAP) FROM(SCR.) INTO(MAP) ERASE END-EXEC
   /* Make sure the map is found. */
@@ -111,7 +112,10 @@ DO FOREVER
     END
     /* Exit. */
     WHEN AID = 'F3' THEN DO
-      DFHCOMMAREA = SET.FILE SET.KEY SET.SEP
+      DFHCOMMAREA = ''
+      IF SET.SEP \= '' THEN
+        DFHCOMMAREA = '-s' SET.SEP
+      DFHCOMMAREA = DFHCOMMAREA SET.FILE SET.KEY SET.SEP
       EXEC CICS RETURN END-EXEC
     END
     /* Reset the cursor. */
@@ -238,17 +242,14 @@ EXIT
 
 /* FIELDS. is here so it gets passed through to procedure calls. */
 COMMAND_LINE_PARSE: PROCEDURE EXPOSE DFHCOMMAREA FIELDS. SCR. SET.
-  /* Check for anything in DFHCOMMAREA. */
-  /* Use the contents as if they were from the command line. */
-  IF DFHCOMMAREA \= '' THEN DO
+  /* Check for command line arguments. */
+  /* If there are none check for arguments in DFHCOMMAREA. */
+  EXEC CICS RECEIVE INTO(BUF) END-EXEC
+  PARSE VAR BUF SET.TID CKEY
+  IF DFHCOMMAREA \= '' & CKEY = '' THEN DO
     CKEY = STRIP(DFHCOMMAREA)
   END
-  ELSE DO
-    /* Parse the actual command line. */
-    EXEC CICS RECEIVE INTO(BUF) END-EXEC
-    PARSE VAR BUF SET.TID CKEY
-    SCR.TRANSID = SET.TID
-  END
+
 
   /* Do they need help? */
   IF        CKEY        = '-?'   |,
@@ -289,39 +290,40 @@ RECORD_PARSE: PROCEDURE EXPOSE FIELDS. SCR. SET. TRUNC.
   SET.PAGE = 1
   SCR.PAGES_EXTRA = ''
   IF SET.SEP = '' THEN DO
+    /* Present the record as one long string of text. */
+    /* The record is wrapped as needed. */
     FIELDS.0 = 0
     POS = 1
     DO WHILE POS < LENGTH(SET.REC)
-      N = FIELDS.0 + 1
-      FIELDS.0 = N
-      FIELDS.N = SUBSTR(SET.REC, POS, SET.ROW_WIDTH)
-      TRUNC.N = ''
+      FIELD_NUM = FIELDS.0 + 1
+      FIELDS.0 = FIELD_NUM
+      FIELDS.FIELD_NUM = SUBSTR(SET.REC, POS, SET.ROW_WIDTH)
+      TRUNC.FIELD_NUM = ''
       POS = POS + SET.ROW_WIDTH
     END
     IF LENGTH(SET.REC) > SET.ROW_WIDTH THEN
       SCR.PAGES_EXTRA = 'Record wrapped. '
   END
   ELSE DO
+    /* Parse the record into separate fields. */
     FIELDS.0 = 0
     RIGHT = SET.REC
-    LEFT = RIGHT
-    DO WHILE LEFT \= ''
+    DO WHILE LENGTH(RIGHT) > 0
       /* Do a strange little dance to parse the record. */
       /* This translate to: PARSE VAR LEFT 'X' RIGHT */
       /* With X as the separator character. */
       INTERPRET 'PARSE VAR RIGHT LEFT ''' || SET.SEP || ''' RIGHT' 
-      N = FIELDS.0 + 1
-      FIELDS.0 = N
-      TRUNC.N = ''
+      FIELDS.0 = FIELDS.0 + 1
+      FIELD_NUM = FIELDS.0
+      TRUNC.FIELD_NUM = ''
       IF LENGTH(LEFT) > SET.ROW_WIDTH THEN DO
-        FIELDS.N = LEFT(LEFT, SET.ROW_WIDTH - 6) '...'
+        FIELDS.FIELD_NUM = LEFT(LEFT, SET.ROW_WIDTH - 6) '...'
         SCR.PAGES_EXTRA = 'Field(s) truncated. '
-        TRUNC.N = 'T'
+        TRUNC.FIELD_NUM = 'T'
       END
       ELSE
-        FIELDS.N = LEFT
+        FIELDS.FIELD_NUM = LEFT
     END
-    FIELDS.0 = FIELDS.0 - 1
   END
   SET.PAGES = (FIELDS.0 + SET.PER_PAGE - 1) % SET.PER_PAGE
   CALL FIELDS_LOAD
@@ -464,11 +466,11 @@ SEND_HELP: PROCEDURE EXPOSE SET.
   Key = '1234567890'
   CALL TEST_DATA_RECORD KEY REC
   REC = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
-  REC = 'This is a really big record.|' || COPIES(REC,100)
+  REC = 'This is a really big record.|' || COPIES(REC,100) || '|The End.'
   KEY = 'ReallyBig'
   CALL TEST_DATA_RECORD KEY REC
   REC = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
-  REC = 'This is an incredibly big record.:' || COPIES(REC,200)
+  REC = 'This is an incredibly big record.:' || COPIES(REC,200) ||':The End.'
   KEY = 'ZBig'
   CALL TEST_DATA_RECORD KEY REC
   REC = '1|2|3|4|5|6|7|8|9|0'
@@ -506,6 +508,9 @@ SEND_HELP: PROCEDURE EXPOSE SET.
   CALL TEST_DATA_RECORD KEY REC
   REC = REC || '~' || REC
   KEY = 'TildeB'
+  CALL TEST_DATA_RECORD KEY REC
+  REC = 'This record has a blank field.||Right there, the line above.'
+  KEY = 'BlankRow'
   CALL TEST_DATA_RECORD KEY REC
   REC = 'This record is just a little bit of plain text.'
   KEY = 'PlainText'

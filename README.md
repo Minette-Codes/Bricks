@@ -15,13 +15,14 @@ Adapted from: <https://rosettacode.org/wiki/Mandelbrot_set> \
 (With help from Google.)
 
 See also:
+
 * <https://en.wikipedia.org/wiki/Mandelbrot_set>
 * <https://www.dynamicmath.xyz/mandelbrot-julia/>
 * <https://paulbourke.net/fractals/juliaset/>
 
 ### Files
 
-```
+```bash
 runtime/rexx/mndl.rexx
 runtime/rexx/mndu.rexx
 runtime/map/mndl1.map
@@ -31,7 +32,7 @@ runtime/tmp/mndl_import.txt
 
 ### Transactions
 
-```
+```text
 MNDL:rexx:mndl.rexx:USERS
 MNDU:rexx:mndu.rexx:USERS
 ```
@@ -58,8 +59,6 @@ Showing the overlay with helpful information, help for the AID keys and a marker
 
 ![Overlay](Screenshots/MNDL_Overlay.png)
 
-
-
 ### Fun thing to try
 
 * Open the web terminal for Bricks <http://localhost:9000/>.
@@ -77,6 +76,7 @@ Showing the overlay with helpful information, help for the AID keys and a marker
 * 2026-05-27 - Fix the page handling code. It was backwards, and didn't update the current page number.
 * 2026-06-01 - Adjusted the maps a bit to be more clear.
 * 2026-06-02 - If a save is passed on the command line render it immediately.
+* 2026-06-02 - Check DFHCOMMAREA for a save to be loaded.
 
 ## BRDS - KSDS File Browser
 
@@ -90,7 +90,7 @@ If the number of rows exceeds the display height then the list can be scrolled u
 
 When `BRDS` exits it sets **DFHCOMMAREA** to the current file, key and field separator. This is intended to allow other programs to **LINK** to `BRDS` to pick a record to be returned. This has the added bonus that **DFHCOMMAREA** persists in your session, so it acts like a place holder. When you start `BRDS` again it will pick up where you left off.
 
-### Fields:
+### Fields
 
 * File: The **KSDS** file to browse. REQUIRED.
 * Start Key: The key to start from. This is passed to **STARTBR** when opening or resetting the cursor. Optional.
@@ -128,7 +128,7 @@ To display a message the start key is required. Everything after the the start k
 
 Examples:
 
-```
+```text
 BRDS -s | MANDELBROT
 BRDS MANDELBROT Defaults
 BRDS BRDSTEST ReallyBig This is a message the user will see in RED.
@@ -138,7 +138,7 @@ You can **CICS** **LINK** to `BRDS` passing command line options via **DFHCOMMAR
 
 ### Files
 
-```
+```text
 runtime/rexx/brds.rexx
 runtime/map/brds1.map
 runtime/map/brds1l.map
@@ -149,7 +149,7 @@ runtime/map/brds1w.map
 
 ### Transactions
 
-```
+```text
 BRDS:rexx:brds.rexx:USERS
 ```
 
@@ -180,7 +180,20 @@ Viewing a rather large record on the enormous Model 5 terminal.
 * 2026-05-30 - Properly handle DFHCOMMAREA. I didn't understand it...
 * 2026-05-30 - Made the AID keys for scrolling through the displayed data more prominent.
 * 2026-06-01 - Adjusted the maps to add more rows of data.
-* 2026-06-02 - Check DFHCOMMAREA for a save to be loaded.
+* 2026-06-06 - Fixed an issue parsing records with empty fields. These would cause parsing to stop.
+* 2026-06-06 - Fixed handling of command line arguments and DFHCOMMAREA. Added a record to test data to exercise this fix.
+* 2026-06-06 - Correctly include the separator in DFHCOMMAREA when quitting.
+* 2026-06-06 - Off by one error where the last field could be dropped.
+
+## The future?
+
+Thoughts on future improvements. Feedback welcome.
+
+* Store record formats for tables to allow fields to be labelled. This should support delimited and fixed width records. With a condition to check if the format applies to a record. Automatically apply a separator at the table and format level. Admin only!
+
+* Delete the current record, with confirmation. Admin only!
+
+* Edit the plain text of a record. Prevent editing if the record contains non-printable characters. Admin only!
 
 ## Go Script
 
@@ -206,14 +219,14 @@ Basic steps:
 
 Copy the `runtime/` files:
 
-```
+```bash
 cp -r runtime/* PATH_TO_BRICKS
 ```
 
 Add these transactions to the file `runtime/transactions.conf`:\
 (These can also be found in the file `transactions.txt`.)
 
-```
+```text
 BRDS:rexx:brds.rexx:USERS
 MNDL:rexx:mndl.rexx:USERS
 MNDU:rexx:mndu.rexx:USERS
@@ -224,10 +237,11 @@ MNDU:rexx:mndu.rexx:USERS
 An alternate setup to make your life easier would be checkout this repository and [Bricks](https://github.com/moshix/bricks_ts) into a shared directory. Then copy the required files from both repositories into the shared parent directory.
 
 The result would look like this:
+
 * `MyBricks/`
   * `BRICKS_TS/` - The [Bricks](https://github.com/moshix/bricks_ts) repository.
   * `Minette/` - This repository.
-  * `runtime/ ` - The combined runtime files from both repositories.
+  * `runtime/` - The combined runtime files from both repositories.
   * `data/` - The `data/` directory from the [Bricks](https://github.com/moshix/bricks_ts) repository.
   * `go` - The script to start [Bricks](https://github.com/moshix/bricks_ts) from this repository. This scripts runs the Bricks binary for the current computer architecture and OS.
   * All of the other files from the [Bricks](https://github.com/moshix/bricks_ts) repository top level.
@@ -236,7 +250,7 @@ This setup would provide a directory to experiment with [Bricks](https://github.
 
 Setup the shared directory:
 
-```
+```bash
 mkdir Bricks
 cd Bricks
 git clone https://github.com/moshix/BRICKS_TS.git
@@ -248,14 +262,14 @@ cat Minette/transactions.txt >> runtime/transactions.conf
 
 Run [Bricks](https://github.com/moshix/bricks_ts):
 
-```
+```bash
 ./go
 ```
 
 Update from Github, **DO NOT** replace any files:\
 (This is the sensible choice. New files will be copied. You can decide what to do with changed files.)
 
-```
+```bash
 (cd BRICKS_TS/; git pull; cp -nrv *.* data/ runtime/ ../)
 (cd Minette; git pull; cp -nrv go runtime/ ../)
 ```
@@ -263,7 +277,7 @@ Update from Github, **DO NOT** replace any files:\
 Update from Github, **REPLACE ALL FILES**:\
 **(DON'T do this if you intend to make changes to the files. You WILL loose your changes!)**
 
-```
+```bash
 (cd BRICKS_TS/; git pull; /bin/cp -rv *.* data/ runtime/ ../)
 (cd Minette; git pull; /bin/cp -rv go runtime/ ../)
 ```
