@@ -1,0 +1,17 @@
+{
+    "editor.someSetting": true,
+    "markdownlint.run": "onSave",
+    "markdownlint.config": {
+        "MD024": false
+    },
+    "cSpell.words": [
+        "rexx",
+        "brds",
+        "mndl",
+        "mndu",
+        "Minette",
+        "Moshix"
+    ],    "cSpell.ignoreRegExpList": [
+        "/\\b[A-Z0-9_-]+\\b/g"
+    ]
+}
