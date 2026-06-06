@@ -5,6 +5,16 @@ Some stuff I wrote for Bricks. \
 
 `MNDL` and `BRDS` are now included in the [Bricks](https://github.com/moshix/bricks_ts) repository. No need to futz around, just go install [Bricks](https://github.com/moshix/bricks_ts)!
 
+## Contents
+
+* [MNDL - Mandelbrot Set Viewer](#mndl---mandelbrot-set-viewer)
+* [BRDS - KSDS File Browser](#brds---ksds-file-browser)
+* [Go Script](#go-script)
+* [Installation](#installation)
+* [License](#license)
+
+<!-- With the help of: https://bitdowntoc.derlin.ch/ -->
+
 ## MNDL - Mandelbrot Set Viewer
 
 Use `MNDL` to generate a Mandelbrot set fractal in plain text. You can zoom in/out, scroll the window, re-center at the cursor, generate a Julia set at the cursor and save/load settings. You can also rotate through the saved settings, even while displaying the fractal. If a save name is passed on the command line it will be rendered immediately.
@@ -68,7 +78,7 @@ Showing the overlay with helpful information, help for the AID keys and a marker
 
 ![Big Mandelbrot](Screenshots/MNDL_Big.png)
 
-## Changes
+### Changes
 
 * 2026-05-25 - Initial release.
 * 2026-05-26 - Added an overlay with useful information. Also position the cursor in the center.
@@ -173,7 +183,7 @@ Viewing a rather large record on the enormous Model 5 terminal.
 
 ![Big Record](Screenshots/BRDS_Model5.png)
 
-## Changes
+### Changes
 
 * 2026-05-25 - Initial release.
 * 2026-05-27 - Read the file and starting key from the command line. Handle going past the last record more gracefully. The cursor is re-opened and the last record re-read so you can keep scrolling through the data.
@@ -187,7 +197,7 @@ Viewing a rather large record on the enormous Model 5 terminal.
 * 2026-06-06 - Correctly include the separator in DFHCOMMAREA when quitting.
 * 2026-06-06 - Off by one error where the last field could be dropped.
 
-## The future?
+### The future?
 
 Thoughts on future improvements. Feedback welcome.
 
@@ -203,7 +213,7 @@ The script `./go` will start Bricks. It figures out which binary to run. Update 
 
 I keep Bricks as a submodule in my Bricks GIT repository.
 
-## Changes
+### Changes
 
 * 2026-05-25 - Initial release.
 
