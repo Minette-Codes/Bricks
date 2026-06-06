@@ -88,7 +88,9 @@ If no separator is provided the record is displayed as plain text. In this mode 
 
 If the number of rows exceeds the display height then the list can be scrolled using **PF9** and **PF10**. Markers indicate where there is more data up or down and if at the top or bottom of the list. The current page and the total number of pages are displayed.
 
-When `BRDS` exits it sets **DFHCOMMAREA** to the current file, key and field separator. This is intended to allow other programs to **LINK** to `BRDS` to pick a record to be returned. This has the added bonus that **DFHCOMMAREA** persists in your session, so it acts like a place holder. When you start `BRDS` again it will pick up where you left off.
+When `BRDS` exits it sets **DFHCOMMAREA** to the current file, key and field separator, just like it is specified on the command line. This is intended to allow other programs to **LINK** to `BRDS` to pick a record to be returned. This has the added bonus that **DFHCOMMAREA** persists in your session, so it acts like a place holder. When you start `BRDS` again it will pick up where you left off.
+
+If you are calling BRDS and and expecting record details to be returned in **DFHCOMMAREA** be aware of the formatting. It is just like command line arguments. Which means the first field might be `-s`. If present `-s` will be followed by the separator. For example `-s | MANDELBROT Antenna` means the separator is `|`, the file is `MANDELBROT` and the record key was `Antenna`. The same example without the separator `MANDELBROT Antenna`.
 
 ### Fields
 
