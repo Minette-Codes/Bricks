@@ -168,9 +168,15 @@ DO FOREVER
       COMMAREA = '-s ~ BRDSTEST ReallyBig Press F3 to return.'
       EXEC CICS LINK PROGRAM(SET.TID) COMMAREA(COMMAREA) END-EXEC
       IF COMMAREA \= '' THEN DO
+        /* Close the cursor if one is open. */
         IF SET.FILE \= '' THEN
           CALL CURSOR_CLOSE SET.FILE
-        PARSE VAR COMMAREA MAP.FNAME SET.START_KEY SET.SEP
+
+        /* Was a separator sent back? */
+        PARSE VAR COMMAREA '-s' SET.SEP COMMAREA 
+
+        /* Read the rest of the returned args. */
+        PARSE VAR COMMAREA MAP.FNAME SET.START_KEY
         MAP.STARTKEY = SET.START_KEY
         MAP.FIELDSEP = SET.SEP
         SET.FILE = '' /* Make it look like the user entered a new file name. */
