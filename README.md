@@ -314,6 +314,7 @@ The `DEMO` Frame.
 ### Changes
 
 * 2026-06-12 - Initial release.
+* 2026-06-13 - Remove an old message from the debug information.
 
 ## Go Script
 
