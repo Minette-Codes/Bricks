@@ -183,7 +183,7 @@ MAP MAINMENUHELP1 SIZE 32x80
   FIELD           AT 12,0   LEN 78   PROT COLOR=BLUE          "With the Option line you can enter:                              Example"
   FIELD           AT 13,0   LEN 78   PROT COLOR=BLUE          "* '/TID' to LINK to the given Transaction ID with arguments.       /HELP"
   FIELD           AT 14,0   LEN 78   PROT COLOR=BLUE          "* '@FRAME' to jump directly to a Frame.                            @DEMO"
-  FIELD           AT 34,0   LEN 78   PROT COLOR=BLUE          "* '?TOPIC' to jump the Help page TOPIC . Works on all Frames.      ?ISPF"
+  FIELD           AT 12,0   LEN 78   PROT COLOR=BLUE          "* '?TOPIC' to jump the Help page TOPIC . Works on all Frames.      ?ISPF"
   FIELD           AT 16,0   LEN 78   PROT COLOR=BLUE          "* 'Link ID' to execute the link.                                      DU"
   FIELD           AT 17,0   LEN 78   PROT COLOR=BLUE          "* 'Frame ID' to jump to the Frame.                                     A"
   FIELD           AT 18,0   LEN 78   PROT COLOR=BLUE          "* 'Frame ID.Link ID' to use a Link in a different Frame.            D.RH"
