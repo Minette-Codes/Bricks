@@ -1,3 +1,5 @@
 BRDS:rexx:brds.rexx:USERS
+ESPF:rexx:espf.rexx:ADMIN
+FSPF:rexx:fspf.rexx:USERS
 MNDL:rexx:mndl.rexx:USERS
 MNDU:rexx:mndu.rexx:USERS

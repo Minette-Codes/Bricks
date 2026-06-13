@@ -1,0 +1,74 @@
+FRAME-M~w~1000~MAIN~Main Menu~B~~
+FRAME-D~w~5000~DEMO~Bricks Demos~C~Bricks Builtin Demos~C
+FRAME-H~w~7000~HELP~Help~P~Bricks Help Screens~P
+FRAME-A~w~9000~ADMIN~Administration~R~Bricks Administration~R
+LINK-~~100~ADMIN~~~~Administration Tools~r~
+LINK-R~w~110~ADMIN~~CEDA~R~Resource Manager~b~
+LINK-K~w~112~ADMIN~~IDCA~R~KSDS Service~b~
+LINK-P~w~112~ADMIN~~CEMT~R~Performance Monitor~b~
+LINK-~~120~ADMIN~~~~Blank Line~h~
+LINK-~~130~ADMIN~~~~Development Tools~Y~
+LINK-I~w~141~ADMIN~~ISPF~Y~ISPF Source Editor~b~
+LINK-C~w~142~ADMIN~~CECI~Y~Command Leve Interpreter~b~
+LINK-~~100~DEMO~~~~REXX: Demos~C~
+LINK-RH~W~110~DEMO~~HELO~G~REXX: Hello World~B~
+LINK-RU~W~111~DEMO~~CUST~G~REXX: Customer Maintenance~B~
+LINK-RL~W~112~DEMO~~CUSL~G~REXX: Customre List~B~
+LINK-RQ~W~113~DEMO~~QAGE~G~REXX: Tells you how old you are~B~
+LINK-RP~w~120~DEMO~~PROD~G~REXX: TS Queu Producer~B~
+LINK-RC~w~121~DEMO~~CONS~G~REXX: TS Queue Consumer~B~
+LINK-RT~w~130~DEMO~~CHAT~G~REXX: Interactive Chat~B~
+LINK-RE~w~131~DEMO~~HELP~G~REXX: Help~B~
+LINK-RS~w~132~DEMO~~SABR~G~REXX: SABRE Airline Booking~B~
+LINK-~~140~DEMO~~~~Blank Line~H~
+LINK-~~150~DEMO~~~~COBOL: Demos~C~
+LINK-CZ~w~160~DEMO~~WZEN~G~COBOL: Experience Zen~B~
+LINK-CH~W~161~DEMO~~HELC~G~COBOL: Hello World~B~
+LINK-CU~w~162~DEMO~~GUST~G~COBOL: Customer Maintenance~B~
+LINK-CL~w~163~DEMO~~GUSL~G~COBOL: Customer List~B~
+LINK-CB~w~164~DEMO~~BANK~G~COBOL: Bank Example App~B~
+LINK-CQ~w~165~DEMO~~QAGC~G~COBOL: Tells you how old you are~B~
+LINK-~~100~HELP~~~~General Help~G~
+LINK-H~w~101~HELP~~?HELP~P~Help on FSPF HELP~B~
+LINK-B~w~102~HELP~~?BRGR~P~Brics Resources~B~
+LINK-G~w~103~HELP~~?CMDS~P~General Bricks Commands~B~
+LINK-~~200~HELP~~~~Blank line.~H~
+LINK-~~201~HELP~~~~Administration Tools~R~
+LINK-R~w~202~HELP~~?CEDA~P~CEDA - Resource Manager~B~
+LINK-K~w~203~HELP~~?IDCA~P~IDCA - KSDS Service~B~
+LINK-P~w~204~HELP~~?CEMT~P~CEMT - Performance Monitor~B~
+LINK-~~300~HELP~~~~Blank line.~H~
+LINK-~~301~HELP~~~~Development Tools~Y~
+LINK-I~w~302~HELP~~?ISPF~P~ISPF - Source Editor~B~
+LINK-C~w~303~HELP~~?CECI~P~CECI - Command-Level Interpreter~B~
+LINK-~~600~HELP~~~~Blank line.~H~
+LINK-~~601~HELP~~~~Quick Reference~W~
+LINK-IO~w~602~HELP~~?QIO~P~Terminal I/O~B~
+LINK-PC~w~603~HELP~~?QPC~P~Program Control~B~
+LINK-SS~w~604~HELP~~?QSS~P~System Services~B~
+LINK-KS~w~605~HELP~~?QKS~P~KSDS files~B~
+LINK-TS~w~606~HELP~~?QTS~P~Temporary Storage~B~
+LINK-RC~w~607~HELP~~?QRC~P~Recovery + Condition~B~
+LINK-SQ~w~608~HELP~~?QSQL~P~SQL~B~
+LINK-EI~w~609~HELP~~?QEIB~P~EIB Fields~B~
+LINK-AI~w~610~HELP~~?QAID~P~AID Key Details~B~
+LINK-WS~w~620~HELP~~?QWSS~P~WEB Server Side~B~
+LINK-WC~w~621~HELP~~?QWCS~P~WEB Client Side~B~
+LINK-DO~w~622~HELP~~?QDOC~P~DOCUMENT Chunked Body Builder~B~
+LINK-B~w~100~MAIN~~BRDS~g~Browse KSDS~b~
+LINK-M~w~101~MAIN~~MNDL~g~Mandelbrot set~b~
+LINK-BM~w~102~MAIN~~BRDS~g~Browse Mandelbrot set saves~b~-s | MANDELBROT
+LINK-BF~w~103~MAIN~~BRDS~g~Browse FSPF Frame and Link data.~b~-s ~ FSPFDATA
+LINK-~~200~MAIN~~~~Blank line.~h~
+LINK-DT~w~201~MAIN~~CHAT~c~Interactive chat app~b~
+LINK-DU~w~202~MAIN~~CUST~C~Customer lookup example~b~
+LINK-D~w~203~MAIN~Y~DEMO~c~More demos...~b~
+LINK-~~300~MAIN~~~~Blank line.~H~
+LINK-I~w~301~MAIN~~ISPF~y~ISPF Source Editor~b~
+LINK-C~w~302~MAIN~~CECI~y~Command Level Interpreter~b~
+LINK-~~400~MAIN~~~~Blank line.~H~
+LINK-P~r~401~MAIN~~CEMT~r~Performance Monitor~r~
+LINK-R~r~402~MAIN~~CEDA~r~Resource Manager~r~
+LINK-K~r~403~MAIN~~IDCA~r~KSDS Service~r~
+LINK-~~900~MAIN~~~~Blank line.~H~
+LINK-Q~W~999~MAIN~~-Q~H~Quit FSPF~W~

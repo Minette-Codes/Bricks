@@ -1,0 +1,54 @@
+* Test data to exercise several features.
+* Does not show up unless jumping to the TEST Frame.
+LINK-AA~W~001~TEST~~AAAA~~Just some test data~B~
+LINK-AB~W~002~TEST~~AAAB~~You probably don't want to load this.~Y~
+LINK-AC~W~003~TEST~~AAAC~~This is a long description. 42 Characters!~W~
+LINK-AD~W~004~TEST~~AAAD~~Test Frame Blue~B~
+LINK-AE~W~005~TEST~~AAAE~~Test Frame Cyan/Turquoise~C~
+LINK-AF~W~006~TEST~~AAAF~~Test Frame Green~G~
+LINK-AG~W~007~TEST~~AAAG~~Test Frame Ping/Magenta~P~
+LINK-AH~W~008~TEST~~AAAH~~Test Frame Red~R~
+LINK-AI~W~009~TEST~~AAAI~~Test Frame White~W~
+LINK-AJ~W~010~TEST~~AAAJ~~Test Frame Yellow~Y~
+LINK-AK~W~011~TEST~~AAAK~~Test Frame Turquoise/Cyan~T~
+LINK-AL~B~012~TEST~~AAAL~~Test Frame Blue~W~
+LINK-AM~C~013~TEST~~AAAM~~Test Frame Cyan/Turquoise~W~
+LINK-AN~G~014~TEST~~AAAN~~Test Frame Green~W~
+LINK-AO~P~015~TEST~~AAAO~~Test Frame Pink/Magenta~W~
+LINK-AP~R~016~TEST~~AAAP~~Test Frame Red~W~
+LINK-AQ~W~017~TEST~~AAAQ~~Test Frame White~W~
+LINK-AR~Y~018~TEST~~AAAR~~Test Frame Yellow~W~
+LINK-AS~T~019~TEST~~AAAS~~Test Frame Turquoise/Cyan~W~
+LINK-AT~W~020~TEST~~AAAT~B~Test Frame Blue~W~
+LINK-AU~W~021~TEST~~AAAU~C~Test Frame Cyan/Turquoise~W~
+LINK-AV~W~022~TEST~~AAAV~G~Test Frame Green~W~
+LINK-AW~W~023~TEST~~AAAW~P~Test Frame Pink/Magenta~W~
+LINK-AX~W~024~TEST~~AAAX~R~Test Frame Red~W~
+LINK-AY~W~025~TEST~~AAAY~W~Test Frame White~W~
+LINK-AZ~W~026~TEST~~AAAZ~Y~Test Frame Yellow~W~
+LINK-BA~W~027~TEST~~AABA~T~Test Frame Turquoise/Cyan~W~
+LINK-BB~B~028~TEST~~AABB~B~Test Frame Blue~B~
+LINK-BC~C~029~TEST~~AABC~C~Test Frame Cyan/Turquoise~C~
+LINK-BD~G~030~TEST~~AABD~G~Test Frame Green~G~
+LINK-BE~P~031~TEST~~AABE~P~Test Frame Ping/Magenta~P~
+LINK-BF~R~032~TEST~~AABF~R~Test Frame Red~R~
+LINK-BG~W~033~TEST~~AABG~W~Test Frame White~W~
+LINK-BH~Y~034~TEST~~AABH~Y~Test Frame Yellow~Y~
+LINK-BI~T~035~TEST~~AABI~T~Test Frame Turquoise/Cyan~T~
+LINK-BJ~W~036~TEST~~AABJ~~The next frame is hidden!~W~
+LINK-BK~H~037~TEST~~AABK~H~Test Frame Hidden!~H~
+LINK-BL~W~038~TEST~~AABL~~Bits of the next three frames are hidden.~W~
+LINK-BM~H~039~TEST~~AABM~~Test Frame~W~
+LINK-BN~W~040~TEST~~AABN~H~Test Frame~W~
+LINK-BO~W~041~TEST~~AABO~~Test Frame~H~
+LINK-BP~W~042~TEST~~AABP~~Test Frame~W~
+LINK-BQ~W~043~TEST~~AABQ~~Test Frame~W~
+LINK-BR~W~044~TEST~~AABR~~Test Frame~W~
+LINK-BS~W~045~TEST~~AABS~~Test Frame~W~
+LINK-BT~W~046~TEST~~AABT~~Test Frame~W~
+LINK-BU~W~047~TEST~~AABU~~Test Frame~W~
+LINK-BV~W~048~TEST~~AABV~~Test Frame~W~
+LINK-BW~W~049~TEST~~AABW~~Test Frame~W~
+LINK-BX~W~050~TEST~~AABX~~Test Frame~W~
+LINK-BY~W~051~TEST~~AABY~~Test Frame~W~
+LINK-BZ~Y~052~TEST~~AABZ~Y~End of the test data. How sad.~Y~
