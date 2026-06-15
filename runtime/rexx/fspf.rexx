@@ -539,7 +539,7 @@ LINK_PARSE: PROCEDURE EXPOSE FRAME. LINK. SCR. SET.
         ROW_ID     '~',
         ROW_IDC    '~',
         ROW_ORDER  '~',
-        ROW_FRAME   '~',
+        ROW_FRAME  '~',
         ROW_SUBM   '~',
         ROW_TRANS  '~',
         ROW_TRANSC '~',
@@ -596,12 +596,12 @@ LINK_PARSE: PROCEDURE EXPOSE FRAME. LINK. SCR. SET.
     SET.POSITION = LINKS
 
   IF SET.POSITION > 1 THEN
-    SCR.MORETOP = CENTER('*** Press PF7 for more links ***', 40)
+    SCR.MORETOP = CENTER('*** Press PF7 for more Links ***', 40)
   ELSE
     SCR.MORETOP = ''
 
   IF SET.POSITION - 1 < (LINKS - SET.LINKCOUNT) & LINKS > SET.LINKCOUNT THEN
-    SCR.MOREBOT = CENTER('*** Press PF8 for more links ***', 40)
+    SCR.MOREBOT = CENTER('*** Press PF8 for more Links ***', 40)
   ELSE
     SCR.MOREBOT = ''
   RETURN

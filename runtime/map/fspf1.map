@@ -723,7 +723,7 @@ MAP EDITLINKHELP2 SIZE 24x80
   INPUT ORDER2    AT 4 ,11  LEN 4   PROT UNDERSCORE COLOR=GREEN  DEFAULT "100"
   INPUT FRAME2    AT 4 ,17  LEN 5   PROT UNDERSCORE COLOR=CYAN   DEFAULT "MAIN"
   INPUT SUBM2     AT 4 ,23  LEN 1   PROT UNDERSCORE COLOR=CYAN   DEFAULT "Y"
-  INPUT TRANS2    AT 4 ,25  LEN 5   PROT UNDERSCORE COLOR=WHITE  DEFAULT "ADMN"
+  INPUT TRANS2    AT 4 ,25  LEN 5   PROT UNDERSCORE COLOR=WHITE  DEFAULT "ADMIN"
   INPUT TRANSC2   AT 4 ,31  LEN 1   PROT UNDERSCORE COLOR=WHITE  DEFAULT "H"
   INPUT DESCR2    AT 4 ,34  LEN 42  PROT UNDERSCORE COLOR=RED    DEFAULT "Switch to the Administration Frame."
   INPUT DESCRC2   AT 4 ,77  LEN 1   PROT UNDERSCORE COLOR=RED    DEFAULT "R"
@@ -1296,7 +1296,7 @@ MAP EDITFRAMEHELP1 SIZE 24x80
   STOP            AT 3 ,2
   STOP            AT 3 ,8
   STOP            AT 3 ,15
-  STOP            AT 3 ,22
+  STOP            AT 3 ,21
   STOP            AT 3 ,45
   STOP            AT 3 ,79
 
@@ -1356,7 +1356,7 @@ MAP EDITFRAMEHELP2 SIZE 24x80
   STOP            AT 3 ,2
   STOP            AT 3 ,8
   STOP            AT 3 ,15
-  STOP            AT 3 ,22
+  STOP            AT 3 ,21
   STOP            AT 3 ,45
   STOP            AT 3 ,79
 
@@ -1376,41 +1376,53 @@ ENDMAP * EDITFRAMEHELP2
 MAP BRICKSHELPHELP SIZE 24x80
   FIELD           AT 0 ,0   LEN 9    PROT BRIGHT COLOR=CYAN   "FSPF HELP"
   FIELD           AT 0 ,10  LEN 12   PROT BRIGHT COLOR=GREEN  "Help for HELP"
+  FIELD           AT 0 ,60  LEN 10   PROT COLOR=RED           "ADMIN ONLY"
   FIELD           AT 0 ,72  LEN 5    PROT BRIGHT COLOR=PINK   "?HELP"
   
   FIELD           AT 2 ,28  LEN 19   PROT COLOR=BLUE          "Help for FSPF HELP!"
 
-  FIELD           AT 1 ,2   LEN 1    PROT COLOR=CYAN          "\"
-  FIELD           AT 2 ,3   LEN 1    PROT COLOR=CYAN          "\"
-  FIELD           AT 3 ,4   LEN 1    PROT COLOR=CYAN          "\"
-  FIELD           AT 4 ,5   LEN 1    PROT COLOR=CYAN          "\"
-  FIELD           AT 5 ,6   LEN 1    PROT COLOR=CYAN          "\"
-  FIELD           AT 6 ,7   LEN 1    PROT COLOR=CYAN          "=> Help topic or command."
+  FIELD           AT 1 ,1   LEN 1    PROT COLOR=CYAN          "\"
+  FIELD           AT 2 ,2   LEN 1    PROT COLOR=CYAN          "\"
+  FIELD           AT 3 ,3   LEN 1    PROT COLOR=CYAN          "\"
+  FIELD           AT 4 ,4   LEN 1    PROT COLOR=CYAN          "\"
+  FIELD           AT 5 ,5   LEN 1    PROT COLOR=CYAN          "\"
+  FIELD           AT 6 ,6   LEN 1    PROT COLOR=CYAN          "=> Help topic or command."
 
   FIELD           AT 1 ,11  LEN 1    PROT COLOR=GREEN         "\"
   FIELD           AT 2 ,12  LEN 1    PROT COLOR=GREEN         "\"
   FIELD           AT 3 ,13  LEN 1    PROT COLOR=GREEN         "\"
   FIELD           AT 4 ,14  LEN 1    PROT COLOR=GREEN         "=> Brief note on the help topic."
 
-  FIELD           AT 1 ,73  LEN 1    PROT COLOR=PINK          "/"
-  FIELD           AT 2 ,72  LEN 1    PROT COLOR=PINK          "/"
-  FIELD           AT 3 ,71  LEN 1    PROT COLOR=PINK          "/"
-  FIELD           AT 4 ,70  LEN 1    PROT COLOR=PINK          "/"
-  FIELD           AT 5 ,69  LEN 1    PROT COLOR=PINK          "/"
-  FIELD           AT 6 ,68  LEN 1    PROT COLOR=PINK          "/"
-  FIELD           AT 7 ,67  LEN 1    PROT COLOR=PINK          "/"
-  FIELD           AT 8 ,21  LEN 46   PROT COLOR=PINK          "How to get to this Help screen. (Type this!)<="
+  FIELD           AT 1 ,68  LEN 1    PROT COLOR=RED           "/"
+  FIELD           AT 2 ,67  LEN 1    PROT COLOR=RED           "/"
+  FIELD           AT 3 ,66  LEN 1    PROT COLOR=RED           "/"
+  FIELD           AT 4 ,65  LEN 1    PROT COLOR=RED           "/"
+  FIELD           AT 5 ,64  LEN 1    PROT COLOR=RED           "/"
+  FIELD           AT 6 ,63  LEN 1    PROT COLOR=RED           "/"
+  FIELD           AT 7 ,62  LEN 1    PROT COLOR=RED           "/"
+  FIELD           AT 8 ,13  LEN 49   PROT COLOR=RED           "Some things are only for Admins or Developers. <="
 
-  FIELD           AT 11,15  LEN 19   PROT COLOR=WHITE         "Help via the ? prefix is always available."
-  FIELD           AT 12,15  LEN 19   PROT COLOR=WHITE         "?HELP will always bring you to this screen."
-  FIELD           AT 13,15  LEN 19   PROT COLOR=WHITE         "@HELP will always bring you to the HELP Frame."
+  FIELD           AT 1 ,75  LEN 1    PROT COLOR=PINK          "/"
+  FIELD           AT 2 ,74  LEN 1    PROT COLOR=PINK          "/"
+  FIELD           AT 3 ,73  LEN 1    PROT COLOR=PINK          "/"
+  FIELD           AT 4 ,72  LEN 1    PROT COLOR=PINK          "/"
+  FIELD           AT 5 ,71  LEN 1    PROT COLOR=PINK          "/"
+  FIELD           AT 6 ,70  LEN 1    PROT COLOR=PINK          "/"
+  FIELD           AT 7 ,69  LEN 1    PROT COLOR=PINK          "/"
+  FIELD           AT 8 ,68  LEN 1    PROT COLOR=PINK          "/"
+  FIELD           AT 9 ,67  LEN 1    PROT COLOR=PINK          "/"
+  FIELD           AT 10,20  LEN 47   PROT COLOR=PINK          "How to get to this Help screen. (Type this!) <="
 
-  FIELD           AT 16,5   LEN 1    PROT COLOR=YELLOW       "=> When available, a link for more information is provided."
-  FIELD           AT 17,6   LEN 1    PROT COLOR=YELLOW       "(Space permitting. Visit the README if no ling is present.)"
-  FIELD           AT 18,6   LEN 1    PROT COLOR=YELLOW       "(READ THE DOCS!!! They are very detailed and super helpful.)"
-  FIELD           AT 17,4   LEN 1    PROT COLOR=YELLOW       "/"
-  FIELD           AT 18,3   LEN 1    PROT COLOR=YELLOW       "/"
-  FIELD           AT 19,2   LEN 1    PROT COLOR=YELLOW       "/"
+  FIELD           AT 12,15  LEN 19   PROT COLOR=WHITE         "Help via the ? prefix is always available."
+  FIELD           AT 13,15  LEN 19   PROT COLOR=WHITE         "?HELP will always bring you to this screen."
+  FIELD           AT 14,15  LEN 19   PROT COLOR=WHITE         "@HELP will always bring you to the HELP Frame."
+
+  FIELD           AT 16,4   LEN 1    PROT COLOR=YELLOW       "=> When available, a link for more information is provided."
+  FIELD           AT 17,7   LEN 1    PROT COLOR=YELLOW       "Space permitting. Visit the README if no link is present."
+  FIELD           AT 18,7   LEN 1    PROT COLOR=YELLOW       "READ THE DOCS!!! They are very detailed and super helpful."
+  FIELD           AT 17,3   LEN 1    PROT COLOR=YELLOW       "/"
+  FIELD           AT 18,2   LEN 1    PROT COLOR=YELLOW       "/"
+  FIELD           AT 19,1   LEN 1    PROT COLOR=YELLOW       "/"
 
   FIELD           AT 20,0   LEN 70   PROT COLOR=BLUE          "More information can be found in the BRICKS_TS GitHub repository:"
   FIELD           AT 21,0   LEN 70   PROT COLOR=YELLOW        "https://github.com/moshix/bricks_ts#readme"
@@ -1778,28 +1790,28 @@ MAP BRICKSHELPQSS SIZE 24x80
   FIELD           AT 0 ,72  LEN 5    PROT BRIGHT COLOR=PINK   "?QSS"
   
   FIELD           AT 2 ,0   LEN 7    PROT COLOR=CYAN          "Command"
-  FIELD           AT 2 ,10  LEN 7    PROT COLOR=CYAN          "Options"
+  FIELD           AT 2 ,11  LEN 7    PROT COLOR=CYAN          "Options"
   FIELD           AT 2 ,48  LEN 7    PROT COLOR=CYAN          "Purpose"
 
   FIELD           AT 4 ,0   LEN 40   PROT COLOR=WHITE         "ASSIGN"
-  FIELD           AT 4 ,10  LEN 40   PROT COLOR=BLUE          "<FIELD>(v) ..."
+  FIELD           AT 4 ,11  LEN 40   PROT COLOR=BLUE          "<FIELD>(v) ..."
   FIELD           AT 4 ,48  LEN 30   PROT COLOR=GREEN         "Read EIB / environment fields."
   FIELD           AT 6 ,0   LEN 40   PROT COLOR=WHITE         "ASKTIME"
-  FIELD           AT 6 ,10  LEN 40   PROT COLOR=BLUE          "[ABSTIME(v)]"
+  FIELD           AT 6 ,11  LEN 40   PROT COLOR=BLUE          "[ABSTIME(v)]"
   FIELD           AT 6 ,48  LEN 30   PROT COLOR=GREEN         "Refresh EIBDATE / EIBTIME"
   FIELD           AT 7 ,48  LEN 30   PROT COLOR=GREEN         "(+ optional ABSTIME)."
   FIELD           AT 9 ,0   LEN 40   PROT COLOR=WHITE         "FORMATTIME"
-  FIELD           AT 9 ,10  LEN 40   PROT COLOR=BLUE          "ABSTIME(s) [DATE / TIME / YYYY... / DAYOFWEEK ...]"
+  FIELD           AT 9 ,11  LEN 40   PROT COLOR=BLUE          "ABSTIME(s) [DATE / TIME / YYYY... / DAYOFWEEK ...]"
   FIELD           AT 10,48  LEN 30   PROT COLOR=GREEN         "Decode an ABSTIME."
   FIELD           AT 12,0   LEN 40   PROT COLOR=WHITE         "QUERY"
-  FIELD           AT 12,10  LEN 40   PROT COLOR=BLUE          "SECURITY RESOURCE(name) [RESCLASS(c)]"
-  FIELD           AT 13,19  LEN 40   PROT COLOR=BLUE          "[READ/UPDATE/CONTROL/ALTER(v)]"
+  FIELD           AT 12,11  LEN 40   PROT COLOR=BLUE          "SECURITY RESOURCE(name) "
+  FIELD           AT 13,20  LEN 40   PROT COLOR=BLUE          "[RESCLASS(c)] [READ/UPDATE/CONTROL/ALTER(v)]"
   FIELD           AT 12,48  LEN 30   PROT COLOR=GREEN         "Four-axis access inquiry."
   FIELD           AT 15,0   LEN 40   PROT COLOR=WHITE         "VERIFY"
-  FIELD           AT 15,10  LEN 40   PROT COLOR=BLUE          "PASSWORD USERID(u) PASSWORD(p)"
+  FIELD           AT 15,11  LEN 40   PROT COLOR=BLUE          "PASSWORD USERID(u) PASSWORD(p)"
   FIELD           AT 15,48  LEN 30   PROT COLOR=GREEN         "Re-authenticate credentials."
   FIELD           AT 17,0   LEN 40   PROT COLOR=WHITE         "INQUIRE"
-  FIELD           AT 17,10  LEN 40   PROT COLOR=BLUE          "SYSTEM [GMMTEXT(v)]"
+  FIELD           AT 17,11  LEN 40   PROT COLOR=BLUE          "SYSTEM [GMMTEXT(v)]"
   FIELD           AT 17,48  LEN 30   PROT COLOR=GREEN         "SIT-level inquiry"
   FIELD           AT 18,48  LEN 30   PROT COLOR=GREEN         "(v1 honours GMMTEXT only)."
 
