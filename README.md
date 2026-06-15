@@ -197,6 +197,7 @@ Viewing a rather large record on the enormous Model 5 terminal.
 * 2026-06-06 - Fixed handling of command line arguments and DFHCOMMAREA. Added a record to test data to exercise this fix.
 * 2026-06-06 - Correctly include the separator in DFHCOMMAREA when quitting.
 * 2026-06-06 - Off by one error where the last field could be dropped.
+* 2026-06-15 - Hopefully handling command line arguments correctly.
 
 ### The future?
 

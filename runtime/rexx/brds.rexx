@@ -74,7 +74,7 @@ ELSE IF SCRH >= 27 & SCRW = 132 THEN DO /* Model 5 - 27x132 */
 END
 SET.MAP = MAPBASE || SUFFIX
 
-CALL COMMAND_LINE_PARSE
+CALL COMMAND_LINE_CHECK
 
 /* Main loop. */
 DO FOREVER
@@ -172,17 +172,16 @@ DO FOREVER
         IF SET.FILE \= '' THEN
           CALL CURSOR_CLOSE SET.FILE
 
-        /* Was a separator sent back? */
-        PARSE VAR COMMAREA '-s' SET.SEP COMMAREA 
+          /* Figure out what was sent back. */
+          CALL COMMAND_LINE_PARSE COMMAREA
 
-        /* Read the rest of the returned args. */
-        PARSE VAR COMMAREA MAP.FNAME SET.START_KEY
-        MAP.STARTKEY = SET.START_KEY
-        MAP.FIELDSEP = SET.SEP
-        SET.FILE = '' /* Make it look like the user entered a new file name. */
+          /* Avoid any processing below. */
+          /* If needed the cursor is already opened and the record read. */
+          MAP.FIELDSEP = SET.SEP
+          MAP.FNAME    = SET.FILE
+          MAP.STARTKEY = SET.START_KEY
       END
-      ELSE
-        SKIP = 'YES'
+      SKIP = 'YES'
     END
     /* Test data. SSSHHH! TOP SECRET!! */
     WHEN AID = '4C' THEN DO /* PF24 */
@@ -209,7 +208,7 @@ DO FOREVER
   END
 
   /* Did the start key change? */
-  IF SET.START_KEY \= MAP.STARTKEY THEN DO
+  IF MAP.STARTKEY \= SET.START_KEY THEN DO
     SET.START_KEY = MAP.STARTKEY
     IF SET.FILE \= '' THEN DO
       CALL CURSOR_RESET SET.FILE SET.START_KEY
@@ -246,36 +245,52 @@ END
 
 EXIT
 
+/* Check for command line arguments. */
 /* FIELDS. is here so it gets passed through to procedure calls. */
-COMMAND_LINE_PARSE: PROCEDURE EXPOSE DFHCOMMAREA FIELDS. SCR. SET.
+COMMAND_LINE_CHECK: PROCEDURE EXPOSE DFHCOMMAREA FIELDS. SCR. SET.
   /* Check for command line arguments. */
   /* If there are none check for arguments in DFHCOMMAREA. */
   EXEC CICS RECEIVE INTO(BUF) END-EXEC
-  PARSE VAR BUF SET.TID CKEY
-  IF DFHCOMMAREA \= '' & CKEY = '' THEN DO
-    CKEY = STRIP(DFHCOMMAREA)
+  PARSE VAR BUF TRANSID ARGS
+  IF DFHCOMMAREA \= '' & ARGS = '' THEN DO
+    ARGS = STRIP(DFHCOMMAREA)
   END
+  ELSE IF TRANSID \= '' THEN
+    SET.TID = TRANSID
+  
+  CALL COMMAND_LINE_PARSE ARGS
+  RETURN
+
+
+/* Parse command line arguments passed in. */
+/* These could come from the command line or DFHCOMMAREA. */
+COMMAND_LINE_PARSE: PROCEDURE EXPOSE FIELDS. SCR. SET.
+  IF ARG() = 0 THEN
+    RETURN -1
+  ARGS = ARG(1)
 
 
   /* Do they need help? */
-  IF        CKEY        = '-?'   |,
-     SUBSTR(CKEY, 1, 2) = '--'   |,
-      LOWER(CKEY)       = '-h'   |,
-      UPPER(CKEY)       = 'HELP' THEN DO
+  IF        ARGS        = '-?'   |,
+     SUBSTR(ARGS, 1, 2) = '--'   |,
+      LOWER(ARGS)       = '-h'   |,
+      UPPER(ARGS)       = 'HELP' THEN DO
     CALL SEND_HELP
     EXIT
   END
 
   /* Was the field separator provided? */
-  PARSE VAR CKEY '-s' CHECK REST
+  PARSE VAR ARGS '-s' CHECK REST
   IF CHECK \= '' THEN DO
     SET.SEP = CHECK
-    CKEY = REST
+    ARGS = REST
   END
+  ELSE
+    SET.SEP = ''
 
   /* If a file is given open it and read a record. */
-  IF CKEY \= '' THEN DO
-    PARSE VAR CKEY SET.FILE SET.START_KEY
+  IF ARGS \= '' THEN DO
+    PARSE VAR ARGS SET.FILE SET.START_KEY
     SET.FILE = UPPER(SET.FILE)
 
     /* Check for a message to display. */
