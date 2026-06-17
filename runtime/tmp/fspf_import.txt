@@ -32,6 +32,7 @@ LINK-~~100~HELP~~~~General Help~G~
 LINK-H~w~101~HELP~~?HELP~P~Help on FSPF HELP~B~
 LINK-B~w~102~HELP~~?BRGR~P~Brics Resources~B~
 LINK-G~w~103~HELP~~?CMDS~P~General Bricks Commands~B~
+LINK-L~w~104~HELP~~?LOGO~P~Help with LOGON and LOGOFF~B~
 LINK-~~200~HELP~~~~Blank line.~H~
 LINK-~~201~HELP~~~~Administration Tools~R~
 LINK-R~w~202~HELP~~?CEDA~P~CEDA - Resource Manager~B~

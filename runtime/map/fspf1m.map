@@ -7,14 +7,12 @@
 *   EDITLINK        - EFSPF edit Links.
 *   EDITLINKHELP1   - First page of help for ESPF Link editing.
 *   EDITLINKHELP2   - Second page of help for ESPF Link editing.
-*   EDITCOMM        - Edit the DFHCOMMAREA value for a Link.
-*   EDITEXPORT      - Prompt for a file to export.
-*   EDITIMPORT      - Prompt for a file to import.
-*   EDITLINKFILTER  - Filter the Link list.
 *   EDITFRAME       - Edit the Frames.
 *   EDITFRAMEHELP1  - First page of help for ESPF Frame editing.
 *   EDITFRAMEHELP2  - Second page of help for ESPF Frame editing.
+*   EDITPOPUP       - A little popup for requesting information from the user.
 *   BRICKSHELP####  - The user enters '?####' and gets this help screen.
+*   DEBUGCONSOLE    - Debugging console.
 
 MAPSET FSPF1M
 MAP MAINMENU SIZE 32x80
@@ -1006,142 +1004,6 @@ MAP EDITLINKHELP2 SIZE 32x80
   CURSOR          AT 31,0
 ENDMAP * EDITLINKHELP2
 
-MAP EDITCOMM SIZE 24x80
-  FIELD           AT 5 ,20  LEN 36  PROT COLOR=GREEN          "########################################"
-  FIELD           AT 6 ,20  LEN 36  PROT COLOR=GREEN          "########################################"
-  
-  FIELD           AT 7 ,20  LEN 2   PROT COLOR=GREEN          "##"
-  FIELD           AT 8 ,20  LEN 2   PROT COLOR=GREEN          "##"
-  FIELD           AT 9 ,20  LEN 2   PROT COLOR=GREEN          "##"
-  FIELD           AT 10,20  LEN 2   PROT COLOR=GREEN          "##"
-  FIELD           AT 11,20  LEN 2   PROT COLOR=GREEN          "##"
-  FIELD           AT 12,20  LEN 2   PROT COLOR=GREEN          "##"
-  FIELD           AT 14,20  LEN 2   PROT COLOR=GREEN          "##"
-  FIELD           AT 13,20  LEN 2   PROT COLOR=GREEN          "##"
-
-  FIELD           AT 15,20  LEN 36  PROT COLOR=GREEN          "########################################"
-  FIELD           AT 16,20  LEN 36  PROT COLOR=GREEN          "########################################"
-
-  FIELD           AT 8 ,24  LEN 32  PROT COLOR=BLUE           "Enter the value for DFHCOMMAREA:"
-  INPUT NOTE      AT 9 ,24  LEN 32  PROT COLOR=BLUE
-  INPUT COMMAREA  AT 11,24  LEN 32  UNDERSCORE COLOR=CYAN
-  STOP            AT 11,57
-  FIELD           AT 13,24  LEN 32  PROT COLOR=BLUE           "ENTER=Save             PF3=Abort"
-
-  FIELD           AT 7 ,58  LEN 2   PROT COLOR=GREEN          "##"
-  FIELD           AT 8 ,58  LEN 2   PROT COLOR=GREEN          "##"
-  FIELD           AT 9 ,58  LEN 2   PROT COLOR=GREEN          "##"
-  FIELD           AT 10,58  LEN 2   PROT COLOR=GREEN          "##"
-  FIELD           AT 11,58  LEN 2   PROT COLOR=GREEN          "##"
-  FIELD           AT 12,58  LEN 2   PROT COLOR=GREEN          "##"
-  FIELD           AT 13,58  LEN 2   PROT COLOR=GREEN          "##"
-  FIELD           AT 14,58  LEN 2   PROT COLOR=GREEN          "##"
-
-  CURSOR          AT COMMAREA
-ENDMAP * EDITCOMM
-
-MAP EDITEXPORT SIZE 24x80
-  FIELD           AT 5 ,20  LEN 36  PROT COLOR=GREEN          "########################################"
-  FIELD           AT 6 ,20  LEN 36  PROT COLOR=GREEN          "########################################"
-  
-  FIELD           AT 7 ,20  LEN 2   PROT COLOR=GREEN          "##"
-  FIELD           AT 8 ,20  LEN 2   PROT COLOR=GREEN          "##"
-  FIELD           AT 9 ,20  LEN 2   PROT COLOR=GREEN          "##"
-  FIELD           AT 10,20  LEN 2   PROT COLOR=GREEN          "##"
-  FIELD           AT 11,20  LEN 2   PROT COLOR=GREEN          "##"
-  FIELD           AT 12,20  LEN 2   PROT COLOR=GREEN          "##"
-  FIELD           AT 13,20  LEN 2   PROT COLOR=GREEN          "##"
-  FIELD           AT 14,20  LEN 2   PROT COLOR=GREEN          "##"
-
-  FIELD           AT 15,20  LEN 36  PROT COLOR=GREEN          "########################################"
-  FIELD           AT 16,20  LEN 36  PROT COLOR=GREEN          "########################################"
-
-  FIELD           AT 8 ,28  LEN 23  PROT COLOR=BLUE           "File name to export to:"
-  FIELD           AT 9 ,27  LEN 25  PROT COLOR=RED            "The file will be DELETED!"
-  INPUT FILENAME  AT 11,25  LEN 30  UNDERSCORE COLOR=CYAN   DEFAULT "fspf_export.txt"
-  STOP            AT 11,55
-  FIELD           AT 13,24  LEN 32  PROT COLOR=BLUE           "ENTER=Export           PF3=Abort"
-
-  FIELD           AT 7 ,58  LEN 2   PROT COLOR=GREEN          "##"
-  FIELD           AT 8 ,58  LEN 2   PROT COLOR=GREEN          "##"
-  FIELD           AT 9 ,58  LEN 2   PROT COLOR=GREEN          "##"
-  FIELD           AT 10,58  LEN 2   PROT COLOR=GREEN          "##"
-  FIELD           AT 11,58  LEN 2   PROT COLOR=GREEN          "##"
-  FIELD           AT 12,58  LEN 2   PROT COLOR=GREEN          "##"
-  FIELD           AT 13,58  LEN 2   PROT COLOR=GREEN          "##"
-  FIELD           AT 14,58  LEN 2   PROT COLOR=GREEN          "##"
-
-  CURSOR          AT FILENAME
-ENDMAP * EDITEXPORT
-
-MAP EDITIMPORT SIZE 24x80
-  FIELD           AT 5 ,20  LEN 36  PROT COLOR=GREEN          "########################################"
-  FIELD           AT 6 ,20  LEN 36  PROT COLOR=GREEN          "########################################"
-  
-  FIELD           AT 7 ,20  LEN 2   PROT COLOR=GREEN          "##"
-  FIELD           AT 8 ,20  LEN 2   PROT COLOR=GREEN          "##"
-  FIELD           AT 9 ,20  LEN 2   PROT COLOR=GREEN          "##"
-  FIELD           AT 10,20  LEN 2   PROT COLOR=GREEN          "##"
-  FIELD           AT 11,20  LEN 2   PROT COLOR=GREEN          "##"
-  FIELD           AT 12,20  LEN 2   PROT COLOR=GREEN          "##"
-  FIELD           AT 13,20  LEN 2   PROT COLOR=GREEN          "##"
-  FIELD           AT 14,20  LEN 2   PROT COLOR=GREEN          "##"
-
-  FIELD           AT 15,20  LEN 36  PROT COLOR=GREEN          "########################################"
-  FIELD           AT 16,20  LEN 36  PROT COLOR=GREEN          "########################################"
-
-  FIELD           AT 8 ,27  LEN 25  PROT COLOR=BLUE           "File name to import from:"
-  FIELD           AT 9 ,23  LEN 32  PROT COLOR=RED            "Existing records will be DELETED!!"
-  INPUT FILENAME  AT 11,25  LEN 30  UNDERSCORE COLOR=CYAN   DEFAULT "fspf_import.txt"
-  STOP            AT 11,55
-  FIELD           AT 13,24  LEN 32  PROT COLOR=BLUE           "ENTER=Export           PF3=Abort"
-
-  FIELD           AT 7 ,58  LEN 2   PROT COLOR=GREEN          "##"
-  FIELD           AT 8 ,58  LEN 2   PROT COLOR=GREEN          "##"
-  FIELD           AT 9 ,58  LEN 2   PROT COLOR=GREEN          "##"
-  FIELD           AT 10,58  LEN 2   PROT COLOR=GREEN          "##"
-  FIELD           AT 11,58  LEN 2   PROT COLOR=GREEN          "##"
-  FIELD           AT 12,58  LEN 2   PROT COLOR=GREEN          "##"
-  FIELD           AT 13,58  LEN 2   PROT COLOR=GREEN          "##"
-  FIELD           AT 14,58  LEN 2   PROT COLOR=GREEN          "##"
-
-  CURSOR          AT FILENAME
-ENDMAP * EDITIMPORT
-
-MAP EDITLINKFILTER SIZE 24x80
-  FIELD           AT 5 ,20  LEN 36  PROT COLOR=GREEN          "########################################"
-  FIELD           AT 6 ,20  LEN 36  PROT COLOR=GREEN          "########################################"
-  
-  FIELD           AT 7 ,20  LEN 2   PROT COLOR=GREEN          "##"
-  FIELD           AT 8 ,20  LEN 2   PROT COLOR=GREEN          "##"
-  FIELD           AT 9 ,20  LEN 2   PROT COLOR=GREEN          "##"
-  FIELD           AT 10,20  LEN 2   PROT COLOR=GREEN          "##"
-  FIELD           AT 11,20  LEN 2   PROT COLOR=GREEN          "##"
-  FIELD           AT 12,20  LEN 2   PROT COLOR=GREEN          "##"
-  FIELD           AT 13,20  LEN 2   PROT COLOR=GREEN          "##"
-  FIELD           AT 14,20  LEN 2   PROT COLOR=GREEN          "##"
-
-  FIELD           AT 15,20  LEN 36  PROT COLOR=GREEN          "########################################"
-  FIELD           AT 16,20  LEN 36  PROT COLOR=GREEN          "########################################"
-
-  FIELD           AT 8 ,28  LEN 24  PROT COLOR=BLUE           "Filter the list to Frame:"
-  FIELD           AT 9 ,29  LEN 24  PROT COLOR=BLUE           "(Leave blank to clear.)"
-  INPUT FILTERM   AT 11,38  LEN 5   UNDERSCORE COLOR=CYAN
-  STOP            AT 11,44
-  FIELD           AT 13,24  LEN 32  PROT COLOR=BLUE           "ENTER=Filter           PF3=Abort"
-
-  FIELD           AT 7 ,58  LEN 2   PROT COLOR=GREEN          "##"
-  FIELD           AT 8 ,58  LEN 2   PROT COLOR=GREEN          "##"
-  FIELD           AT 9 ,58  LEN 2   PROT COLOR=GREEN          "##"
-  FIELD           AT 10,58  LEN 2   PROT COLOR=GREEN          "##"
-  FIELD           AT 11,58  LEN 2   PROT COLOR=GREEN          "##"
-  FIELD           AT 12,58  LEN 2   PROT COLOR=GREEN          "##"
-  FIELD           AT 13,58  LEN 2   PROT COLOR=GREEN          "##"
-  FIELD           AT 14,58  LEN 2   PROT COLOR=GREEN          "##"
-
-  CURSOR          AT FILTERM
-ENDMAP * EDITLINKFILTER
-
 MAP EDITFRAME SIZE 32x80
   FIELD           AT 0 ,0   LEN 18  PROT BRIGHT COLOR=BLUE  "FSPF - Frame Editor"
   FIELD           AT 1 ,0   LEN 78  PROT COLOR=BLUE         "D to Duplicate / P to Purge / ENTER=COMMIT"
@@ -1727,6 +1589,41 @@ MAP EDITFRAMEHELP2 SIZE 32x80
 
   CURSOR          AT 31,0
 ENDMAP * EDITFRAMEHELP2
+
+MAP EDITPOPUP SIZE 24x80
+  FIELD           AT 5 ,20  LEN 36  PROT COLOR=GREEN          "########################################"
+  FIELD           AT 6 ,20  LEN 36  PROT COLOR=GREEN          "########################################"
+  
+  FIELD           AT 7 ,20  LEN 2   PROT COLOR=GREEN          "##"
+  FIELD           AT 8 ,20  LEN 2   PROT COLOR=GREEN          "##"
+  FIELD           AT 9 ,20  LEN 2   PROT COLOR=GREEN          "##"
+  FIELD           AT 10,20  LEN 2   PROT COLOR=GREEN          "##"
+  FIELD           AT 11,20  LEN 2   PROT COLOR=GREEN          "##"
+  FIELD           AT 12,20  LEN 2   PROT COLOR=GREEN          "##"
+  FIELD           AT 14,20  LEN 2   PROT COLOR=GREEN          "##"
+  FIELD           AT 13,20  LEN 2   PROT COLOR=GREEN          "##"
+
+  FIELD           AT 15,20  LEN 36  PROT COLOR=GREEN          "########################################"
+  FIELD           AT 16,20  LEN 36  PROT COLOR=GREEN          "########################################"
+
+  INPUT POPMSG    AT 8 ,23  LEN 34  PROT COLOR=BLUE
+  INPUT POPNOTE   AT 9 ,23  LEN 34  PROT COLOR=BLUE
+  INPUT POPINPUT  AT 11,24  LEN 32  UNDERSCORE COLOR=CYAN
+  STOP            AT 11,57
+  FIELD           AT 13,24  LEN 32  PROT COLOR=BLUE           "ENTER=                 PF3=Abort"
+  INPUT POPAID    AT 13,31  LEN 16  PROT COLOR=BLUE
+
+  FIELD           AT 7 ,58  LEN 2   PROT COLOR=GREEN          "##"
+  FIELD           AT 8 ,58  LEN 2   PROT COLOR=GREEN          "##"
+  FIELD           AT 9 ,58  LEN 2   PROT COLOR=GREEN          "##"
+  FIELD           AT 10,58  LEN 2   PROT COLOR=GREEN          "##"
+  FIELD           AT 11,58  LEN 2   PROT COLOR=GREEN          "##"
+  FIELD           AT 12,58  LEN 2   PROT COLOR=GREEN          "##"
+  FIELD           AT 13,58  LEN 2   PROT COLOR=GREEN          "##"
+  FIELD           AT 14,58  LEN 2   PROT COLOR=GREEN          "##"
+
+  CURSOR          AT POPINPUT
+ENDMAP * EDITPOPUP
 
 MAP BRICKSHELPHELP SIZE 24x80
   FIELD           AT 0 ,0   LEN 9    PROT BRIGHT COLOR=CYAN   "FSPF HELP"
@@ -2711,6 +2608,44 @@ MAP BRICKSHELPQCOP SIZE 24x80
 
   CURSOR          AT 23,0
 ENDMAP * BRICKSHELPQCOP
+
+MAP BRICKSHELPLOGO SIZE 24x80
+  FIELD           AT 0 ,0   LEN 15   PROT BRIGHT COLOR=CYAN   "Quick Reference"
+  FIELD           AT 0 ,16  LEN 12   PROT BRIGHT COLOR=GREEN  "Logon And Logoff"
+  FIELD           AT 0 ,72  LEN 5    PROT BRIGHT COLOR=PINK   "?LOGO"
+  
+  FIELD           AT 2 ,0   LEN 70   PROT COLOR=CYAN          "LOGON:"
+  FIELD           AT 3 ,0   LEN 70   PROT COLOR=BLUE          "Use the command CSSN to logon to Bricks."
+  FIELD           AT 4 ,0   LEN 70   PROT COLOR=BLUE          "You will be prompted for your Userid and Password."
+  FIELD           AT 6 ,0   LEN 70   PROT COLOR=WHITE         "CSSN LOGON"
+  FIELD           AT 6 ,25  LEN 40   PROT COLOR=GREEN         "Logon to Bricks"
+  FIELD           AT 7 ,0   LEN 70   PROT COLOR=WHITE         "CSSN"
+  FIELD           AT 7 ,25  LEN 40   PROT COLOR=GREEN         "The LOGON option is optional."
+
+  FIELD           AT 10,0   LEN 70   PROT COLOR=CYAN          "LOGOFF:"
+  FIELD           AT 11,0   LEN 70   PROT COLOR=BLUE          "Use the command CSSF to logoff of Bricks."
+  FIELD           AT 13,0   LEN 70   PROT COLOR=WHITE         "CSSF LOGOFF"
+  FIELD           AT 13,25  LEN 40   PROT COLOR=GREEN         "Logoff of Bricks and stay connected."
+  FIELD           AT 14,0   LEN 70   PROT COLOR=WHITE         "CSSF DISC / GOODNIGHT"
+  FIELD           AT 14,25  LEN 40   PROT COLOR=GREEN         "Logoff of Bricks and disconnect."
+  FIELD           AT 15,0   LEN 70   PROT COLOR=BLUE          "(The option for CSSF is required.)"
+  
+  FIELD           AT 17,0   LEN 12   PROT COLOR=CYAN          "Please note:"
+  FIELD           AT 17,13  LEN 7    PROT COLOR=BLUE          "Neither"
+  FIELD           AT 17,19  LEN 4    PROT COLOR=WHITE         "CSSN"
+  FIELD           AT 17,24  LEN 3    PROT COLOR=BLUE          "nor"
+  FIELD           AT 17,28  LEN 4    PROT COLOR=WHITE         "CSSF"
+  FIELD           AT 17,33  LEN 14   PROT COLOR=BLUE          "will work from"
+  FIELD           AT 17,48  LEN 4    PROT COLOR=WHITE         "FSPF"
+  FIELD           AT 18,0   LEN 70   PROT COLOR=BLUE          "You may only logon or logoff from the blank command line."
+
+  FIELD           AT 20,0   LEN 70   PROT COLOR=BLUE          "The online manual can be found in the BRICKS_TS GitHub repository:"
+  FIELD           AT 21,0   LEN 70   PROT COLOR=YELLOW        "https://github.com/moshix/bricks_ts#readme"
+
+  FIELD           AT 23,0   LEN 70   PROT COLOR=BLUE          "Press ENTER to exit."
+
+  CURSOR          AT 23,0
+ENDMAP * BRICKSHELPLOGO
 
 MAP BRICKSHELPQ SIZE 24x80
   FIELD           AT 0 ,0   LEN 15   PROT BRIGHT COLOR=CYAN   "Quick Reference"
