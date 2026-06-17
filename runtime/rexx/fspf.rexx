@@ -25,14 +25,20 @@ EXEC CICS IGNORE CONDITION MAPFAIL PGMIDERR END-EXEC
 
 /* Query the system for various bits of information. */
 EXEC CICS ASSIGN
-  USERID(SYSUSR)
+  USERID(SYSUSER)
   TERMID(SYSTERM)
   CONNECTED(SYSCONNECTED)
 END-EXEC
 
-EXEC CICS INQUIRE SYSTEM GMMTEXT(GMMTEXT) END-EXEC
+EXEC CICS INQUIRE SYSTEM
+  GMMTEXT(GMMTEXT)
+END-EXEC
 
-EXEC CICS QUERY SECURITY RESOURCE('FSPF') READ(CANREAD) UPDATE(CANUPDATE) END-EXEC
+EXEC CICS QUERY SECURITY
+  RESOURCE('FSPF')
+  READ(CANREAD)
+  UPDATE(CANUPDATE)
+END-EXEC
 
 /* Initialize variables. */
 FRAME.          = ''      /* Frames from the database. */
@@ -52,7 +58,7 @@ LOOKUP.LINK.    = ''      /* Lookup a Frame Name and Link ID to the LINK.FRAME.I
 LOOKUP.FRAME.   = ''      /* Lookup a Frame ID to the FRAME.NAME. */
 
 SCR.            = ''      /* Screen interface. */
-SCR.USRID       = SYSUSR
+SCR.USRID       = SYSUSER
 SCR.WELCOMEA    = CENTER('Welcome to BRICKS Transaction Server', 50)
 SCR.WELCOMEB    = CENTER(GMMTEXT, 50)
 PARSE VAR SYSCONNECTED SCR.CONDATE SCR.CONTIME
@@ -65,7 +71,6 @@ SET.USERFILE    = 'FSPFUSER'
 SET.POSITION    = 1       /* Position in the Frame Links list. */
 SET.WELCOMEB    = GMMTEXT
 SET.BCOLOR      = 'BLUE'  /* The default color of the per-frame welcome message. */
-SET.USR         = SYSUSR
 SET.LASTINPUT   = ''      /* The last input from the user. Used for PF6 to recall input. */
 SET.ISAUTH      = 'NO'    /* The user is authenticated. Not PUBLIC. */
 SET.ISADMIN     = 'NO'    /* The user has admin access. */
