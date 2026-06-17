@@ -219,15 +219,15 @@ FSPF presents Frames, which are composed of Links. Links can link to Transaction
 
 Links to Transactions may optionally have a value to put in `DFHCOMMAREA` when LINKing to the Transaction. For an example start the FSPF Editor `ESPF`, locate the Link `Browse Mandelbrot set saves`, put the cursor on this Link then press `PF2`. A small popup will prompt for the value to pass via `DFHCOMMAREA`. See `PF1` for help in `ESPF`.
 
-Links can link to a different Frame. This is done by placing a `Y` in the `S` Sub Frame column when editing a Link. For an example FSPF Editor `ESPF`, locate the Link `More demos...`, note the `Y` in the `S` column. See `PF1` for help in `ESPF`.
+Links can link to a different Frame. This is done by placing a `Y` in the `S` Sub Frame column when editing a Link. For an example start the FSPF Editor `ESPF`, locate the Link `More demos...`, note the `Y` in the `S` column. See `PF1` for help in `ESPF`.
 
-Help screens are separate maps in the `FSPF1` Map Set. Entering `?TOPIC` on the `Option` line will lookup the help screen for that topic. For example enter `?CEDA` for a help screen about the Transaction `CEDA`. There are also Quick Reference screens, like `?CEMT` for help on the `CEMT` Transaction.
+Help screens are separate maps in the `FSPF1` Map Set. Entering `?TOPIC` on the `Option` line will lookup the help screen for that topic. For example enter `?CEDA` for a help screen about the Transaction `CEDA`. There are also Quick Reference screens, like `?QIO` for the quick reference card on Bricks Terminal I/O.
 
 The file `runtime/tmp/fspf_import.txt` contains the default Frames. This file may be imported using the FSPF Editor `ESPF`. Start `ESPF`, Press `PF9` to open an import popup, press `ENTER` to load the default file. You can make your own Frames from scratch, the default examples will make it easier. Importing will **OVERWRITE** existing data. Use caution if you have made customizations.
 
-Likewise the Frame data in Bricks may be exported using the FSPF Editor `ESPF`.Start `ESPF`, Press `PF10` to open an export popup, press `ENTER` to export to the default file `fspf_export.txt`. Use Export to make backups when customizing your Frames. If the export file already exists it will be **DELETED**.
+Likewise the Frame data in Bricks may be exported using the FSPF Editor `ESPF`. Start `ESPF`, Press `PF10` to open an export popup, press `ENTER` to export to the default file `fspf_export.txt`. Use Export to make backups when customizing your Frames. If the export file already exists it will be **DELETED**.
 
-Adding more help screens is as "simple" as adding a new map named `BRICKSHELP####`, where `####` is the topic. See existing examples. "Simple" is in quotes because the new map must be added to all four Map Set files, `runtime/map/fspf1.map`, `runtime/map/fspf1m.map`, `runtime/map/fspf1l.map` and `runtime/map/fspf1w.map`.
+Adding more help screens is as "simple" as adding a new map named `BRICKSHELP####`, where `####` is the topic. See existing examples. "Simple" is in quotes because the new map must be added to all four Map Set files, `runtime/map/fspf1.map`, `runtime/map/fspf1m.map`, `runtime/map/fspf1l.map` and `runtime/map/fspf1w.map`. Note that currently the `BRICKSHELP####` have not been customized for the different terminal styles.
 
 ### Option Line Input
 
