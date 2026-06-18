@@ -318,6 +318,7 @@ The `DEMO` Frame.
 * 2026-06-13 - Remove an old message from the debug information.
 * 2026-06-15 - Formatting and spelling fixes.
 * 2026-06-15 - Condensed the various popups into a single map. Added the help screen `?LOGO` for help with logging on and off of Bricks.
+* 2026-06-18 - Added MRO to the help text for CEDA and CEMT. General improvements to help screens.
 
 ## Go Script
 
