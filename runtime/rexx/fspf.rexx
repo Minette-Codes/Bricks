@@ -148,6 +148,11 @@ DO FOREVER
         CALL CLOCK_STOP
         EXEC CICS LINK PROGRAM('ESPF') END-EXEC
         CALL CLOCK_START
+
+        /* Go ahead and reload. The user might have changed something. */
+        CALL DATA_LOAD
+        CALL LINK_PARSE
+        CALL FRAME_POPULATE
       END
       ELSE DO
         SCR.MSG = 'Not authorized to make changes.'
@@ -535,6 +540,8 @@ LINK_PARSE: PROCEDURE EXPOSE FRAME. LINK. SCR. SET.
     IF START > (LINKS - SET.SCROLL) THEN
       START = LINKS - SET.SCROLL
   END
+  IF START < 1 THEN
+    START = 1
 
   DO SCR_ROW = 1 TO SET.LINKCOUNT
     ROW_ID = START + SCR_ROW - 1
@@ -611,7 +618,7 @@ LINK_PARSE: PROCEDURE EXPOSE FRAME. LINK. SCR. SET.
     SCR.MOREBOT = ''
   RETURN
 
-/* Populate the frame list in the lower right. */
+/* Populate the Frame list in the lower right. */
 FRAME_POPULATE: PROCEDURE EXPOSE FRAME. LINK. SCR. SET.
   DO SCR_ROW = 1 TO SET.FRAMECOUNT
     IF SCR_ROW <= FRAME.COUNT THEN DO
@@ -689,7 +696,7 @@ RECORD_WRITE: PROCEDURE
   KEY  = ARG(2)
   REC  = ARG(3)
   EXEC CICS WRITE FILE(FILE) FROM(REC) RIDFLD(KEY) END-EXEC
-  RETURN REC
+  RETURN EIBRESP
 
 /* ----~~~~====####    KSDS Cursor interface    ####====~~~~---- */
 

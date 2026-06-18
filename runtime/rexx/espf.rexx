@@ -739,7 +739,7 @@ RECORD_WRITE: PROCEDURE
   KEY  = ARG(2)
   REC  = ARG(3)
   EXEC CICS WRITE FILE(FILE) FROM(REC) RIDFLD(KEY) END-EXEC
-  RETURN REC
+  RETURN EIBRESP
 
 /* ----~~~~====####    KSDS Cursor interface    ####====~~~~---- */
 
