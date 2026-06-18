@@ -2171,39 +2171,39 @@ ENDMAP * BRICKSHELPCECI
 
 MAP BRICKSHELPCEDA SIZE 24x80
   FIELD           AT 0 ,0   LEN 4    PROT BRIGHT COLOR=CYAN   "CEDA"
-  FIELD           AT 0 ,5   LEN 16   PROT BRIGHT COLOR=GREEN  "Resource Manager"
+  FIELD           AT 0 ,5   LEN 16   PROT BRIGHT COLOR=GREEN  "Bricks Resource Manager"
   FIELD           AT 0 ,60  LEN 10   PROT COLOR=RED           "ADMIN ONLY"
   FIELD           AT 0 ,72  LEN 5    PROT BRIGHT COLOR=PINK   "?CEDA"
-
-  FIELD           AT 2 ,0   LEN 78   PROT COLOR=BLUE          "Manages various Bricks resources."
   
-  FIELD           AT 4 ,0   LEN 4    PROT COLOR=WHITE         "USER"
-  FIELD           AT 4 ,13  LEN 65   PROT COLOR=BLUE          "View, Create, Alter and Delete user accounts."
+  FIELD           AT 2 ,0   LEN 4    PROT COLOR=WHITE         "USER"
+  FIELD           AT 2 ,13  LEN 65   PROT COLOR=BLUE          "List, Create, Alter and Delete user accounts."
 
-  FIELD           AT 6 ,0   LEN 12   PROT COLOR=WHITE         "TRANSACTIONS"
-  FIELD           AT 6 ,13  LEN 65   PROT COLOR=BLUE          "View, Create, Alter and Delete Transactions."
+  FIELD           AT 4 ,0   LEN 12   PROT COLOR=WHITE         "TRANSACTIONS"
+  FIELD           AT 4 ,13  LEN 65   PROT COLOR=BLUE          "List, Create, Alter and Delete Transactions."
+
+  FIELD           AT 6 ,0   LEN 12   PROT COLOR=WHITE         "PROGRAM"
+  FIELD           AT 6 ,13  LEN 65   PROT COLOR=BLUE          "A program oriented view of Transactions."
 
   FIELD           AT 8 ,0   LEN 8    PROT COLOR=WHITE         "DATABASE"
-  FIELD           AT 8 ,13  LEN 65   PROT COLOR=BLUE          "View, Create, Alter and Delete PostgreSQL Databases."
+  FIELD           AT 8 ,13  LEN 65   PROT COLOR=BLUE          "List, Create, Alter and Delete PostgreSQL Databases."
 
   FIELD           AT 10 ,0  LEN 4    PROT COLOR=WHITE         "VSAM"
-  FIELD           AT 10,13  LEN 65   PROT COLOR=BLUE          "View KSDS files and their stats. Delete KSDS files."
-  FIELD           AT 11,13  LEN 23   PROT COLOR=BLUE          "(NOT file contents. Use"
-  FIELD           AT 11,37  LEN 4    PROT COLOR=PINK          "BRDS"
-  FIELD           AT 11,42  LEN 27   PROT COLOR=BLUE          "for viewing file contents.)"
+  FIELD           AT 10,13  LEN 65   PROT COLOR=BLUE          "List and Delete KSDS files. (NOT file contents.)"
 
-  FIELD           AT 13,0   LEN 6    PROT COLOR=WHITE         "URIMAP"
-  FIELD           AT 13,13  LEN 65   PROT COLOR=BLUE          "View, Create, Alter and Delete output URI Maps."
+  FIELD           AT 12,0   LEN 6    PROT COLOR=WHITE         "URIMAP"
+  FIELD           AT 12,13  LEN 65   PROT COLOR=BLUE          "List, Create, Alter and Delete output URI Maps."
 
-  FIELD           AT 15,0   LEN 4    PROT COLOR=WHITE         "WAPI"
-  FIELD           AT 15,13  LEN 65   PROT COLOR=BLUE          "View, Create, Alter and Delete inbound WEB API Routes."
+  FIELD           AT 14,0   LEN 4    PROT COLOR=WHITE         "WAPI"
+  FIELD           AT 14,13  LEN 65   PROT COLOR=BLUE          "List, Create, Alter and Delete inbound WEB API Routes."
 
-  FIELD           AT 17,0   LEN 6    PROT COLOR=WHITE         "QUEUES"
-  FIELD           AT 17,13  LEN 65   PROT COLOR=BLUE          "View and Delete TS Queues."
-  FIELD           AT 18,13  LEN 65   PROT COLOR=BLUE          "(NOT queue contents. Use CONS for viewing queue contents.)"
+  FIELD           AT 16,0   LEN 6    PROT COLOR=WHITE         "MRO"
+  FIELD           AT 16,13  LEN 65   PROT COLOR=BLUE          "List, Create, Alter and Delete peer regions."
+
+  FIELD           AT 18,0   LEN 6    PROT COLOR=WHITE         "QUEUES"
+  FIELD           AT 18,13  LEN 65   PROT COLOR=BLUE          "List and Delete TS Queues. (NOT queue contents.)"
 
   FIELD           AT 20,0   LEN 70   PROT COLOR=BLUE          "The online manual can be found in the BRICKS_TS GitHub repository:"
-  FIELD           AT 21,0   LEN 70   PROT COLOR=YELLOW        "https://github.com/moshix/bricks_ts#ceda-database"
+  FIELD           AT 21,0   LEN 70   PROT COLOR=YELLOW        "https://github.com/moshix/bricks_ts#ceda--resource-definitions"
 
   FIELD           AT 23,0   LEN 78   PROT COLOR=BLUE          "Press ENTER to exit."
 
@@ -2223,7 +2223,7 @@ MAP BRICKSHELPCMDS SIZE 24x80
   FIELD           AT 6 ,32  LEN 5    PROT COLOR=WHITE         "LOGON"
   FIELD           AT 6 ,38  LEN 13   PROT COLOR=BLUE          "is optional."
   FIELD           AT 7 ,0   LEN 11   PROT COLOR=WHITE         "CSSF LOGOFF"
-  FIELD           AT 7 ,15  LEN 65   PROT COLOR=BLUE          "Logoff from Bricks."
+  FIELD           AT 7 ,15  LEN 65   PROT COLOR=BLUE          "Logoff from Bricks and stay connected."
   FIELD           AT 8 ,0   LEN 4    PROT COLOR=WHITE         "CSSF DISC"
   FIELD           AT 8 ,15  LEN 65   PROT COLOR=BLUE          "Logoff from Bricks and disconnect."
 
@@ -2237,7 +2237,7 @@ MAP BRICKSHELPCMDS SIZE 24x80
   FIELD           AT 13,15  LEN 65   PROT COLOR=BLUE          "Open"
   FIELD           AT 13,20  LEN 4    PROT COLOR=PINK          "CEDA"
   FIELD           AT 13,25  LEN 50   PROT COLOR=BLUE          "directly to the given node. One of:"
-  FIELD           AT 14,15  LEN 60   PROT COLOR=WHITE         "USER TRANSACTION PROGRAM DATABASE VSAM URIMAP WAPI QUEUES"
+  FIELD           AT 14,15  LEN 60   PROT COLOR=WHITE         "USER TRANSACTION PROGRAM DATABASE VSAM URIMAP WAPI MRO QUEUES"
 
   FIELD           AT 16,0   LEN 78   PROT COLOR=BLUE          "Demos that accept command line arguments:"
   FIELD           AT 17,0   LEN 4    PROT COLOR=WHITE         "EXAM 1 A #"
@@ -2269,7 +2269,7 @@ MAP BRICKSHELPCEMT SIZE 24x80
   FIELD           AT 6 ,0   LEN 7    PROT COLOR=WHITE         "INQUIRE"
   FIELD           AT 6 ,8   LEN 70   PROT COLOR=BLUE          "Inquire into Bricks state."
   FIELD           AT 7 ,8   LEN 70   PROT COLOR=BLUE          "View TS Queues, Files, Users, Terminals, Transactions,"
-  FIELD           AT 8 ,8   LEN 70   PROT COLOR=BLUE          "Inbound WEB Requests, and URIMAP routes."
+  FIELD           AT 8 ,8   LEN 70   PROT COLOR=BLUE          "Inbound WEB Requests, URIMAP routes and MRO regions."
   FIELD           AT 9 ,8   LEN 70   PROT COLOR=BLUE          "Control Blocks TCBS, UCBS, TXCBS, and FCBS."
   FIELD           AT 9 ,68  LEN 10   PROT COLOR=RED           "ADMIN ONLY"
   
@@ -3025,7 +3025,7 @@ ENDMAP * BRICKSHELPQCOP
 
 MAP BRICKSHELPLOGO SIZE 24x80
   FIELD           AT 0 ,0   LEN 15   PROT BRIGHT COLOR=CYAN   "Quick Reference"
-  FIELD           AT 0 ,16  LEN 12   PROT BRIGHT COLOR=GREEN  "Logon And Logoff"
+  FIELD           AT 0 ,16  LEN 12   PROT BRIGHT COLOR=GREEN  "Logging on and off of Bricks"
   FIELD           AT 0 ,72  LEN 5    PROT BRIGHT COLOR=PINK   "?LOGO"
   
   FIELD           AT 2 ,0   LEN 70   PROT COLOR=CYAN          "LOGON:"
@@ -3036,22 +3036,23 @@ MAP BRICKSHELPLOGO SIZE 24x80
   FIELD           AT 7 ,0   LEN 70   PROT COLOR=WHITE         "CSSN"
   FIELD           AT 7 ,25  LEN 40   PROT COLOR=GREEN         "The LOGON option is optional."
 
-  FIELD           AT 10,0   LEN 70   PROT COLOR=CYAN          "LOGOFF:"
-  FIELD           AT 11,0   LEN 70   PROT COLOR=BLUE          "Use the command CSSF to logoff of Bricks."
-  FIELD           AT 13,0   LEN 70   PROT COLOR=WHITE         "CSSF LOGOFF"
-  FIELD           AT 13,25  LEN 40   PROT COLOR=GREEN         "Logoff of Bricks and stay connected."
-  FIELD           AT 14,0   LEN 70   PROT COLOR=WHITE         "CSSF DISC / GOODNIGHT"
-  FIELD           AT 14,25  LEN 40   PROT COLOR=GREEN         "Logoff of Bricks and disconnect."
-  FIELD           AT 15,0   LEN 70   PROT COLOR=BLUE          "(The option for CSSF is required.)"
+  FIELD           AT 9 ,0   LEN 70   PROT COLOR=CYAN          "LOGOFF:"
+  FIELD           AT 10,0   LEN 70   PROT COLOR=BLUE          "Use the command CSSF to logoff of Bricks."
+  FIELD           AT 12,0   LEN 70   PROT COLOR=WHITE         "CSSF LOGOFF"
+  FIELD           AT 12,25  LEN 40   PROT COLOR=GREEN         "Logoff of Bricks and stay connected."
+  FIELD           AT 13,0   LEN 70   PROT COLOR=WHITE         "CSSF DISC / GOODNIGHT"
+  FIELD           AT 13,25  LEN 40   PROT COLOR=GREEN         "Logoff of Bricks and disconnect."
+  FIELD           AT 14,0   LEN 70   PROT COLOR=BLUE          "(The option for CSSF is required.)"
   
-  FIELD           AT 17,0   LEN 12   PROT COLOR=CYAN          "Please note:"
-  FIELD           AT 17,13  LEN 7    PROT COLOR=BLUE          "Neither"
-  FIELD           AT 17,19  LEN 4    PROT COLOR=WHITE         "CSSN"
-  FIELD           AT 17,24  LEN 3    PROT COLOR=BLUE          "nor"
-  FIELD           AT 17,28  LEN 4    PROT COLOR=WHITE         "CSSF"
-  FIELD           AT 17,33  LEN 14   PROT COLOR=BLUE          "will work from"
-  FIELD           AT 17,48  LEN 4    PROT COLOR=WHITE         "FSPF"
-  FIELD           AT 18,0   LEN 70   PROT COLOR=BLUE          "You may only logon or logoff from the blank command line."
+  FIELD           AT 16,0   LEN 12   PROT COLOR=CYAN          "Please note:"
+  FIELD           AT 16,13  LEN 7    PROT COLOR=BLUE          "Neither"
+  FIELD           AT 16,19  LEN 4    PROT COLOR=WHITE         "CSSN"
+  FIELD           AT 16,24  LEN 3    PROT COLOR=BLUE          "nor"
+  FIELD           AT 16,28  LEN 4    PROT COLOR=WHITE         "CSSF"
+  FIELD           AT 16,33  LEN 14   PROT COLOR=BLUE          "will work from"
+  FIELD           AT 16,48  LEN 4    PROT COLOR=WHITE         "FSPF"
+  FIELD           AT 17,0   LEN 70   PROT COLOR=BLUE          "You may only logon or logoff from the blank command line."
+  FIELD           AT 18,0   LEN 70   PROT COLOR=BLUE          "Most of the demos will work while unauthenticated."
 
   FIELD           AT 20,0   LEN 70   PROT COLOR=BLUE          "The online manual can be found in the BRICKS_TS GitHub repository:"
   FIELD           AT 21,0   LEN 70   PROT COLOR=YELLOW        "https://github.com/moshix/bricks_ts#readme"
