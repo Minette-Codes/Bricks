@@ -954,6 +954,10 @@ DEBUG_CONSOLE: PROCEDURE EXPOSE FRAME. LINK. LOOKUP. SCR. SET.
           CALL VALUE VARIABLE, VALUE
           DEBUG_SCR.MSG = VARIABLE '=' VALUE
         END
+        /* Quit */
+        WHEN UPPER(COMMAND) = 'QUIT' THEN DO
+          RETURN
+        END
         /* Search for text. */
         WHEN UPPER(COMMAND) = 'RELOAD' THEN DO
           DO_RELOAD = 'YES'
