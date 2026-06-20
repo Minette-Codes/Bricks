@@ -1156,6 +1156,7 @@ DEBUG_CONSOLE: PROCEDURE EXPOSE FRAME. LINK. SCR. SET.
         /* Quit */
         WHEN UPPER(COMMAND) = 'QUIT' THEN DO
           RETURN
+        END
         /* Search for text. */
         WHEN UPPER(COMMAND) = 'RELOAD' THEN DO
           DO_RELOAD = 'YES'
