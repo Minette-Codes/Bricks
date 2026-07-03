@@ -322,19 +322,9 @@ The `DEMO` Frame.
 * 2026-06-19 - Add the command `QUIT` to the debug console.
 * 2026-06-20 - Add a missing `END` for the new debug console `QUIT` command.
 
-## Go Script
-
-The script `./go` will start Bricks. It figures out which binary to run. Update the variable `BricksPath` to the path Brick lives.
-
-I keep Bricks as a submodule in my Bricks GIT repository.
-
-### Changes
-
-* 2026-05-25 - Initial release.
-
 ## Installation
 
-**NOTE:** `MNDL` and `BRDS` are now included in the [Bricks](https://github.com/moshix/bricks_ts) repository. The only reason to use this repository is to grab changes Moshix hasn't included or to send me pull requests. Save yourself the hassle, just go run [Bricks](https://github.com/moshix/bricks_ts).
+**NOTE:** `BRDS`, `FSPF` and `MNDL` are now included in the [Bricks](https://github.com/moshix/bricks_ts) repository. The only reason to use this repository is to grab changes Moshix hasn't included or to send me pull requests. Save yourself the hassle, just go run [Bricks](https://github.com/moshix/bricks_ts).
 
 Basic steps:
 
@@ -355,6 +345,8 @@ Add these transactions to the file `runtime/transactions.conf`:\
 
 ```text
 BRDS:rexx:brds.rexx:USERS
+ESPF:rexx:espf.rexx:ADMIN
+FSPF:rexx:fspf.rexx:USERS
 MNDL:rexx:mndl.rexx:USERS
 MNDU:rexx:mndu.rexx:USERS
 ```
@@ -370,7 +362,6 @@ The result would look like this:
   * `Minette/` - This repository.
   * `runtime/` - The combined runtime files from both repositories.
   * `data/` - The `data/` directory from the [Bricks](https://github.com/moshix/bricks_ts) repository.
-  * `go` - The script to start [Bricks](https://github.com/moshix/bricks_ts) from this repository. This scripts runs the Bricks binary for the current computer architecture and OS.
   * All of the other files from the [Bricks](https://github.com/moshix/bricks_ts) repository top level.
 
 This setup would provide a directory to experiment with [Bricks](https://github.com/moshix/bricks_ts) and not interfere with either of the repositories. It can get messy quick when you `git pull` if any files are new or different.
@@ -383,17 +374,17 @@ cd Bricks
 git clone https://github.com/moshix/BRICKS_TS.git
 git clone https://github.com/Minette-Codes/Bricks.git Minette
 (cd BRICKS_TS/; cp *.* ../; cp -rv data/ runtime/ ../)
-(cd Minette; cp -rv go runtime/ ../)
+(cd Minette; cp -rv runtime/ ../)
 cat Minette/transactions.txt >> runtime/transactions.conf
 ```
 
 Run [Bricks](https://github.com/moshix/bricks_ts):
 
 ```bash
-./go
+./start_bricks.bash
 ```
 
-Update from Github, **DO NOT** replace any files:\
+Update from Github, **WITHOUT** replace any files:\
 (This is the sensible choice. New files will be copied. You can decide what to do with changed files.)
 
 ```bash
@@ -408,6 +399,10 @@ Update from Github, **REPLACE ALL FILES**:\
 (cd BRICKS_TS/; git pull; /bin/cp -rv *.* data/ runtime/ ../)
 (cd Minette; git pull; /bin/cp -rv go runtime/ ../)
 ```
+
+### Changes
+
+* 2026-07-03 - Removed the `go` script. Use `start_bricks.bash` from the BRICKS_TS directory.
 
 ## License
 
