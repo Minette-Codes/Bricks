@@ -304,7 +304,7 @@ The `ADMIN` Frame.
 
 ![ADMIN](Screenshots/FSPF_Admin.png)
 
-Help scren for `CEMT`.
+Help screen for `CEMT`.
 
 ![HELP CEMT](Screenshots/FSPF_CEMT.png)
 
