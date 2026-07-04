@@ -321,6 +321,7 @@ The `DEMO` Frame.
 * 2026-06-18 - Added MRO to the help text for CEDA and CEMT. General improvements to help screens.
 * 2026-06-19 - Add the command `QUIT` to the debug console.
 * 2026-06-20 - Add a missing `END` for the new debug console `QUIT` command.
+* 2026-07-04 - Fix formatting on the Quick Reference screen for AID Keys.
 
 ## Installation
 
