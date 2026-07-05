@@ -7,14 +7,30 @@ Some stuff I wrote for Bricks. \
 
 ## Contents
 
+* [JSON REXX Library](#json-rexx-library)
+* [BOFH - JSON Example](#bofh---json-example)
+* [Installation](#installation)
 * [MNDL - Mandelbrot Set Viewer](#mndl---mandelbrot-set-viewer)
 * [BRDS - KSDS File Browser](#brds---ksds-file-browser)
 * [FSPF - Fake ISPF Menu](#fspf---fake-ispf-menu)
-* [Go Script](#go-script)
-* [Installation](#installation)
 * [License](#license)
 
 <!-- With the help of: https://bitdowntoc.derlin.ch/ -->
+
+## JSON REXX Library
+
+A library for parsing and manipulating JSON.
+See the  [JSON.md](JSON.md) for details.
+There is too much to fit here.
+
+![JSON Explorer](Screenshots/JSON_Console.png)
+
+## BOFH - JSON Example
+
+A simple example of using the [JSON library](JSON.md) to fetch and display an excuse.
+See the site <https://bofh.bombeck.io/> for details.
+
+![BOFH Excuse](Screenshots/BOFH.png)
 
 ## MNDL - Mandelbrot Set Viewer
 
@@ -350,6 +366,8 @@ ESPF:rexx:espf.rexx:ADMIN
 FSPF:rexx:fspf.rexx:USERS
 MNDL:rexx:mndl.rexx:USERS
 MNDU:rexx:mndu.rexx:USERS
+JSON:rexx:json.rexx:USERS
+BOFH:rexx:bofh.rexx:USERS
 ```
 
 ### Alternate setup

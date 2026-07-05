@@ -1,0 +1,18 @@
+* BOFH transaction -- Display a BOFH excuse.
+* See: https://bofh.bombeck.io/
+* Copied from wen1.map
+MAP BOFH1 SIZE 24x80
+  FIELD           AT 1 ,29  LEN 21  PROT COLOR=CYAN           "BOFH Excuse Generator"
+  FIELD           AT 2 ,26  LEN 28  PROT COLOR=CYAN           "(Bastard Operator From Hell)"
+
+  FIELD           AT 4 ,26  LEN 29  PROT COLOR=BLUE           "See: https://bofh.bombeck.io/"
+
+  FIELD EXC_NUM   AT 8 , 0  LEN 79  PROT COLOR=GREEN
+  FIELD EXC_TXT   AT 10, 0  LEN 79  PROT COLOR=WHITE
+
+  FIELD           AT 18,12  LEN 56  PROT COLOR=BLUE           "https://en.wikipedia.org/wiki/Bastard_Operator_From_Hell"
+
+  INPUT MSG       AT 20, 0  LEN 79  PROT BRIGHT COLOR=RED
+
+  CURSOR          AT 23, 0
+ENDMAP
