@@ -408,7 +408,7 @@ Update from Github, **WITHOUT** replace any files:\
 
 ```bash
 (cd BRICKS_TS/; git pull; cp -nrv *.* data/ runtime/ ../)
-(cd Minette; git pull; cp -nrv go runtime/ ../)
+(cd Minette; git pull; cp -nrv runtime/ ../)
 ```
 
 Update from Github, **REPLACE ALL FILES**:\
@@ -416,7 +416,7 @@ Update from Github, **REPLACE ALL FILES**:\
 
 ```bash
 (cd BRICKS_TS/; git pull; /bin/cp -rv *.* data/ runtime/ ../)
-(cd Minette; git pull; /bin/cp -rv go runtime/ ../)
+(cd Minette; git pull; /bin/cp -rv runtime/ ../)
 ```
 
 ### Changes
