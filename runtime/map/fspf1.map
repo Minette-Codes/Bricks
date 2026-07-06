@@ -1250,12 +1250,12 @@ MAP EDITPOPUP SIZE 24x80
   FIELD           AT 15,20  LEN 36  PROT COLOR=GREEN          "########################################"
   FIELD           AT 16,20  LEN 36  PROT COLOR=GREEN          "########################################"
 
-  INPUT POPMSG    AT 8 ,23  LEN 34  PROT COLOR=BLUE
-  INPUT POPNOTE   AT 9 ,23  LEN 34  PROT COLOR=BLUE
+  FIELD POPMSG    AT 8 ,23  LEN 34  PROT COLOR=BLUE
+  FIELD POPNOTE   AT 9 ,23  LEN 34  PROT COLOR=BLUE
   INPUT POPINPUT  AT 11,24  LEN 32  UNDERSCORE COLOR=CYAN
   STOP            AT 11,57
   FIELD           AT 13,24  LEN 32  PROT COLOR=BLUE           "ENTER=                 PF3=Abort"
-  INPUT POPAID    AT 13,31  LEN 16  PROT COLOR=BLUE
+  FIELD POPAID    AT 13,31  LEN 16  PROT COLOR=BLUE
 
   FIELD           AT 7 ,58  LEN 2   PROT COLOR=GREEN          "##"
   FIELD           AT 8 ,58  LEN 2   PROT COLOR=GREEN          "##"
