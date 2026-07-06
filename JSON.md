@@ -18,6 +18,7 @@ See the file [json-library.rexx](json-library.rexx) for including the library in
 ## Contents
 
 * [Using the JSON Explorer](#using-the-json-explorer)
+* [TODO](#todo)
 * [Parsing JSON](#parsing-json)
 * [Working with parsed JSON](#working-with-parsed-json)
 * [Return values](#return-values)
@@ -48,6 +49,8 @@ Enter `DEMO` to run the demo.
 
 See screenshots at the bottom of this file.
 
+JSON can also be passed into the Transaction either from the command line or via the COMMAREA.
+
 ## TODO
 
 Still to be completed.
@@ -55,6 +58,9 @@ Still to be completed.
 * More refinement of the help text.
 * Document the test details.
 * Expand the tests for more edge cases.
+* Properly parse and handle numbers.
+  * Parsing numbers just grabs anything that isn't whitespace.
+  * Numbers internally are treated like strings. No special considerations.
 
 ## Parsing JSON
 
@@ -254,7 +260,7 @@ The code assumes you know what you are doing.
 These functions are extras that could be useful.
 
 I recommend NOT including the `JSON_TESTS()` function in your code.
-Unless you actually intent to run the JSON tests in your code.
+Unless you actually intend to run the JSON tests in your code.
 
 | Function              | Description                                         |
 |-----------------------|-----------------------------------------------------|
@@ -286,6 +292,9 @@ Each test is a line of self contained JSON specifying the test parameters.
 Each test contains JSON to be parsed, manipulated and verified.
 See the top of the test file for details on the test format.
 
+Note: Tests that are prefixed with `ERROR:` are expected failures.
+These tests verify functions fail in the expected manner on bad input.
+
 The test results are stored as strings in the STEM `JSON_TESTS`.
 Search for uses this STEM to see what to do with the contents.
 
@@ -293,9 +302,10 @@ Search for uses this STEM to see what to do with the contents.
 
 In the JSON Explorer Console the tests can be run using the command `TEST`.
 After the tests are run the results will be displayed with some basic formatting applied.
-The test name, error code, and pass/fail status.
-The remaining test data is listed underneath the test names.
+The test name, error code, and pass/fail status are displayed on one line.
+The remaining test data is listed below the test name..
 Simple highlighting is applied to make specific bits stand out.
+See the screenshots below for an example of the test output.
 
 ## Return values
 
@@ -508,6 +518,7 @@ Meta data about the JSON and internal state.
 ## Screenshots
 
 The initial view of the JSON Explorer.
+The JSON being displayed is the example from the documentation above.
 
 ![JSON Explorer](Screenshots/JSON_Console.png)
 
