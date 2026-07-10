@@ -1,25 +1,25 @@
-# Tests for the JSON library.
-# Comments start with # of course.
-# Each test is just a collection of variables in JSON.
-# The only required variables are "name" and "json".
-# Variables:
-#   name    The test name. Required.
-#   json    JSON text to be parsed. Required.
-#           To simplify writing tests ' is replaced with ".
-#   rc      Expected return code. See below.
-#   error   Expected error text, false for no error, true for an error.
-#   string  The parsed JSON turned back to text. ' is replaced with ".
-#   path    A path to move the pointer to after parsing the JSON.
-#   func    A function to call after parsing.
-#           If a function is given then rc and error check the function result.
-#   arg[12] Arguments to the function.
-#   result  Expected result of the function call. String or number.
-#
-# The "rc" can be one of:
-#   An integer to check for the exact value.
-#   true to check for success. RC > 0
-#   false to check for failure. RC < 0
-#   null to accept anything other than -1. (This means I screwed up the code.)
+// Tests for the JSON library.
+// Comments start with // of course.
+// Each test is just a collection of variables in JSON.
+// The only required variables are "name" and "json".
+// Variables:
+//   name    The test name. Required.
+//   json    JSON text to be parsed. Required.
+//           To simplify writing tests ' is replaced with ".
+//   rc      Expected return code. See below.
+//   error   Expected error text, false for no error, true for an error.
+//   string  The parsed JSON turned back to text. ' is replaced with ".
+//   path    A path to move the pointer to after parsing the JSON.
+//   func    A function to call after parsing.
+//           If a function is given then rc and error check the function result.
+//   arg[12] Arguments to the function.
+//   result  Expected result of the function call. String or number.
+//
+// The "rc" can be one of:
+//   An integer to check for the exact value.
+//   true to check for success. RC > 0
+//   false to check for failure. RC < 0
+//   null to accept anything other than -1. (This means I screwed up the code.)
 
 {"name": "Simple object.", "json": "{'T':true}", "rc": 0, "error": false, "string": "{'T':true}"}
 {"name": "Simple array.",  "json": "[true]",     "rc": 0, "error": false, "string": "[true]"}
@@ -63,7 +63,7 @@
 {"name": "ERROR: Incomplete array, ending before element.", "json": "[", "rc":-12, "error": true, "string": ""}
 {"name": "ERROR: Incomplete array, missing close brace.", "json": "[true", "rc":-12, "error": true, "string": "[true]"}
 
-# Main interface.
+// Main interface.
 {"name": "Function: JSON_CLEAR()", "json": "true", "rc": 0, "error": false, "string": "", "func": "JSON_CLEAR", "result": "1"}
 
 {"name": "Function: JSON_COUNT() - Array", "json": "[true,false,null]", "rc": 0, "error": false, "string": "[true,false,null]", "func": "JSON_COUNT", "result": "3"}
@@ -136,7 +136,7 @@
 {"name": "Function: JSON_VALUE(MEMBER)", "json": "{'member':true}", "rc": 0, "error": false, "string": "{'member':true}", "func": "JSON_VALUE", "arg1": "member", "result": "true"}
 {"name": "Function: JSON_VALUE(PATH)", "json": "[{'path':false}]", "rc": 0, "error": false, "string": "[{'path':false}]", "func": "JSON_VALUE", "arg1": ".1.path", "result": "false"}
 
-# Shortcuts for type checking.
+// Shortcuts for type checking.
 {"name": "Function: JSON_IS_ARRAY() - Array.", "json": "[null]", "rc": 0, "error": false, "string": "[null]", "func": "JSON_IS_ARRAY", "result": "1"}
 {"name": "Function: JSON_IS_ARRAY() - Not a array.", "json": "null", "rc": 0, "error": false, "string": "null", "func": "JSON_IS_ARRAY", "result": "0"}
 {"name": "Function: JSON_IS_ARRAY(PATH) - Array.", "json": "[[null]]", "rc": 0, "error": false, "string": "[[null]]", "func": "JSON_IS_ARRAY", "arg1": ".1", "result": "1"}
@@ -172,13 +172,12 @@
 {"name": "Function: JSON_IS_NULL(PATH) - Null.", "json": "[null]", "rc": 0, "error": false, "string": "[null]", "func": "JSON_IS_NULL", "arg1": ".1", "result": "1"}
 {"name": "Function: JSON_IS_NULL(PATH) - Not null.", "json": "[false]", "rc": 0, "error": false, "string": "[false]", "func": "JSON_IS_NULL", "arg1": ".1", "result": "0"}
 
-# Permutation interface.
-{"name": "Function: JSON_ADD()", "json": "[1,2]", "rc": 0, "error": false, "string": "[1,2,null]", "path": ".1", "func": "JSON_ADD", "result": "3"}
-{"name": "ERROR: Function: JSON_ADD() - Root", "json": "null", "rc": false, "error": true, "string": "null", "func": "JSON_ADD", "result": "-21"}
+// Permutation interface.
+{"name": "Function: JSON_ADD()", "json": "[1,2]", "rc": 0, "error": false, "string": "[1,2,null]", "func": "JSON_ADD", "result": "3"}
+{"name": "ERROR: Function: JSON_ADD() - Root is not an array.", "json": "null", "rc": false, "error": true, "string": "null", "func": "JSON_ADD", "result": "-21"}
 {"name": "ERROR: Function: JSON_ADD() - Not an array.", "json": "{'A':null}", "rc": false, "error": true, "string": "{'A':null}", "path": ".1", "func": "JSON_ADD", "result": "-21"}
 
 {"name": "Function: JSON_NEW(NAME)", "json": "{'A':null}", "rc": 0, "error": false, "string": "{'A':null,'B':null}", "func": "JSON_NEW", "arg1": "B", "result": "2"}
-{"name": "Function: JSON_NEW(NAME)", "json": "{'A':null}", "rc": 0, "error": false, "string": "{'A':null,'B':null}", "path": ".1", "func": "JSON_NEW", "arg1": "B", "result": "2"}
 {"name": "Function: JSON_NEW(NAME) - Blank name.", "json": "{'A':null}", "rc": false, "error": true, "string": "{'A':null}", "path": ".1", "func": "JSON_NEW", "arg1": "", "result": "-20"}
 {"name": "Function: JSON_NEW() - Root", "json": "{'A':null}", "rc": 0, "error": false, "string": "{'A':null,'B':null}", "func": "JSON_NEW", "arg1": "B", "result": "2"}
 {"name": "ERROR: Function: JSON_NEW() - Not an object.", "json": "[1,2]", "rc": false, "error": true, "string": "[1,2]", "path": ".1", "func": "JSON_NEW", "arg1": "B", "result": "-21"}
@@ -198,10 +197,10 @@
 {"name": "Function: JSON_SET_TYPE(TYPE) - False from String.", "json": "'String'", "rc": 0, "error": false, "string": "false", "func": "JSON_SET_TYPE", "arg1": "F", "result": "S"}
 {"name": "Function: JSON_SET_TYPE(TYPE) - Null from Array.", "json": "[1,2,3]", "rc": 0, "error": false, "string": "null", "func": "JSON_SET_TYPE", "arg1": "U", "result": "A"}
 {"name": "Function: JSON_SET_TYPE(TYPE) - Null from Null.", "json": "null", "rc": 0, "error": false, "string": "null", "func": "JSON_SET_TYPE", "arg1": "U", "result": "U"}
+{"name": "Function: JSON_SET_TYPE(TYPE) - Long type name.", "json": "true", "rc": 0, "error": false, "string": "null", "func": "JSON_SET_TYPE", "arg1": "null", "result": "T"}
 {"name": "ERROR: Function: JSON_SET_TYPE() - Missing type.", "json": "null", "rc": false, "error": true, "string": "", "func": "JSON_SET_TYPE", "result": "-20"}
 {"name": "ERROR: Function: JSON_SET_TYPE() - Invalid type.", "json": "null", "rc": false, "error": true, "string": "", "func": "JSON_SET_TYPE", "arg1": "Z", "result": "-21"}
 
-# TODO: JSON_SET_VALUE
 {"name": "Function: JSON_SET_VALUE(VALUE) - Number.", "json": "1234", "rc": 0, "error": false, "string": "9876", "func": "JSON_SET_VALUE", "arg1": "9876", "result": "1"}
 {"name": "Function: JSON_SET_VALUE(VALUE) - Quoted String.", "json": "'String'", "rc": 0, "error": false, "string": "'Different'", "func": "JSON_SET_VALUE", "arg1": "'Different'", "result": "1"}
 {"name": "Function: JSON_SET_VALUE(PATH, VALUE) - String.", "json": "['String']", "rc": 0, "error": false, "string": "['Another']", "func": "JSON_SET_VALUE", "arg1": ".1", "arg2": "Another", "result": "1"}
@@ -209,16 +208,22 @@
 {"name": "ERROR: Function: JSON_SET_VALUE() - Array.", "json": "[null]", "rc": false, "error": true, "string": "[null]", "func": "JSON_SET_VALUE", "result": "-20"}
 {"name": "ERROR: Function: JSON_SET_VALUE() - Object.", "json": "{'member':'Value'}", "rc": false, "error": true, "string": "{'member':'Value'}", "func": "JSON_SET_VALUE", "result": "-20"}
 
-{"name": "Function: JSON_SET_NUMBER(VALUE)", "json": "'String'", "rc": 0, "error": false, "string": "123", "func": "JSON_SET_NUMBER", "arg1": "123", "result": "1"}
-{"name": "Function: JSON_SET_NUMBER(PATH,VALUE)", "json": "['String']", "rc": 0, "error": false, "string": "[123]", "func": "JSON_SET_NUMBER", "arg1": ".1", "arg2": "123", "result": "1"}
+{"name": "Function: JSON_SET_ARRAY()", "json": "'String'", "rc": 0, "error": false, "string": "[]", "func": "JSON_SET_ARRAY", "result": "S"}
+{"name": "Function: JSON_SET_ARRAY(PATH)", "json": "['String']", "rc": 0, "error": false, "string": "[[]]", "func": "JSON_SET_ARRAY", "arg1": ".1", "result": "S"}
+{"name": "Function: JSON_SET_NUMBER(VALUE)", "json": "'String'", "rc": 0, "error": false, "string": "123", "func": "JSON_SET_NUMBER", "arg1": "123", "result": "S"}
+{"name": "Function: JSON_SET_NUMBER(PATH,VALUE)", "json": "['String']", "rc": 0, "error": false, "string": "[123]", "func": "JSON_SET_NUMBER", "arg1": ".1", "arg2": "123", "result": "S"}
 {"name": "ERROR: Function: JSON_SET_NUMBER(VALUE) - Missing value.", "json": "'String'", "rc": false, "error": true, "string": "'String'", "func": "JSON_SET_NUMBER", "result": "-20"}
-
-# TODO: JSON_SET_STRING
-{"name": "Function: JSON_SET_STRING(VALUE)", "json": "1234", "rc": 0, "error": false, "string": "'String'", "func": "JSON_SET_STRING", "arg1": "String", "result": "1"}
-{"name": "Function: JSON_SET_STRING(PATH,VALUE)", "json": "[123]", "rc": 0, "error": false, "string": "['String']", "func": "JSON_SET_STRING", "arg1": ".1", "arg2": "String", "result": "1"}
+{"name": "Function: JSON_SET_STRING(VALUE)", "json": "1234", "rc": 0, "error": false, "string": "'String'", "func": "JSON_SET_STRING", "arg1": "String", "result": "N"}
+{"name": "Function: JSON_SET_STRING(PATH,VALUE)", "json": "[123]", "rc": 0, "error": false, "string": "['String']", "func": "JSON_SET_STRING", "arg1": ".1", "arg2": "String", "result": "N"}
 {"name": "ERROR: Function: JSON_SET_STRING(VALUE) - Missing value.", "json": "1234", "rc": false, "error": true, "string": "1234", "func": "JSON_SET_STRING", "result": "-20"}
+{"name": "Function: JSON_SET_TRUE()", "json": "'String'", "rc": 0, "error": false, "string": "true", "func": "JSON_SET_TRUE", "result": "S"}
+{"name": "Function: JSON_SET_TRUE(PATH)", "json": "['String']", "rc": 0, "error": false, "string": "[true]", "func": "JSON_SET_TRUE", "arg1": ".1", "result": "S"}
+{"name": "Function: JSON_SET_FALSE()", "json": "'String'", "rc": 0, "error": false, "string": "false", "func": "JSON_SET_FALSE", "result": "S"}
+{"name": "Function: JSON_SET_FALSE(PATH)", "json": "['String']", "rc": 0, "error": false, "string": "[false]", "func": "JSON_SET_FALSE", "arg1": ".1", "result": "S"}
+{"name": "Function: JSON_SET_NULL()", "json": "'String'", "rc": 0, "error": false, "string": "null", "func": "JSON_SET_NULL", "result": "S"}
+{"name": "Function: JSON_SET_NULL(PATH)", "json": "['String']", "rc": 0, "error": false, "string": "[null]", "func": "JSON_SET_NULL", "arg1": ".1", "result": "S"}
 
-# Utilities.
+// Utilities.
 {"name": "Function: JSON_TYPE_STRING() - A - Array.", "json": "null", "rc": 0, "error": false, "func": "JSON_TYPE_STRING", "arg1": "A", "result": "Array"}
 {"name": "Function: JSON_TYPE_STRING() - O - Object.", "json": "null", "rc": 0, "error": false, "func": "JSON_TYPE_STRING", "arg1": "O", "result": "Object"}
 {"name": "Function: JSON_TYPE_STRING() - S - String.", "json": "null", "rc": 0, "error": false, "func": "JSON_TYPE_STRING", "arg1": "S", "result": "String"}

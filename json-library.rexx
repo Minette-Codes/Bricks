@@ -46,8 +46,9 @@ JSON_CLEAR: PROCEDURE EXPOSE JSON.
     INTERPRET 'DROP JSON.' || TAIL
   END
 
-  /* Set the pointer to the root. */
+  /* Set the pointer to the root and set the type to null. */
   JSON._PTR = 'JSON'
+  CALL _JSON_SET_TYPE JSON._PTR, 'U'
   RETURN 1
 
 /* Return the error text. */
@@ -249,7 +250,7 @@ JSON_LIST: PROCEDURE EXPOSE JSON.
   IF TYPE \= 'O' THEN
     RETURN _JSON_SET_ERROR('JSON_LIST() requires an object.', -21)
 
-/* Loop over the object and build the list. */
+  /* Loop over the object and build the list. */
   LIST = ''
   COUNT = VALUE(POINTER || '.0')
   DO INDX = 1 TO COUNT
@@ -274,9 +275,10 @@ JSON_MEMBER: PROCEDURE EXPOSE JSON.
     RETURN _JSON_SET_ERROR('JSON_MEMBER() requires an member name.', -20)
   MEMBER = ARG(1)
 
-  POINTER = JSON._PTR || '.' || _JSON_FIND_MEMBER(JSON._PTR, MEMBER)
+  POINTER = _JSON_FIND_MEMBER(JSON._PTR, MEMBER)
   IF POINTER <= 0 THEN
     RETURN _JSON_SET_ERROR('JSON_MEMBER(MEMBER)' JSON._ERROR, POINTER)
+  POINTER = JSON._PTR || '.' || POINTER
 
   TYPE = VALUE(JSON._PTR || '.TYPE')
   IF TYPE \= 'O' THEN
@@ -378,7 +380,8 @@ JSON_PATH: PROCEDURE EXPOSE JSON.
       RETURN POINTER
   END
 
-  JSON._PTR = POINTER
+  IF POINTER \= JSON._PTR THEN
+    JSON._PTR = POINTER
   PATH = SUBSTR(JSON._PTR, 5)
   IF PATH = '' THEN
     PATH = '.'
@@ -688,20 +691,11 @@ JSON_ADD: PROCEDURE EXPOSE JSON.
       RETURN POINTER
   END
 
-  IF POINTER = 'JSON' THEN
-    RETURN _JSON_SET_ERROR('JSON_ADD() does not work at the root.', -21)
-
-  PARENT = SUBSTR(POINTER, 1, LASTPOS('.', POINTER) - 1)
-  PARENT_TYPE = VALUE(PARENT || '.TYPE')
-  IF PARENT_TYPE \= 'A' THEN
+  TYPE = VALUE(POINTER || '.TYPE')
+  IF TYPE \= 'A' THEN
     RETURN _JSON_SET_ERROR('JSON_ADD() requires an array.', -21)
 
-
-  INDX = VALUE(PARENT || '.0') + 1
-  CALL VALUE PARENT || '.0', INDX
-  CALL VALUE PARENT || '.' || INDX || '.TYPE', 'U'
-  CALL VALUE PARENT || '.' || INDX || '.VALUE', 'null'
-  RETURN INDX
+  RETURN _JSON_ADD(POINTER)
 
 /* Deletes the current element and children.                              */
 /* Renumbers elements for arrays and objects.                             */
@@ -771,7 +765,7 @@ JSON_NEW: PROCEDURE EXPOSE JSON.
   POINTER = JSON._PTR
 
   IF ARG() < 1 THEN
-    RETURN _JSON_SET_ERROR('JSON_NEW() Member name required when adding to an object.', -20)
+    RETURN _JSON_SET_ERROR('JSON_NEW() Member name required', -20)
   IF ARG() > 1 THEN DO
     POINTER = _JSON_PATH_RESOLVE(ARG(1), 'JSON_NEW')
     IF POINTER <= 0 THEN
@@ -784,20 +778,11 @@ JSON_NEW: PROCEDURE EXPOSE JSON.
   IF NAME = '' THEN
     RETURN _JSON_SET_ERROR('JSON_NEW() Member name must not be blank.', -20)
 
-  IF POINTER = 'JSON' THEN
-    PARENT = POINTER
-  ELSE
-    PARENT = SUBSTR(POINTER, 1, LASTPOS('.', POINTER) - 1)
-  PARENT_TYPE = VALUE(PARENT || '.TYPE')
-  IF PARENT_TYPE \= 'O' THEN
+  TYPE = VALUE(POINTER || '.TYPE')
+  IF TYPE \= 'O' THEN
     RETURN _JSON_SET_ERROR('JSON_NEW() requires an object.', -21)
 
-  INDX = VALUE(PARENT || '.0') + 1
-  CALL VALUE PARENT || '.0', INDX
-  CALL VALUE PARENT || '.' || INDX || '.MEMBER', NAME
-  CALL VALUE PARENT || '.' || INDX || '.TYPE', 'U'
-  CALL VALUE PARENT || '.' || INDX || '.VALUE', 'null'
-  RETURN INDX
+  RETURN _JSON_NEW(POINTER, NAME)
 
 /* Set the type of the current element.                                   */
 /* Prepares the new element according to the type.                        */
@@ -825,27 +810,17 @@ JSON_SET_TYPE: PROCEDURE EXPOSE JSON.
     NEW_TYPE = UPPER(ARG(2))
   END
 
+  /* If the long type name is given turn it into the type code. */
+  IF NEW_TYPE = 'NULL' THEN
+    NEW_TYPE = 'U'
+  ELSE IF LENGTH(NEW_TYPE) > 1 THEN
+    NEW_TYPE = SUBSTR(NEW_TYPE, 1, 1)
+
   IF POS(NEW_TYPE, 'AFNOSTU') < 1 | LENGTH(NEW_TYPE) \= 1 THEN
     RETURN _JSON_SET_ERROR('JSON_SET_TYPE() requires a VALID type. (AFNOSTU)' , -21)
 
-  /* Make sure the proper structure exists for this type. */
-  IF NEW_TYPE = 'A' & VALUE(POINTER || '.0') = '' THEN
-    CALL VALUE POINTER || '.0', 0
-  ELSE IF NEW_TYPE = 'F' & VALUE(POINTER || '.VALUE') = '' THEN
-    CALL VALUE POINTER || '.VALUE', 'false'
-  ELSE IF NEW_TYPE = 'N' & VALUE(POINTER || '.VALUE') = '' THEN
-    CALL VALUE POINTER || '.VALUE', 0
-  ELSE IF NEW_TYPE = 'O' & VALUE(POINTER || '.0') = '' THEN
-    CALL VALUE POINTER || '.0', 0
-  ELSE IF NEW_TYPE = 'U' & VALUE(POINTER || '.VALUE') = '' THEN
-    CALL VALUE POINTER || '.VALUE', 'null'
-  ELSE IF NEW_TYPE = 'S' & VALUE(POINTER || '.VALUE') = '' THEN
-    CALL VALUE POINTER || '.VALUE', ''
-  ELSE IF NEW_TYPE = 'T' & VALUE(POINTER || '.VALUE') = '' THEN
-    CALL VALUE POINTER || '.VALUE', 'true'
-
-  /* Set the new type and return the old. */
-  RETURN VALUE(POINTER || '.TYPE', NEW_TYPE)
+  /* Set the type, returning the old type. */
+  RETURN _JSON_SET_TYPE(POINTER, NEW_TYPE)
 
 /* Set the value of the current element. */
 /*                                                                        */
@@ -889,14 +864,446 @@ JSON_SET_VALUE: PROCEDURE EXPOSE JSON.
   CALL VALUE POINTER || '.VALUE', JSON_ESCAPE(NEW_VALUE)
   RETURN 1
 
+/* JSON Permutation Shortcuts =========================================== */
+
+/* Adds a new array element to an array.                                  */
+/*                                                                        */
+/* Arguments:                                                             */
+/*  POINTER - The path to add the new element. Optional.                  */
+/*                                                                        */
+/* Returns:                                                               */
+/*  The index number of the new element.                                  */
+/*  -21 if the current element is not an array.                           */
+/*  -24 if the path is invalid.                                           */
+/*  -26 if the member was not found.                                      */
+JSON_ADD_ARRAY: PROCEDURE EXPOSE JSON.
+  POINTER = JSON._PTR
+
+  IF ARG() > 0 THEN DO
+    POINTER = _JSON_PATH_RESOLVE(ARG(1), 'JSON_ADD_ARRAY')
+    IF POINTER <= 0 THEN
+      RETURN POINTER
+  END
+
+  /* Setup the new element. */
+  INDX = _JSON_ADD(POINTER)
+  RETURN _JSON_SET_TYPE(POINTER || '.' || INDX, 'A')
+  RETURN INDX
+
+/* Adds a new object element to an array.                                 */
+/*                                                                        */
+/* Arguments:                                                             */
+/*  POINTER - The path to add the new element. Optional.                  */
+/*                                                                        */
+/* Returns:                                                               */
+/*  The index number of the new element.                                  */
+/*  -21 if the current element is not an array.                           */
+/*  -24 if the path is invalid.                                           */
+/*  -26 if the member was not found.                                      */
+JSON_ADD_OBJECT: PROCEDURE EXPOSE JSON.
+  POINTER = JSON._PTR
+
+  IF ARG() > 0 THEN DO
+    POINTER = _JSON_PATH_RESOLVE(ARG(1), 'JSON_ADD_OBJECT')
+    IF POINTER <= 0 THEN
+      RETURN POINTER
+  END
+
+  /* Setup the new element. */
+  INDX = _JSON_ADD(POINTER)
+  RETURN _JSON_SET_TYPE(POINTER || '.' || INDX, 'O')
+  RETURN INDX
+
+/* Adds a new string to an array.                                         */
+/*                                                                        */
+/* Arguments:                                                             */
+/*  POINTER - The path to add the new string. Optional.                   */
+/*  VALUE   - The string value for the new element.                     */
+/*                                                                        */
+/* Returns:                                                               */
+/*  The index number of the new element.                                  */
+/*  -21 if the current element is not an array.                           */
+/*  -24 if the path is invalid.                                           */
+/*  -26 if the member was not found.                                      */
+JSON_ADD_STRING: PROCEDURE EXPOSE JSON.
+  POINTER = JSON._PTR
+  VALUE = ARG(1)
+
+  IF ARG() < 1 THEN
+    RETURN _JSON_SET_ERROR('JSON_ADD_STRING() requires a string', -20)
+  IF ARG() > 1 THEN DO
+    POINTER = _JSON_PATH_RESOLVE(ARG(1), 'JSON_ADD_STRING')
+    IF POINTER <= 0 THEN
+      RETURN POINTER
+    VALUE = ARG(2)
+  END
+
+  /* Setup the new element. */
+  INDX = _JSON_ADD(POINTER)
+  CALL VALUE POINTER || '.' || INDX || '.TYPE', 'S'
+  CALL VALUE POINTER || '.' || INDX || '.VALUE', JSON_ESCAPE(VALUE)
+  RETURN INDX
+
+/* Adds a new number to an array.                                         */
+/*                                                                        */
+/* Arguments:                                                             */
+/*  POINTER - The path to add the new number. Optional.                   */
+/*  VALUE   - The number value for the new element.                     */
+/*                                                                        */
+/* Returns:                                                               */
+/*  The index number of the new element.                                  */
+/*  -21 if the current element is not an array.                           */
+/*  -24 if the path is invalid.                                           */
+/*  -26 if the member was not found.                                      */
+JSON_ADD_NUMBER: PROCEDURE EXPOSE JSON.
+  POINTER = JSON._PTR
+  VALUE = ARG(1)
+
+  IF ARG() < 1 THEN
+    RETURN _JSON_SET_ERROR('JSON_ADD_NUMBER() requires a number', -20)
+  IF ARG() > 1 THEN DO
+    POINTER = _JSON_PATH_RESOLVE(ARG(1), 'JSON_ADD_NUMBER')
+    IF POINTER <= 0 THEN
+      RETURN POINTER
+    VALUE = ARG(2)
+  END
+
+  /* Setup the new element. */
+  INDX = _JSON_ADD(POINTER)
+  CALL VALUE POINTER || '.' || INDX || '.TYPE', 'N'
+  CALL VALUE POINTER || '.' || INDX || '.VALUE', VALUE
+  RETURN INDX
+
+/* Adds a new true element to an array.                                   */
+/*                                                                        */
+/* Arguments:                                                             */
+/*  POINTER - The path to add the new element. Optional.                  */
+/*                                                                        */
+/* Returns:                                                               */
+/*  The index number of the new element.                                  */
+/*  -21 if the current element is not an array.                           */
+/*  -24 if the path is invalid.                                           */
+/*  -26 if the member was not found.                                      */
+JSON_ADD_TRUE: PROCEDURE EXPOSE JSON.
+  POINTER = JSON._PTR
+
+  IF ARG() > 0 THEN DO
+    POINTER = _JSON_PATH_RESOLVE(ARG(1), 'JSON_ADD_TRUE')
+    IF POINTER <= 0 THEN
+      RETURN POINTER
+  END
+
+  /* Setup the new element. */
+  INDX = _JSON_ADD(POINTER)
+  RETURN _JSON_SET_TYPE(POINTER || '.' || INDX, 'T')
+  RETURN INDX
+
+/* Adds a new false element to an array.                                  */
+/*                                                                        */
+/* Arguments:                                                             */
+/*  POINTER - The path to add the new element. Optional.                  */
+/*                                                                        */
+/* Returns:                                                               */
+/*  The index number of the new element.                                  */
+/*  -21 if the current element is not an array.                           */
+/*  -24 if the path is invalid.                                           */
+/*  -26 if the member was not found.                                      */
+JSON_ADD_FALSE: PROCEDURE EXPOSE JSON.
+  POINTER = JSON._PTR
+
+  IF ARG() > 0 THEN DO
+    POINTER = _JSON_PATH_RESOLVE(ARG(1), 'JSON_ADD_FALSE')
+    IF POINTER <= 0 THEN
+      RETURN POINTER
+  END
+
+  /* Setup the new element. */
+  INDX = _JSON_ADD(POINTER)
+  RETURN _JSON_SET_TYPE(POINTER || '.' || INDX, 'F')
+  RETURN INDX
+
+/* Adds a new null element to an array.                                   */
+/*                                                                        */
+/* Arguments:                                                             */
+/*  POINTER - The path to add the new element. Optional.                  */
+/*                                                                        */
+/* Returns:                                                               */
+/*  The index number of the new element.                                  */
+/*  -21 if the current element is not an array.                           */
+/*  -24 if the path is invalid.                                           */
+/*  -26 if the member was not found.                                      */
+JSON_ADD_NULL: PROCEDURE EXPOSE JSON.
+  POINTER = JSON._PTR
+
+  IF ARG() > 0 THEN DO
+    POINTER = _JSON_PATH_RESOLVE(ARG(1), 'JSON_ADD_NULL')
+    IF POINTER <= 0 THEN
+      RETURN POINTER
+  END
+
+  /* Setup the new element. */
+  INDX = _JSON_ADD(POINTER)
+  RETURN _JSON_SET_TYPE(POINTER || '.' || INDX, 'U')
+  RETURN INDX
+
+/* Adds a new array element to an object.                                 */
+/*                                                                        */
+/* Arguments:                                                             */
+/*  POINTER - The path to add the new element. Optional.                  */
+/*  NAME    - The name for the new member.                                */
+/*                                                                        */
+/* Returns:                                                               */
+/*  The index number of the new element.                                  */
+/*  -21 if the current element is not an object.                          */
+/*  -24 if the path is invalid.                                           */
+/*  -26 if the member was not found.                                      */
+JSON_NEW_ARRAY: PROCEDURE EXPOSE JSON.
+  POINTER = JSON._PTR
+  NAME = ARG(1)
+
+  IF ARG() < 1 THEN
+    RETURN _JSON_SET_ERROR('JSON_NEW_ARRAY() Member name required', -20)
+  IF ARG() > 1 THEN DO
+    POINTER = _JSON_PATH_RESOLVE(ARG(1), 'JSON_NEW_ARRAY')
+    IF POINTER <= 0 THEN
+      RETURN POINTER
+    NAME = ARG(2)
+  END
+
+  /* Setup the new element. */
+  INDX = _JSON_NEW(POINTER, NAME)
+  RETURN _JSON_SET_TYPE(POINTER || '.' || INDX, 'A')
+
+/* Adds a new object element to an object.                                */
+/*                                                                        */
+/* Arguments:                                                             */
+/*  POINTER - The path to add the new element. Optional.                  */
+/*  NAME    - The name for the new member.                                */
+/*                                                                        */
+/* Returns:                                                               */
+/*  The index number of the new element.                                  */
+/*  -21 if the current element is not an object.                          */
+/*  -24 if the path is invalid.                                           */
+/*  -26 if the member was not found.                                      */
+JSON_NEW_OBJECT: PROCEDURE EXPOSE JSON.
+  POINTER = JSON._PTR
+  NAME = ARG(1)
+
+  IF ARG() < 1 THEN
+    RETURN _JSON_SET_ERROR('JSON_NEW_OBJECT() Member name required', -20)
+  IF ARG() > 1 THEN DO
+    POINTER = _JSON_PATH_RESOLVE(ARG(1), 'JSON_NEW_OBJECT')
+    IF POINTER <= 0 THEN
+      RETURN POINTER
+    NAME = ARG(2)
+  END
+
+  /* Setup the new element. */
+  INDX = _JSON_NEW(POINTER, NAME)
+  RETURN _JSON_SET_TYPE(POINTER || '.' || INDX, 'O')
+
+/* Adds a new string element to an object.                                */
+/*                                                                        */
+/* Arguments:                                                             */
+/*  POINTER - The path to add the new element. Optional.                  */
+/*  NAME    - The name for the new member.                                */
+/*  VALUE   - The  string value for the new element.                    */
+/*                                                                        */
+/* Returns:                                                               */
+/*  The index number of the new element.                                  */
+/*  -21 if the current element is not an object.                          */
+/*  -24 if the path is invalid.                                           */
+/*  -26 if the member was not found.                                      */
+JSON_NEW_STRING: PROCEDURE EXPOSE JSON.
+  POINTER = JSON._PTR
+  NAME = ARG(1)
+  VALUE = ARG(2)
+
+  IF ARG() < 2 THEN
+    RETURN _JSON_SET_ERROR('JSON_NEW_STRING() Member name and value required', -20)
+  IF ARG() > 2 THEN DO
+    POINTER = _JSON_PATH_RESOLVE(ARG(1), 'JSON_NEW_STRING')
+    IF POINTER <= 0 THEN
+      RETURN POINTER
+    NAME = ARG(2)
+    VALUE = ARG(3)
+  END
+
+  /* Setup the new element. */
+  INDX = _JSON_NEW(POINTER, NAME)
+  CALL VALUE POINTER || '.' || INDX || '.TYPE', 'S'
+  CALL VALUE POINTER || '.' || INDX || '.VALUE', JSON_ESCAPE(VALUE)
+  RETURN INDX
+
+/* Adds a new number element to an object.                                */
+/*                                                                        */
+/* Arguments:                                                             */
+/*  POINTER - The path to add the new element. Optional.                  */
+/*  NAME    - The name for the new member.                                */
+/*  VALUE   - The number value for the new element.                     */
+/*                                                                        */
+/* Returns:                                                               */
+/*  The index number of the new element.                                  */
+/*  -21 if the current element is not an object.                          */
+/*  -24 if the path is invalid.                                           */
+/*  -26 if the member was not found.                                      */
+JSON_NEW_NUMBER: PROCEDURE EXPOSE JSON.
+  POINTER = JSON._PTR
+  NAME = ARG(1)
+  VALUE = ARG(2)
+
+  IF ARG() < 2 THEN
+    RETURN _JSON_SET_ERROR('JSON_NEW_NUMBER() Member name and value required', -20)
+  IF ARG() > 2 THEN DO
+    POINTER = _JSON_PATH_RESOLVE(ARG(1), 'JSON_NEW_NUMBER')
+    IF POINTER <= 0 THEN
+      RETURN POINTER
+    NAME = ARG(2)
+    VALUE = ARG(3)
+  END
+
+  /* Setup the new element. */
+  INDX = _JSON_NEW(POINTER, NAME)
+  CALL VALUE POINTER || '.' || INDX || '.TYPE', 'N'
+  CALL VALUE POINTER || '.' || INDX || '.VALUE', VALUE
+  RETURN INDX
+
+/* Adds a new true element to an object.                                  */
+/*                                                                        */
+/* Arguments:                                                             */
+/*  POINTER - The path to add the new element. Optional.                  */
+/*  NAME    - The name for the new member.                                */
+/*                                                                        */
+/* Returns:                                                               */
+/*  The index number of the new element.                                  */
+/*  -21 if the current element is not an object.                          */
+/*  -24 if the path is invalid.                                           */
+/*  -26 if the member was not found.                                      */
+JSON_NEW_TRUE: PROCEDURE EXPOSE JSON.
+  POINTER = JSON._PTR
+  NAME = ARG(1)
+
+  IF ARG() < 1 THEN
+    RETURN _JSON_SET_ERROR('JSON_NEW_TRUE() Member name required', -20)
+  IF ARG() > 1 THEN DO
+    POINTER = _JSON_PATH_RESOLVE(ARG(1), 'JSON_NEW_TRUE')
+    IF POINTER <= 0 THEN
+      RETURN POINTER
+    NAME = ARG(2)
+  END
+
+  /* Setup the new element. */
+  INDX = _JSON_NEW(POINTER, NAME)
+  RETURN _JSON_SET_TYPE(POINTER || '.' || INDX, 'T')
+
+/* Adds a new false element to an object.                                 */
+/*                                                                        */
+/* Arguments:                                                             */
+/*  POINTER - The path to add the new element. Optional.                  */
+/*  NAME    - The name for the new member.                                */
+/*                                                                        */
+/* Returns:                                                               */
+/*  The index number of the new element.                                  */
+/*  -21 if the current element is not an object.                          */
+/*  -24 if the path is invalid.                                           */
+/*  -26 if the member was not found.                                      */
+JSON_NEW_FALSE: PROCEDURE EXPOSE JSON.
+  POINTER = JSON._PTR
+  NAME = ARG(1)
+
+  IF ARG() < 1 THEN
+    RETURN _JSON_SET_ERROR('JSON_NEW_FALSE() Member name required', -20)
+  IF ARG() > 1 THEN DO
+    POINTER = _JSON_PATH_RESOLVE(ARG(1), 'JSON_NEW_FALSE')
+    IF POINTER <= 0 THEN
+      RETURN POINTER
+    NAME = ARG(2)
+  END
+
+  /* Setup the new element. */
+  INDX = _JSON_NEW(POINTER, NAME)
+  RETURN _JSON_SET_TYPE(POINTER || '.' || INDX, 'F')
+
+/* Adds a new null element to an object.                                  */
+/*                                                                        */
+/* Arguments:                                                             */
+/*  POINTER - The path to add the new element. Optional.                  */
+/*  NAME    - The name for the new member.                                */
+/*                                                                        */
+/* Returns:                                                               */
+/*  The index number of the new element.                                  */
+/*  -21 if the current element is not an object.                          */
+/*  -24 if the path is invalid.                                           */
+/*  -26 if the member was not found.                                      */
+JSON_NEW_NULL: PROCEDURE EXPOSE JSON.
+  POINTER = JSON._PTR
+  NAME = ARG(1)
+
+  IF ARG() < 1 THEN
+    RETURN _JSON_SET_ERROR('JSON_NEW_NULL() Member name required', -20)
+  IF ARG() > 1 THEN DO
+    POINTER = _JSON_PATH_RESOLVE(ARG(1), 'JSON_NEW_NULL')
+    IF POINTER <= 0 THEN
+      RETURN POINTER
+    NAME = ARG(2)
+  END
+
+  /* Setup the new element. */
+  INDX = _JSON_NEW(POINTER, NAME)
+  RETURN _JSON_SET_TYPE(POINTER || '.' || INDX, 'N')
+
+/* Set the current element type to array.                                 */
+/*                                                                        */
+/* Arguments:                                                             */
+/*  POINTER   - The path to element to be modified. Optional.             */
+/*                                                                        */
+/* Returns:                                                               */
+/*  The old type value.                                                   */
+/*  -20 if the required value is not provided.                            */
+/*  -21 if the current element is an array or object.                     */
+/*  -24 if the path is invalid.                                           */
+/*  -26 if the member was not found.                                      */
+JSON_SET_ARRAY: PROCEDURE EXPOSE JSON.
+  POINTER = JSON._PTR
+
+  IF ARG() > 0 THEN DO
+    POINTER = _JSON_PATH_RESOLVE(ARG(1), 'JSON_SET_ARRAY')
+    IF POINTER <= 0 THEN
+      RETURN POINTER
+  END
+
+  RETURN _JSON_SET_TYPE(POINTER, 'A')
+
+/* Set the current element type to object.                                */
+/*                                                                        */
+/* Arguments:                                                             */
+/*  POINTER   - The path to element to be modified. Optional.             */
+/*                                                                        */
+/* Returns:                                                               */
+/*  The old type value.                                                   */
+/*  -20 if the required value is not provided.                            */
+/*  -21 if the current element is an array or object.                     */
+/*  -24 if the path is invalid.                                           */
+/*  -26 if the member was not found.                                      */
+JSON_SET_OBJECT: PROCEDURE EXPOSE JSON.
+  POINTER = JSON._PTR
+
+  IF ARG() > 0 THEN DO
+    POINTER = _JSON_PATH_RESOLVE(ARG(1), 'JSON_SET_OBJECT')
+    IF POINTER <= 0 THEN
+      RETURN POINTER
+  END
+
+  RETURN _JSON_SET_TYPE(POINTER, 'O')
+
 /* Set the current element type to string and set the value.              */
 /*                                                                        */
 /* Arguments:                                                             */
-/*  POINTER   - The path to add the new element. Optional.                */
+/*  POINTER   - The path to element to be modified. Optional.             */
 /*  NEW_VALUE - The new string value for the current element.             */
 /*                                                                        */
 /* Returns:                                                               */
-/*  1 on success.                                                         */
+/*  The old type value.                                                   */
 /*  -20 if the required value is not provided.                            */
 /*  -21 if the current element is an array or object.                     */
 /*  -24 if the path is invalid.                                           */
@@ -906,7 +1313,7 @@ JSON_SET_STRING: PROCEDURE EXPOSE JSON.
   NEW_VALUE = ARG(1)
 
   IF ARG() < 1 THEN
-    RETURN _JSON_SET_ERROR('JSON_SET_STRING(STRING) requires a string', -20)
+    RETURN _JSON_SET_ERROR('JSON_SET_STRING() requires a string', -20)
   IF ARG() > 1 THEN DO
     POINTER = _JSON_PATH_RESOLVE(ARG(1), 'JSON_SET_STRING')
     IF POINTER <= 0 THEN
@@ -924,18 +1331,19 @@ JSON_SET_STRING: PROCEDURE EXPOSE JSON.
       NEW_VALUE = SUBSTR(NEW_VALUE, 2, END_QUOTE - 2)
   END
 
+  OLD_TYPE = VALUE(POINTER || '.TYPE')
   CALL VALUE POINTER || '.TYPE', 'S'
   CALL VALUE POINTER || '.VALUE', JSON_ESCAPE(NEW_VALUE)
-  RETURN 1
+  RETURN OLD_TYPE
 
 /* Set the current element type to number and set the value.              */
 /*                                                                        */
 /* Arguments:                                                             */
-/*  POINTER   - The path to add the new element. Optional.                */
+/*  POINTER   - The path to element to be modified. Optional.             */
 /*  NEW_VALUE - The new number value for the current element.             */
 /*                                                                        */
 /* Returns:                                                               */
-/*  1 on success.                                                         */
+/*  The old type value.                                                   */
 /*  -20 if the required value is not provided.                            */
 /*  -21 if the current element is an array or object.                     */
 /*  -24 if the path is invalid.                                           */
@@ -945,7 +1353,7 @@ JSON_SET_NUMBER: PROCEDURE EXPOSE JSON.
   NEW_VALUE = ARG(1)
 
   IF ARG() < 1 THEN
-    RETURN _JSON_SET_ERROR('JSON_SET_NUMBER(NUMBER) requires a value', -20)
+    RETURN _JSON_SET_ERROR('JSON_SET_NUMBER() requires a value', -20)
   IF ARG() > 1 THEN DO
     POINTER = _JSON_PATH_RESOLVE(ARG(1), 'JSON_SET_NUMBER')
     IF POINTER <= 0 THEN
@@ -953,9 +1361,76 @@ JSON_SET_NUMBER: PROCEDURE EXPOSE JSON.
     NEW_VALUE = ARG(2)
   END
 
+  OLD_TYPE = VALUE(POINTER || '.TYPE')
   CALL VALUE POINTER || '.TYPE', 'N'
   CALL VALUE POINTER || '.VALUE', JSON_ESCAPE(NEW_VALUE)
-  RETURN 1
+  RETURN OLD_TYPE
+
+/* Set the current element type to true.                                  */
+/*                                                                        */
+/* Arguments:                                                             */
+/*  POINTER   - The path to element to be modified. Optional.             */
+/*                                                                        */
+/* Returns:                                                               */
+/*  The old type value.                                                   */
+/*  -20 if the required value is not provided.                            */
+/*  -21 if the current element is an array or object.                     */
+/*  -24 if the path is invalid.                                           */
+/*  -26 if the member was not found.                                      */
+JSON_SET_TRUE: PROCEDURE EXPOSE JSON.
+  POINTER = JSON._PTR
+
+  IF ARG() > 0 THEN DO
+    POINTER = _JSON_PATH_RESOLVE(ARG(1), 'JSON_SET_TRUE')
+    IF POINTER <= 0 THEN
+      RETURN POINTER
+  END
+
+  RETURN _JSON_SET_TYPE(POINTER, 'T')
+
+/* Set the current element type to false.                                 */
+/*                                                                        */
+/* Arguments:                                                             */
+/*  POINTER   - The path to element to be modified. Optional.             */
+/*                                                                        */
+/* Returns:                                                               */
+/*  The old type value.                                                   */
+/*  -20 if the required value is not provided.                            */
+/*  -21 if the current element is an array or object.                     */
+/*  -24 if the path is invalid.                                           */
+/*  -26 if the member was not found.                                      */
+JSON_SET_FALSE: PROCEDURE EXPOSE JSON.
+  POINTER = JSON._PTR
+
+  IF ARG() > 0 THEN DO
+    POINTER = _JSON_PATH_RESOLVE(ARG(1), 'JSON_SET_FALSE')
+    IF POINTER <= 0 THEN
+      RETURN POINTER
+  END
+
+  RETURN _JSON_SET_TYPE(POINTER, 'F')
+
+/* Set the current element type to null.                                  */
+/*                                                                        */
+/* Arguments:                                                             */
+/*  POINTER   - The path to element to be modified. Optional.             */
+/*                                                                        */
+/* Returns:                                                               */
+/*  The old type value.                                                   */
+/*  -20 if the required value is not provided.                            */
+/*  -21 if the current element is an array or object.                     */
+/*  -24 if the path is invalid.                                           */
+/*  -26 if the member was not found.                                      */
+JSON_SET_NULL: PROCEDURE EXPOSE JSON.
+  POINTER = JSON._PTR
+
+  IF ARG() > 0 THEN DO
+    POINTER = _JSON_PATH_RESOLVE(ARG(1), 'JSON_SET_NULL')
+    IF POINTER <= 0 THEN
+      RETURN POINTER
+  END
+
+  RETURN _JSON_SET_TYPE(POINTER, 'U')
 
 /* JSON Utilities ======================================================= */
 
@@ -1564,6 +2039,27 @@ _JSON_PP_PUSH: PROCEDURE EXPOSE JSON.
 
 /* JSON Private Utilities =============================================== */
 
+/* Adds a new element to an array.                                        */
+/*                                                                        */
+/* Arguments:                                                             */
+/*  POINTER - The path to add the new element.                            */
+/*                                                                        */
+/* Returns:                                                               */
+/*  The index number of the new element.                                  */
+/*  -21 if the current element is not an array.                           */
+/*  -24 if the path is invalid.                                           */
+/*  -26 if the member was not found.                                      */
+_JSON_ADD: PROCEDURE EXPOSE JSON.
+  IF ARG() < 1 THEN
+    RETURN _JSON_SET_ERROR('FATAL ERROR IN _JSON_ADD!', -1)
+  POINTER = ARG(1)
+
+  INDX = VALUE(POINTER || '.0') + 1
+  CALL VALUE POINTER || '.0', INDX
+  CALL VALUE POINTER || '.' || INDX || '.TYPE', 'U'
+  CALL VALUE POINTER || '.' || INDX || '.VALUE', 'null'
+  RETURN INDX
+
 /* Search the object at the given pointer for a member name.              */
 /*                                                                        */
 /* Arguments:                                                             */
@@ -1608,6 +2104,30 @@ _JSON_FIND_MEMBER: PROCEDURE EXPOSE JSON.
 
   /* Not found. */
   RETURN _JSON_SET_ERROR('Member name not found.', -26)
+
+/* Adds a new element to an object.                                       */
+/*                                                                        */
+/* Arguments:                                                             */
+/*  POINTER - The path to add the new element.                            */
+/*  NAME    - The name for the new member.                                */
+/*                                                                        */
+/* Returns:                                                               */
+/*  The index number of the new element.                                  */
+/*  -21 if the current element is not an object.                          */
+/*  -24 if the path is invalid.                                           */
+/*  -26 if the member was not found.                                      */
+_JSON_NEW: PROCEDURE EXPOSE JSON.
+  IF ARG() < 2 THEN
+    RETURN _JSON_SET_ERROR('FATAL ERROR IN _JSON_NEW!', -1)
+  POINTER = ARG(1)
+  NAME = ARG(2)
+
+  INDX = VALUE(POINTER || '.0') + 1
+  CALL VALUE POINTER || '.0', INDX
+  CALL VALUE POINTER || '.' || INDX || '.MEMBER', NAME
+  CALL VALUE POINTER || '.' || INDX || '.TYPE', 'U'
+  CALL VALUE POINTER || '.' || INDX || '.VALUE', 'null'
+  RETURN INDX
 
 /* Resolve a path into an absolute pointer.                               */
 /* Will resolve element indexes and member names.                         */
@@ -1737,6 +2257,44 @@ _JSON_SET_ERROR: PROCEDURE EXPOSE JSON.
     JSON._ERRORCODE = ARG(2)
   RETURN JSON._ERRORCODE
 
+/* Set the type of the current element.                                   */
+/* Prepares the new element according to the type.                        */
+/* See the table Types: above.                                            */
+/*                                                                        */
+/* Arguments:                                                             */
+/*  POINTER   - The path to add the new element.                          */
+/*  NEW_TYPE  - The new type for the current element.                     */
+/*                                                                        */
+/* Returns:                                                               */
+/*  The old type value.                                                   */
+/*  -20 if the required type is not provided.                             */
+/*  -24 if the path is invalid.                                           */
+/*  -26 if the member was not found.                                      */
+_JSON_SET_TYPE: PROCEDURE EXPOSE JSON.
+  IF ARG() < 2 THEN
+    RETURN _JSON_SET_ERROR('FATAL ERROR IN _JSON_NEW!', -1)
+  POINTER = ARG(1)
+  NEW_TYPE = UPPER(ARG(2))
+
+  /* Make sure the proper structure exists for this type. */
+  IF NEW_TYPE = 'A' & VALUE(POINTER || '.0') = '' THEN
+    CALL VALUE POINTER || '.0', 0
+  ELSE IF NEW_TYPE = 'F' THEN
+    CALL VALUE POINTER || '.VALUE', 'false'
+  ELSE IF NEW_TYPE = 'N' & VALUE(POINTER || '.VALUE') = '' THEN
+    CALL VALUE POINTER || '.VALUE', 0
+  ELSE IF NEW_TYPE = 'O' & VALUE(POINTER || '.0') = '' THEN
+    CALL VALUE POINTER || '.0', 0
+  ELSE IF NEW_TYPE = 'U' THEN
+    CALL VALUE POINTER || '.VALUE', 'null'
+  ELSE IF NEW_TYPE = 'S' & VALUE(POINTER || '.VALUE') = '' THEN
+    CALL VALUE POINTER || '.VALUE', ''
+  ELSE IF NEW_TYPE = 'T' THEN
+    CALL VALUE POINTER || '.VALUE', 'true'
+
+  /* Set the new type and return the old. */
+  RETURN VALUE(POINTER || '.TYPE', NEW_TYPE)
+
 /* Return the end of the quoted string at the start of the variable.      */
 /*                                                                        */
 /* Arguments:                                                             */
@@ -1862,7 +2420,7 @@ JSON_TESTS: PROCEDURE EXPOSE JSON. JSON_TESTS.
 
     /* Skip comments. and blank lines. */
     REC = STRIP(REC)
-    IF LENGTH(REC) = 0 | SUBSTR(REC, 1, 1) = '#' THEN
+    IF LENGTH(REC) = 0 | SUBSTR(REC, 1, 2) = '//' THEN
       ITERATE
 
     /* Parse the test case. */
@@ -1994,34 +2552,25 @@ JSON_TESTS: PROCEDURE EXPOSE JSON. JSON_TESTS.
     /* Save to RESULT_FILE. */
     CALL JSON_CLEAR
     CALL JSON_SET_TYPE 'O'
-    CALL JSON_NEW "name"
-    CALL JSON_SET_STRING '.name', TEST_NAME
-    CALL JSON_NEW "number"
-    CALL JSON_SET_NUMBER '.number', TEST_TOTAL
-    CALL JSON_NEW "status"
+    CALL JSON_NEW_STRING 'name', TEST_NAME
+    CALL JSON_NEW_NUMBER 'number', TEST_TOTAL
     IF TEST_STATUS = 'PASS' THEN
-      CALL JSON_SET_TYPE '.status', 'T'
+      CALL JSON_NEW_TRUE 'status'
     ELSE
-      CALL JSON_SET_TYPE '.status', 'F'
-    CALL JSON_NEW "json"
-    CALL JSON_SET_STRING '.json', CHANGESTR('"', TEST_JSON, "'")
-    CALL JSON_NEW "message"
+      CALL JSON_NEW_FALSE 'status'
+    CALL JSON_NEW_STRING 'json', CHANGESTR('"', TEST_JSON, "'")
     IF TEST_MESSAGE = '' THEN
-      CALL JSON_SET_TYPE '.message', 'U'
+      CALL JSON_NEW_NULL 'message'
     ELSE
-      CALL JSON_SET_STRING '.message', CHANGESTR('"', TEST_MESSAGE, "'")
-    CALL JSON_NEW "error"
+      CALL JSON_NEW_STRING 'message', CHANGESTR('"', TEST_MESSAGE, "'")
     IF ERROR_TEXT = '' THEN
-      CALL JSON_SET_TYPE '.error', 'U'
+      CALL JSON_NEW_NULL 'error'
     ELSE
-      CALL JSON_SET_STRING '.error', CHANGESTR('"', ERROR_TEXT, "'")
-    CALL JSON_NEW "rc"
-    CALL JSON_SET_NUMBER '.rc', ERROR_CODE
+      CALL JSON_NEW_STRING 'error', CHANGESTR('"', ERROR_TEXT, "'")
+    CALL JSON_NEW_NUMBER 'rc', ERROR_CODE
     IF TEST_FUNC \= '' THEN DO
-      CALL JSON_NEW "function"
-      CALL JSON_SET_STRING '.function', TEST_FUNC
-      CALL JSON_NEW "result"
-      CALL JSON_SET_STRING '.result', FUNC_RESULT
+      CALL JSON_NEW_STRING 'function', TEST_FUNC
+      CALL JSON_NEW_STRING 'result', FUNC_RESULT
     END
     OUTPUT = JSON_STRING()
     EXEC CICS WRITEQ TD QUEUE(RESULT_FILE) FROM(OUTPUT) END-EXEC

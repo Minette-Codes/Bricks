@@ -55,6 +55,9 @@ JSON can also be passed into the Transaction either from the command line or via
 
 Still to be completed.
 
+* Tests for the new `JSON_ADD_*` and `JSON_NEW_*` functions.
+* Change the test cases and results into one giant JSON blob.
+  Members are the test names.
 * More refinement of the help text.
 * Document the test details.
 * Expand the tests for more edge cases.
@@ -190,7 +193,7 @@ For example:
 * Or type this from the JSON Explorer Console: \
   `GET map:METRICS/metrics`
 
-### Special cases for checking types
+### JSON Type Checks
 
 These are intended to make your code a bit cleaner.
 Returns a REXX boolean, 1 for true, 0 for false.
@@ -236,7 +239,7 @@ They can also be used to build JSON from scratch after calling `JSON_CLEAR()`.
 | JSON_ADD(PATH)               | Adds a new element to the array at the given path.  |
 | JSON_NEW(NAME)               | Adds a new member to the current object.            |
 |                              | Returns the index number of the new member.         |
-| JSON_NEW(PATH,NAME)          | Adds a new member to the object at the given path.  |
+| JSON_NEW(PATH, NAME)         | Adds a new member to the object at the given path.  |
 | JSON_DELETE()                | Deletes the current node and children.              |
 |                              | Renumbers elements for arrays and objects.          |
 | JSON_DELETE(PATH)            | Deletes the node and children at the given path.    |
@@ -245,15 +248,145 @@ They can also be used to build JSON from scratch after calling `JSON_CLEAR()`.
 |                              | value will also be set to the corresponding value.  |
 | JSON_SET_TYPE(PATH, TYPE)    | Set the type of the element at the given path.      |
 | JSON_SET_VALUE(VALUE)        | Set the value of the current element.               |
-| JSON_SET_VALUE(VALUE, PATH)  | Set the value of the element at the given path.     |
-| JSON_SET_NUMBER(VALUE)       | Special case, set type to Number and set value.     |
-| JSON_SET_NUMBER(PATH, VALUE) | Special case, set type to Number and set value.     |
-| JSON_SET_STRING(VALUE)       | Special case, set type to String and set value.     |
-| JSON_SET_STRING(PATH, VALUE) | Special case, set type to String and set value.     |
+| JSON_SET_VALUE(PATH, VALUE)  | Set the value of the element at the given path.     |
 
 These work at the current pointer or a path to permute the JSON.
 Use caution when using these. There is little sanity checking.
 The code assumes you know what you are doing.
+
+**IMPORTANT NOTE:**
+When you change the type of an element nothing is deleted.
+So if you change an Array or Object into anything else the contents are not deleted.
+If you intention is to remove an array or object and replace it with something else then delete it.
+
+### JSON Permutation Special cases
+
+These are intended to make your code a bit cleaner.
+They combine multiple steps into one command.
+
+Using these functions you can go from visually noisy:
+
+```rexx
+CALL JSON_NEW 'Member'
+CALL JSON_SET_TYPE 'Member', 'String'
+CALL JSON_SET_VALUE 'Member', 'This member has a string.'
+```
+
+To a bit more succinct:
+
+```rexx
+CALL JSON_NEW_STRING 'Member', 'This member has a string.'
+```
+
+These are for setting the type and value of existing elements at the same time.
+
+| Function                     | Description                                         |
+|------------------------------|-----------------------------------------------------|
+| JSON_SET_ARRAY()             | Special case, set type to Array.                    |
+| JSON_SET_ARRAY(PATH)         | Special case, set type to Array.                    |
+| JSON_SET_OBJECT()            | Special case, set type to Object.                   |
+| JSON_SET_OBJECT(PATH)        | Special case, set type to Object.                   |
+| JSON_SET_NUMBER(VALUE)       | Special case, set type to Number and set value.     |
+| JSON_SET_NUMBER(PATH, VALUE) | Special case, set type to Number and set value.     |
+| JSON_SET_STRING(VALUE)       | Special case, set type to String and set value.     |
+| JSON_SET_STRING(PATH, VALUE) | Special case, set type to String and set value.     |
+| JSON_SET_TRUE()              | Special case, set type to True.                     |
+| JSON_SET_TRUE(PATH)          | Special case, set type to True.                     |
+| JSON_SET_FALSE()             | Special case, set type to False.                    |
+| JSON_SET_FALSE(PATH)         | Special case, set type to False.                    |
+| JSON_SET_NULL()              | Special case, set type to Null.                     |
+| JSON_SET_NULL(PATH)          | Special case, set type to Null.                     |
+
+These are for creating new array elements with a specific type and value.
+
+| Function                           | Description                             |
+|------------------------------------|-----------------------------------------|
+| JSON_ADD_ARRAY()                   | Add a new Array element to an array.    |
+| JSON_ADD_ARRAY(PATH)               | Add a new Array element to an array.    |
+| JSON_ADD_OBJECT()                  | Add a new Object element to an array.   |
+| JSON_ADD_OBJECT(PATH)              | Add a new Object element to an array.   |
+| JSON_ADD_STRING(VALUE)             | Add a new string element to an array.   |
+| JSON_ADD_STRING(PATH, VALUE)       | Add a new string element to an array.   |
+| JSON_ADD_NUMBER(VALUE)             | Add a new Number element to an array.   |
+| JSON_ADD_NUMBER(PATH, VALUE)       | Add a new Number element to an array.   |
+| JSON_ADD_TRUE()                    | Add a new True element to an array.     |
+| JSON_ADD_TRUE(PATH)                | Add a new True element to an array.     |
+| JSON_ADD_FALSE()                   | Add a new FALSE element to an array.    |
+| JSON_ADD_FALSE(PATH)               | Add a new FALSE element to an array.    |
+| JSON_ADD_NULL()                    | Add a new Null element to an array.     |
+| JSON_ADD_NULL(PATH)                | Add a new Null element to an array.     |
+
+These are for creating new object members with a specific type and value.
+
+| Function                           | Description                             |
+|------------------------------------|-----------------------------------------|
+| JSON_NEW_ARRAY(NAME)               | Add a new Array member to an object.    |
+| JSON_NEW_ARRAY(PATH, NAME)         | Add a new Array member to an object.    |
+| JSON_NEW_OBJECT(NAME)              | Add a new Object member to an object.   |
+| JSON_NEW_OBJECT(PATH, NAME)        | Add a new Object member to an object.   |
+| JSON_NEW_STRING(NAME, VALUE)       | Add a new string member to an object.   |
+| JSON_NEW_STRING(PATH, NAME, VALUE) | Add a new string member to an object.   |
+| JSON_NEW_NUMBER(NAME, VALUE)       | Add a new Number member to an object.   |
+| JSON_NEW_NUMBER(PATH, NAME, VALUE) | Add a new Number member to an object.   |
+| JSON_NEW_TRUE(NAME)                | Add a new True member to an object.     |
+| JSON_NEW_TRUE(PATH, NAME)          | Add a new True member to an object.     |
+| JSON_NEW_FALSE(NAME)               | Add a new FALSE member to an object.    |
+| JSON_NEW_FALSE(PATH, NAME)         | Add a new FALSE member to an object.    |
+| JSON_NEW_NULL(NAME)                | Add a new Null member to an object.     |
+| JSON_NEW_NULL(PATH, NAME)          | Add a new Null member to an object.     |
+
+### Building JSON
+
+This is an example of building a JSON from scratch.
+
+```rexx
+/* Start with a clean slate. */
+CALL JSON_CLEAR
+
+/* Set the top level type to Object. */
+CALL JSON_SET_TYPE 'Object'
+
+/* Create some new members of various types. */
+CALL JSON_NEW_STRING 'String', 'This is a string.'
+CALL JSON_NEW_NUMBER 'Number', 1234567890
+CALL JSON_NEW_TRUE 'True'
+CALL JSON_NEW_FALSE 'FALSE'
+CALL JSON_NEW_NULL 'null'
+
+/* Add an array member. */
+CALL JSON_NEW_ARRAY 'Array'
+
+/* Add some elements to the array. */
+CALL JSON_ADD_STRING '.Array', 'This is another string.'
+CALL JSON_ADD_NUMBER '.Array', '3.1415'
+CALL JSON_ADD_TRUE '.Array'
+CALL JSON_ADD_FALSE '.Array'
+CALL JSON_ADD_NULL '.Array'
+
+/* Change the type of an element. */
+CALL JSON_NEW_NULL 'Test'
+CALL JSON_SET_TYPE '.Test', 'True'
+```
+
+The result is the following JSON:
+
+```json
+{
+  "String": "This is a string.",
+  "Number":1234567890,
+  "True":true,
+  "FALSE":false,
+  "null":null,
+  "Array": [
+    "This is another string.",
+    3.1415,
+    true,
+    false,
+    null
+  ],
+  "Test":true
+}
+```
 
 ### JSON Utilities
 
@@ -549,3 +682,4 @@ See the site <https://bofh.bombeck.io/> for details.
 ## Changes
 
 * 2026-07-05 - Moved the documentation out of the library and into this file.
+* 2026-07-09 - Fixed a few mistakes. Added functions for creating new elements of a given type and value. Improved the tests. Updated the documentation.
