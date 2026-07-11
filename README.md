@@ -3,7 +3,7 @@
 Some stuff I wrote for Bricks. \
 <https://github.com/moshix/bricks_ts>.
 
-`MNDL` and `BRDS` are now included in the [Bricks](https://github.com/moshix/bricks_ts) repository. No need to futz around, just go install [Bricks](https://github.com/moshix/bricks_ts)!
+`FSPF`, `MNDL` and `BRDS` are now included in the [Bricks](https://github.com/moshix/bricks_ts) repository. No need to futz around, just go install [Bricks](https://github.com/moshix/bricks_ts)!
 
 ## Contents
 
