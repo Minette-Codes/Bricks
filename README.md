@@ -9,10 +9,11 @@ Some stuff I wrote for Bricks. \
 
 * [JSON REXX Library](#json-rexx-library)
 * [BOFH - JSON Example](#bofh---json-example)
-* [Installation](#installation)
 * [MNDL - Mandelbrot Set Viewer](#mndl---mandelbrot-set-viewer)
 * [BRDS - KSDS File Browser](#brds---ksds-file-browser)
 * [FSPF - Fake ISPF Menu](#fspf---fake-ispf-menu)
+* [Installation](#installation)
+* [Changes](#changes)
 * [License](#license)
 
 <!-- With the help of: https://bitdowntoc.derlin.ch/ -->
