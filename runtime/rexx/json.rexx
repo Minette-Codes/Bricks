@@ -343,7 +343,7 @@ JSON_NAME: PROCEDURE EXPOSE JSON.
 /*  POINTER - A path or member name to set the pointer to. Optional.      */
 /*                                                                        */
 /* Returns:                                                               */
-/*  The index of the next element.                                        */
+/*  1 if the pointer has been advanced to the next element.               */
 /*  If a path is given returns the new path.                              */
 /*  0 if the pointer or path are already at the last element.             */
 /*  -21 if the current element is not an array or object.                 */
@@ -379,8 +379,8 @@ JSON_NEXT: PROCEDURE EXPOSE JSON.
   JSON._PTR = PARENT || '.' || INDX
 
   IF MODE = 'PTR' THEN
-    /* Return the new index. */
-    RETURN INDX
+    /* Return true. */
+    RETURN 1
   ELSE IF MODE = 'PATH' THEN
     /* Return the new path. */
     RETURN SUBSTR(PARENT || '.' || INDX, 5)
@@ -449,7 +449,7 @@ JSON_PRETTY: PROCEDURE EXPOSE JSON.
 /* Move the pointer to the previous element in an array.                  */
 /*                                                                        */
 /* Returns:                                                               */
-/*  The index of the previous element.                                    */
+/*  1 if the pointer has been advanced to the previous element.           */
 /*  0 if the pointer is already at the first element.                     */
 /*  -21 if the current element is not an array or object.                 */
 /*  -24 if the path is invalid.                                           */
@@ -484,8 +484,8 @@ JSON_PREV: PROCEDURE EXPOSE JSON.
   JSON._PTR = PARENT || '.' || INDX
 
   IF MODE = 'PTR' THEN
-    /* Return the new index. */
-    RETURN INDX
+    /* Return true. */
+    RETURN 1
   ELSE IF MODE = 'PATH' THEN
     /* Return the new path. */
     RETURN SUBSTR(PARENT || '.' || INDX, 5)
@@ -502,10 +502,21 @@ JSON_ROOT: PROCEDURE EXPOSE JSON.
 
 /* Transforms JSON back into a string.                                    */
 /*                                                                        */
+/* Arguments:                                                             */
+/*  POINTER - A path or member name to get the type for. Optional.        */
+/*                                                                        */
 /* Returns:                                                               */
 /*  A string representation of the parsed JSON.                           */
 JSON_STRING: PROCEDURE EXPOSE JSON.
-  RETURN _JSON_STRING_ELEMENT('JSON')
+  POINTER = 'JSON'
+
+  IF ARG() > 0 THEN DO
+    POINTER = _JSON_PATH_RESOLVE(ARG(1), 'JSON_TYPE')
+    IF POINTER <= 0 THEN
+      RETURN ''
+  END
+
+  RETURN _JSON_STRING_ELEMENT(POINTER)
 
 /* Returns the type of the current element or a given path.               */
 /*                                                                        */
@@ -2424,18 +2435,19 @@ _JSON_RENUMBER: PROCEDURE EXPOSE JSON.
 /*  -91 if the test variables name or json are missing.                   */
 JSON_TESTS: PROCEDURE EXPOSE JSON. JSON_TESTS.
   JSON_TESTS. = ''
-  TEST_TOTAL = 0
-  TEST_PASS = 0
-  TEST_FILE = 'json_tests.txt'
-  RESULT_FILE = 'json_results.txt'
+  TEST_FILE = 'json_tests.json'
+  RESULT_FILE = 'json_results.json'
   JSON_TESTS.TOTAL = 0
   JSON_TESTS.PASS = 0
   JSON_TESTS.FAIL = 0
+  JSON_TESTS.ERROR = ''
+  JSON_TESTS.CODE = 0
 
   EXEC CICS DELETEQ TD QUEUE(RESULT_FILE) END-EXEC
 
+  /* Read in the test JSON. */
+  TEST_JSON = ''
   DO FOREVER
-    /* Get the next test case. */
     EXEC CICS READQ TD QUEUE(TEST_FILE) INTO(REC) END-EXEC
     IF EIBRESP = 12 | EIBRESP = 23 THEN
       LEAVE
@@ -2443,170 +2455,223 @@ JSON_TESTS: PROCEDURE EXPOSE JSON. JSON_TESTS.
       RETURN _JSON_SET_ERROR('JSON_TESTS() Test file "' || TEST_FILE || '" does not exist. RC:' EIBRESP, -90)
     ELSE IF EIBRESP \= 0 THEN
       RETURN _JSON_SET_ERROR('JSON_TESTS() Unable to read tests. RC:' EIBRESP, -90)
-
+      
     /* Skip comments. and blank lines. */
     REC = STRIP(REC)
     IF LENGTH(REC) = 0 | SUBSTR(REC, 1, 2) = '//' THEN
       ITERATE
 
-    /* Parse the test case. */
-    TEST_TOTAL = TEST_TOTAL + 1
-    RC = JSON_PARSE(REC)
-    IF RC < 0 THEN
-      RETURN _JSON_SET_ERROR('JSON_TESTS() Unable parse the test. Error:' JSON._ERROR 'Test:' REC, -90)
-
-    /* Get the variables we care about. */
-    TEST_NAME       = JSON_VALUE('.name')
-    IF JSON_ERROR_CODE() < 0 THEN
-      RETURN _JSON_SET_ERROR('JSON_TESTS() Missing member "name". Test:' REC, -91)
-    TEST_JSON       = JSON_VALUE('.json')
-    IF JSON_ERROR_CODE() < 0 THEN
-      RETURN _JSON_SET_ERROR('JSON_TESTS() Missing member "json." Test:' TEST_NAME, -91)
-    TEST_RC         = JSON_VALUE('.rc')
-    TEST_RC_TYPE    = JSON_TYPE('.rc')
-    TEST_ERROR      = JSON_VALUE('.error')
-    TEST_ERROR_TYPE = JSON_TYPE('.error')
-    TEST_STRING     = JSON_VALUE('.string')
-    TEST_PATH       = JSON_VALUE('.path')
-    TEST_FUNC       = JSON_VALUE('.func')
-    TEST_ARG1       = JSON_VALUE('.arg1')
-    TEST_ARG1_TYPE  = JSON_TYPE('.arg1')
-    TEST_ARG2       = JSON_VALUE('.arg2')
-    TEST_ARG2_TYPE  = JSON_TYPE('.arg2')
-    TEST_RESULT     = JSON_VALUE('.result')
-
-    /* Parse the test JSON. */
-    TEST_JSON = CHANGESTR("'", TEST_JSON, '"')
-    TEST_STRING = CHANGESTR("'", TEST_STRING, '"')
-    CALL JSON_PARSE TEST_JSON
-
-    /* Is there a path to move to? */
-    IF TEST_PATH \= '' THEN DO
-      CALL JSON_PATH TEST_PATH
-      IF JSON_ERROR_CODE() \= 0 THEN
-        RETURN _JSON_SET_ERROR('JSON_TESTS() Invalid path:' TEST_PATH, -92)
-    END
-
-    /* Is there a function to call? */
-    FUNC_RESULT = ''
-    IF TEST_FUNC \= '' THEN DO
-      TEST_FUNC = 'CALL' TEST_FUNC
-      IF TEST_ARG1_TYPE \= '' THEN DO
-        TEST_FUNC = TEST_FUNC '"' || JSON_ESCAPE(TEST_ARG1) || '"'
-        IF TEST_ARG2_TYPE \= '' THEN
-          TEST_FUNC = TEST_FUNC || ', "' || JSON_ESCAPE(TEST_ARG2) || '"'
-      END
-      INTERPRET TEST_FUNC
-      FUNC_RESULT = RESULT
-    END
-
-    /* And figure out what to check based on the variables. */
-    ERROR_CODE = JSON_ERROR_CODE()
-    ERROR_TEXT = JSON_ERROR_TEXT()
-    TEST_STATUS = 'PASS'
-    TEST_MESSAGE = ''
-
-    IF TEST_RC \= '' THEN DO
-      SELECT
-        WHEN TEST_RC_TYPE = 'T' & ERROR_CODE <= 0 THEN DO
-          TEST_STATUS = 'FAIL'
-          TEST_MESSAGE = TEST_MESSAGE 'Expected a positive RC.'
-        END
-        WHEN TEST_RC_TYPE = 'F' & ERROR_CODE >= 0 THEN DO
-          TEST_STATUS = 'FAIL'
-          TEST_MESSAGE = TEST_MESSAGE 'Expected a negative RC.'
-        END
-        WHEN TEST_RC_TYPE = 'U' & ERROR_CODE \= 0 THEN DO
-          TEST_STATUS = 'FAIL'
-          TEST_MESSAGE = TEST_MESSAGE 'Expected RC \= -1.'
-        END
-        WHEN TEST_RC_TYPE = 'S' | TEST_RC_TYPE = 'N' THEN DO
-          IF TEST_RC \= ERROR_CODE THEN DO
-            TEST_STATUS = 'FAIL'
-            TEST_MESSAGE = TEST_MESSAGE 'Expected RC:' TEST_RC
-          END
-        END
-        OTHERWISE
-          NOP
-      END
-    END
-
-    IF TEST_ERROR_TYPE = 'F' & ERROR_TEXT \= '' THEN DO
-      TEST_STATUS = 'FAIL'
-      TEST_MESSAGE = TEST_MESSAGE 'Expected no error.'
-    END
-    IF TEST_ERROR_TYPE = 'T' & ERROR_TEXT = '' THEN DO
-      TEST_STATUS = 'FAIL'
-      TEST_MESSAGE = TEST_MESSAGE 'Expected an error, got empty string.'
-    END
-    IF TEST_ERROR_TYPE = 'S' & TEST_ERROR \= ERROR_TEXT THEN DO
-      TEST_STATUS = 'FAIL'
-      TEST_MESSAGE = TEST_MESSAGE 'Expected error: "' || TEST_ERROR || '".'
-    END
-
-    IF TEST_STRING \= '' THEN DO
-      TO_STRING = JSON_STRING()
-      IF TEST_STRING \= TO_STRING THEN DO
-        TEST_STATUS = 'FAIL'
-        TEST_MESSAGE = TEST_MESSAGE 'Expected string: "' || TEST_STRING || '".'
-      END
-      JSON_TESTS.TEST_TOTAL.STRING = TO_STRING
-    END
-    ELSE
-      JSON_TESTS.TEST_TOTAL.STRING = ''
-
-    IF TEST_RESULT \= '' & TEST_RESULT \= FUNC_RESULT THEN DO
-      TEST_STATUS = 'FAIL'
-      TEST_MESSAGE = TEST_MESSAGE 'Expected function result: "' || TEST_RESULT || '".'
-    END
-
-    /* Save the test results. */
-    TEST_MESSAGE = STRIP(TEST_MESSAGE)
-    IF TEST_STATUS = 'PASS' THEN
-      TEST_PASS = TEST_PASS + 1
-    JSON_TESTS.TEST_TOTAL.NAME = TEST_NAME
-    JSON_TESTS.TEST_TOTAL.STATUS = TEST_STATUS
-    JSON_TESTS.TEST_TOTAL.JSON = TEST_JSON
-    JSON_TESTS.TEST_TOTAL.MESSAGE = TEST_MESSAGE
-    JSON_TESTS.TEST_TOTAL.ERROR = ERROR_TEXT
-    JSON_TESTS.TEST_TOTAL.CODE = ERROR_CODE
-    IF TEST_FUNC \= '' THEN DO
-      JSON_TESTS.TEST_TOTAL.FUNC = TEST_FUNC
-      JSON_TESTS.TEST_TOTAL.FRESULT = FUNC_RESULT
-    END
-
-    /* Save to RESULT_FILE. */
-    CALL JSON_CLEAR
-    CALL JSON_SET_TYPE 'O'
-    CALL JSON_NEW_STRING 'name', TEST_NAME
-    CALL JSON_NEW_NUMBER 'number', TEST_TOTAL
-    IF TEST_STATUS = 'PASS' THEN
-      CALL JSON_NEW_TRUE 'status'
-    ELSE
-      CALL JSON_NEW_FALSE 'status'
-    CALL JSON_NEW_STRING 'json', CHANGESTR('"', TEST_JSON, "'")
-    IF TEST_MESSAGE = '' THEN
-      CALL JSON_NEW_NULL 'message'
-    ELSE
-      CALL JSON_NEW_STRING 'message', CHANGESTR('"', TEST_MESSAGE, "'")
-    IF ERROR_TEXT = '' THEN
-      CALL JSON_NEW_NULL 'error'
-    ELSE
-      CALL JSON_NEW_STRING 'error', CHANGESTR('"', ERROR_TEXT, "'")
-    CALL JSON_NEW_NUMBER 'rc', ERROR_CODE
-    IF TEST_FUNC \= '' THEN DO
-      CALL JSON_NEW_STRING 'function', TEST_FUNC
-      CALL JSON_NEW_STRING 'result', FUNC_RESULT
-    END
-    OUTPUT = JSON_STRING()
-    EXEC CICS WRITEQ TD QUEUE(RESULT_FILE) FROM(OUTPUT) END-EXEC
+    TEST_JSON = TEST_JSON REC
   END
 
+  /* Parse the test JSON. */
+  RC = JSON_PARSE(TEST_JSON)
+  IF RC < 0 THEN
+    RETURN _JSON_SET_ERROR('JSON_TESTS() Unable parse the test. Error:' JSON._ERROR 'Test:' REC, -90)
+
+  /* Move to the first test case in the array. */
+  RC = JSON_PATH(".1")
+  IF RC < 0 THEN
+    RETURN RC
+
+  /* Process the test cases. */
+  EXEC CICS WRITEQ TD QUEUE(RESULT_FILE) FROM("[") END-EXEC
+  DO WHILE JSON_NEXT()
+    /* Skip strings, they are used as comments. */
+    IF \JSON_IS_OBJECT() THEN
+      ITERATE
+
+    /* Execute the test. */
+    JSON_TESTS.TOTAL = JSON_TESTS.TOTAL + 1
+    RESULT_JSON = _JSON_TEST_CASE(JSON_STRING(JSON_PATH()))
+    IF JSON_TESTS.CODE < 0 THEN
+      RETURN _JSON_SET_ERROR(JSON_TESTS.ERROR, JSON_TESTS.CODE)
+
+    RESULT_JSON = RESULT_JSON || ','
+    EXEC CICS WRITEQ TD QUEUE(RESULT_FILE) FROM(RESULT_JSON) END-EXEC
+  END
+  EXEC CICS WRITEQ TD QUEUE(RESULT_FILE) FROM("]") END-EXEC
+
   /* Save and return the totals. */
-  JSON_TESTS.TOTAL = TEST_TOTAL
-  JSON_TESTS.PASS = TEST_PASS
-  JSON_TESTS.FAIL = TEST_TOTAL - TEST_PASS
-  RETURN TEST_TOTAL
+  RETURN JSON_TESTS.TOTAL
+
+/* Execute a test case. Update JSON_TESTS.                                */
+/* Sets TEST_CASE_ERROR and TEST_CASE_RC if there is an error.            */
+/*                                                                        */
+/* Arguments:                                                             */
+/*  TEST_JSON - The test case JSON.                                       */
+/*                                                                        */
+/* Returns:                                                               */
+/*  The test results as a JSON string.                                    */
+/*  Returns '' if there is an error.                                      */
+_JSON_TEST_CASE: PROCEDURE EXPOSE JSON_TESTS.
+  IF ARG() < 1 THEN
+    RETURN _JSON_SET_ERROR('FATAL ERROR IN _JSON_PARSE_ELEMENT', -1)
+
+  TEST_JSON = ARG(1)
+  TEST_NUMBER = JSON_TESTS.TOTAL
+
+  /* Parse the test. */
+  RC = JSON_PARSE(TEST_JSON)
+  IF RC < 0 THEN DO
+    JSON_TESTS.ERROR = 'JSON_TESTS() Unable parse the test. Error:' JSON._ERROR 'Test:' TEST_JSON
+    JSON_TESTS.CODE = -90
+    RETURN ''
+  END 
+
+  /* Get the variables we care about. */
+  TEST_NAME       = JSON_VALUE('.name')
+  IF JSON_ERROR_CODE() < 0 THEN DO
+    JSON_TESTS.ERROR = 'JSON_TESTS() Missing member "name". Test:' TEST_JSON
+    JSON_TESTS.CODE = -91
+    RETURN ''
+  END
+  TEST_JSON       = CHANGESTR("'", JSON_VALUE('.json'), '"')
+  IF JSON_ERROR_CODE() < 0 THEN DO
+    JSON_TESTS.ERROR = 'JSON_TESTS() Missing member "json." Test:' TEST_NAME
+    JSON_TESTS.CODE = -91
+    RETURN ''
+  END
+  TEST_RC         = JSON_VALUE('.rc')
+  TEST_RC_TYPE    = JSON_TYPE('.rc')
+  TEST_ERROR      = JSON_VALUE('.error')
+  TEST_ERROR_TYPE = JSON_TYPE('.error')
+  TEST_STRING     = CHANGESTR("'", JSON_VALUE('.string'), '"')
+  TEST_PATH       = JSON_VALUE('.path')
+  TEST_FUNC       = JSON_VALUE('.func')
+  TEST_ARG1       = JSON_VALUE('.arg1')
+  TEST_ARG1_TYPE  = JSON_TYPE('.arg1')
+  TEST_ARG2       = JSON_VALUE('.arg2')
+  TEST_ARG2_TYPE  = JSON_TYPE('.arg2')
+  TEST_RESULT     = JSON_VALUE('.result')
+
+  /* Parse the test JSON. */
+  CALL JSON_PARSE TEST_JSON
+
+  /* Is there a path to move to? */
+  IF TEST_PATH \= '' THEN DO
+    CALL JSON_PATH TEST_PATH
+    IF JSON_ERROR_CODE() \= 0 THEN DO
+      JSON_TESTS.ERROR = 'JSON_TESTS() Invalid path:' TEST_NAME
+      JSON_TESTS.CODE = -92
+      RETURN ''
+    END
+  END
+
+  /* Is there a function to call? */
+  FUNC_RESULT = ''
+  IF TEST_FUNC \= '' THEN DO
+    TEST_FUNC = 'CALL' TEST_FUNC
+    IF TEST_ARG1_TYPE \= '' THEN DO
+      TEST_FUNC = TEST_FUNC '"' || JSON_ESCAPE(TEST_ARG1) || '"'
+      IF TEST_ARG2_TYPE \= '' THEN
+        TEST_FUNC = TEST_FUNC || ', "' || JSON_ESCAPE(TEST_ARG2) || '"'
+    END
+    INTERPRET TEST_FUNC
+    FUNC_RESULT = RESULT
+  END
+
+  /* And figure out what to check based on the variables. */
+  ERROR_CODE = JSON_ERROR_CODE()
+  ERROR_TEXT = JSON_ERROR_TEXT()
+  TEST_STATUS = 'PASS'
+  TEST_MESSAGE = ''
+
+  IF TEST_RC \= '' THEN DO
+    SELECT
+      WHEN TEST_RC_TYPE = 'T' & ERROR_CODE <= 0 THEN DO
+        TEST_STATUS = 'FAIL'
+        TEST_MESSAGE = TEST_MESSAGE 'Expected a positive RC.'
+      END
+      WHEN TEST_RC_TYPE = 'F' & ERROR_CODE >= 0 THEN DO
+        TEST_STATUS = 'FAIL'
+        TEST_MESSAGE = TEST_MESSAGE 'Expected a negative RC.'
+      END
+      WHEN TEST_RC_TYPE = 'U' & ERROR_CODE \= 0 THEN DO
+        TEST_STATUS = 'FAIL'
+        TEST_MESSAGE = TEST_MESSAGE 'Expected RC \= -1.'
+      END
+      WHEN TEST_RC_TYPE = 'S' | TEST_RC_TYPE = 'N' THEN DO
+        IF TEST_RC \= ERROR_CODE THEN DO
+          TEST_STATUS = 'FAIL'
+          TEST_MESSAGE = TEST_MESSAGE 'Expected RC:' TEST_RC
+        END
+      END
+      OTHERWISE
+        NOP
+    END
+  END
+
+  IF TEST_ERROR_TYPE = 'F' & ERROR_TEXT \= '' THEN DO
+    TEST_STATUS = 'FAIL'
+    TEST_MESSAGE = TEST_MESSAGE 'Expected no error.'
+  END
+  IF TEST_ERROR_TYPE = 'T' & ERROR_TEXT = '' THEN DO
+    TEST_STATUS = 'FAIL'
+    TEST_MESSAGE = TEST_MESSAGE 'Expected an error, got empty string.'
+  END
+  IF TEST_ERROR_TYPE = 'S' & TEST_ERROR \= ERROR_TEXT THEN DO
+    TEST_STATUS = 'FAIL'
+    TEST_MESSAGE = TEST_MESSAGE 'Expected error: "' || TEST_ERROR || '".'
+  END
+
+  IF TEST_STRING \= '' THEN DO
+    TO_STRING = JSON_STRING()
+    IF TEST_STRING \= TO_STRING THEN DO
+      TEST_STATUS = 'FAIL'
+      TEST_MESSAGE = TEST_MESSAGE 'Expected string: "' || TEST_STRING || '".'
+    END
+    JSON_TESTS.TEST_NUMBER.STRING = TO_STRING
+  END
+  ELSE
+    JSON_TESTS.TEST_NUMBER.STRING = ''
+
+  IF TEST_RESULT \= '' & TEST_RESULT \= FUNC_RESULT THEN DO
+    TEST_STATUS = 'FAIL'
+    TEST_MESSAGE = TEST_MESSAGE 'Expected function result: "' || TEST_RESULT || '".'
+  END
+
+  /* Save the test results. */
+  TEST_MESSAGE = STRIP(TEST_MESSAGE)
+  IF TEST_STATUS = 'PASS' THEN
+    JSON_TESTS.PASS = JSON_TESTS.PASS + 1
+  ELSE
+    JSON_TESTS.FAIL = JSON_TESTS.FAIL + 1
+  JSON_TESTS.TEST_NUMBER.NAME = TEST_NAME
+  JSON_TESTS.TEST_NUMBER.STATUS = TEST_STATUS
+  JSON_TESTS.TEST_NUMBER.JSON = TEST_JSON
+  JSON_TESTS.TEST_NUMBER.MESSAGE = TEST_MESSAGE
+  JSON_TESTS.TEST_NUMBER.ERROR = ERROR_TEXT
+  JSON_TESTS.TEST_NUMBER.CODE = ERROR_CODE
+  IF TEST_FUNC \= '' THEN DO
+    JSON_TESTS.TEST_NUMBER.FUNC = TEST_FUNC
+    JSON_TESTS.TEST_NUMBER.FRESULT = FUNC_RESULT
+  END
+
+  /* Create JSON with the results for the RESULT_FILE. */
+  CALL JSON_CLEAR
+  CALL JSON_SET_TYPE 'O'
+  CALL JSON_NEW_STRING 'name', TEST_NAME
+  CALL JSON_NEW_NUMBER 'number', JSON_TESTS.TOTAL
+  IF TEST_STATUS = 'PASS' THEN
+    CALL JSON_NEW_TRUE 'status'
+  ELSE
+    CALL JSON_NEW_FALSE 'status'
+  CALL JSON_NEW_STRING 'json', CHANGESTR('"', TEST_JSON, "'")
+  IF TEST_MESSAGE = '' THEN
+    CALL JSON_NEW_NULL 'message'
+  ELSE
+    CALL JSON_NEW_STRING 'message', CHANGESTR('"', TEST_MESSAGE, "'")
+  IF ERROR_TEXT = '' THEN
+    CALL JSON_NEW_NULL 'error'
+  ELSE
+    CALL JSON_NEW_STRING 'error', CHANGESTR('"', ERROR_TEXT, "'")
+  CALL JSON_NEW_NUMBER 'rc', ERROR_CODE
+  IF TEST_FUNC \= '' THEN DO
+    CALL JSON_NEW_STRING 'function', TEST_FUNC
+    CALL JSON_NEW_STRING 'result', FUNC_RESULT
+  END
+  RETURN JSON_STRING()
 
 /* Bottom of JSON Library. */
 
@@ -2684,31 +2749,38 @@ _JSON_CONSOLE_LOOP: PROCEDURE EXPOSE CONS_DATA. CONS_SCR. CONS_HELP. JSON. JSON_
     DO_RELOAD = 'NO'
     PREV_FIND = CONS_SCR.FIND_TEXT
     PREV_SCROLL = CONS_SCR.SCROLL
+    PREV_PAGE = CONS_SCR.CUR_PAGE
     EXEC CICS CONVERSE MAP(CONSOLE_MAP) MAPSET(CONS_DATA.MAPSET) FROM(CONS_SCR.) INTO(CONS_SCR.) ERASE END-EXEC
     CONS_SCR.MSG = ''
-
-    /* Get any input from the user. */
     USER_INPUT = STRIP(CONS_SCR.OPTION)
     CONS_SCR.OPTION = ''
+    AID = C2X(EIBAID)
 
-    /* Did the find text or scroll change? */
-    IF CONS_SCR.FIND_TEXT \= PREV_FIND THEN DO
-      IF CONS_SCR.FIND_TEXT \= '' THEN
-        CALL _CONS_FIND CONS_SCR.FIND_TEXT, 'YES'
-      ELSE DO
-        DO TAIL OVER CONS_DATA.
-          IF ABBREV(TAIL, 'FOUND') THEN
-            INTERPRET 'DROP CONS_DATA.' || TAIL
+    /* Did the find text or scroll or page number change? */
+    IF AID = '7D' THEN DO
+      /* Only process these if ENTER was pressed. */
+      IF CONS_SCR.FIND_TEXT \= PREV_FIND THEN DO
+        IF CONS_SCR.FIND_TEXT \= '' THEN
+          CALL _CONS_FIND CONS_SCR.FIND_TEXT, 'YES'
+        ELSE DO
+          DO TAIL OVER CONS_DATA.
+            IF ABBREV(TAIL, 'FOUND') THEN
+              INTERPRET 'DROP CONS_DATA.' || TAIL
+          END
         END
       END
+      IF CONS_SCR.SCROLL \= PREV_SCROLL THEN
+          IF _CONS_SCROLL_UPDATE(CONS_SCR.SCROLL) = 0 THEN
+            CONS_SCR.SCROLL = PREV_SCROLL
+      IF CONS_SCR.CUR_PAGE \= PREV_PAGE THEN DO
+        IF CONS_SCR.CUR_PAGE <= 0 THEN
+          CONS_SCR.CUR_PAGE = 1
+        CONS_SCR.CUR_POS = (INT(CONS_SCR.CUR_PAGE) - 1) * CONS_DATA.PER_PAGE + 1
+      END
     END
-    IF CONS_SCR.SCROLL \= PREV_SCROLL THEN
-        IF _CONS_SCROLL_UPDATE(CONS_SCR.SCROLL) = 0 THEN
-          CONS_SCR.SCROLL = PREV_SCROLL
 
     /* Handle the AID keys. */
     /* Most of these just set USER_INPUT to the command. */
-    AID = C2X(EIBAID)
     SELECT
       /* Help. */
       WHEN AID = 'F1' THEN DO
@@ -3134,6 +3206,8 @@ _CONS_FIND: PROCEDURE EXPOSE CONS_SCR. CONS_DATA.
       END
     END
   END
+
+  CONS_SCR.MSG = 'Found' CONS_SCR.FIND_CNT 'matches for:' CONS_SCR.FIND_TEXT
   RETURN
 
 /* Fill CONS_SCR from CONS_DATA based on the current position. */
@@ -3222,51 +3296,26 @@ _CONS_FILL_SCR: PROCEDURE EXPOSE CONS_SCR. CONS_DATA. JSON.
 _CONS_JSON_COMMAND: PROCEDURE EXPOSE CONS_SCR. CONS_DATA. CONS_HELP. JSON.
   IF ARG() < 1 THEN
     RETURN _JSON_SET_ERROR('FATAL ERROR IN _CONS_JSON_COMMAND', -1)
+
+  /* Split the user input into the COMMAND an the ARGS array. */
   USER_INPUT = ARG(1)
-  PARSE VAR USER_INPUT COMMAND ARGS
-  COMMAND = UPPER(COMMAND)
+  ARGS. = ''
+  ARGS.0 = 0
+  COMMAND = UPPER(_SPLIT_COMMAND(USER_INPUT))
+  IF COMMAND = '' THEN
+    RETURN 'NO'
   IF SUBSTR(COMMAND, 1, 5) = 'JSON_' THEN
     COMMAND = SUBSTR(COMMAND, 6)
-  DO_RELOAD = 'NO'
-
-  /* Split the args into ARGA and ARGB. */
-  ARGA = ''
-  ARGB = ''
-  IF ARGS \= '' THEN DO
-    IF ABBREV(ARGS, '"') | ABBREV(ARGS, "'") THEN DO
-      /* The first arg is quoted. */
-      END_QUOTE = _JSON_STRING_END(ARGS)
-      IF END_QUOTE < 0 THEN DO
-        CONS_SCR.MSG = JSON_ERROR_TEXT()
-        RETURN 'NO'
-      END
-      ARGA = _JSON_STRING_EXTRACT(ARGS, END_QUOTE)
-      ARGB = STRIP(SUBSTR(ARGS, END_QUOTE + 1))
-    END
-    ELSE DO
-      /* Not quoted. */
-      PARSE VAR ARGS ARGA ARGB
-    END
-
-    /* Is the second arg quoted? */
-    IF ARGB \= '' & (ABBREV(ARGB, '"') | ABBREV(ARGB, "'")) THEN DO
-      END_QUOTE = _JSON_STRING_END(ARGB)
-      IF END_QUOTE < 0 THEN DO
-        CONS_SCR.MSG = JSON_ERROR_TEXT()
-        RETURN 'NO'
-      END
-      ARGB = _JSON_STRING_EXTRACT(ARGB, END_QUOTE)
-    END
-  END
 
   /* Handle the user input. */
+  DO_RELOAD = 'NO'
   SELECT
     /* Add an element to an array */
     WHEN COMMAND = 'ADD' THEN DO
-      IF ARGA = '' THEN
+      IF ARGS.0 = 0 THEN
         NEW_INDX = JSON_ADD()
       ELSE
-        NEW_INDX = JSON_ADD(ARGA)
+        NEW_INDX = JSON_ADD(ARGS.1)
       IF NEW_INDX < 0 THEN
         CONS_SCR.MSG = 'ERROR:' JSON_ERROR_TEXT()
       ELSE
@@ -3280,10 +3329,10 @@ _CONS_JSON_COMMAND: PROCEDURE EXPOSE CONS_SCR. CONS_DATA. CONS_HELP. JSON.
     END
     /* Element count at the pointer. */
     WHEN COMMAND = 'COUNT' THEN DO
-      IF ARGA = '' THEN
+      IF ARGS.0 = 0 THEN
         COUNT = JSON_COUNT()
       ELSE
-        COUNT = JSON_COUNT(ARGA)
+        COUNT = JSON_COUNT(ARGS.1)
       IF COUNT < 0 THEN
         CONS_SCR.MSG = 'ERROR:' JSON_ERROR_TEXT()
       ELSE
@@ -3291,10 +3340,10 @@ _CONS_JSON_COMMAND: PROCEDURE EXPOSE CONS_SCR. CONS_DATA. CONS_HELP. JSON.
     END
     /* Delete the current element. */
     WHEN COMMAND = 'DELETE' | COMMAND = 'DEL' | COMMAND = 'RM' THEN DO
-      IF ARGA = '' THEN
+      IF ARGS.0 = 0 THEN
         RC = JSON_DELETE()
       ELSE
-        RC = JSON_DELETE(ARGA)
+        RC = JSON_DELETE(ARGS.1)
       IF RC < 0 THEN
         CONS_SCR.MSG = 'ERROR:' JSON_ERROR_TEXT()
       ELSE IF RC = 1 THEN
@@ -3305,10 +3354,10 @@ _CONS_JSON_COMMAND: PROCEDURE EXPOSE CONS_SCR. CONS_DATA. CONS_HELP. JSON.
     END
     /* Depth of the current element. */
     WHEN COMMAND = 'DEPTH' THEN DO
-      IF ARGA = '' THEN
+      IF ARGS.0 = 0 THEN
         DEPTH = JSON_DEPTH()
       ELSE
-        DEPTH = JSON_DEPTH(ARGA)
+        DEPTH = JSON_DEPTH(ARGS.1)
       IF DEPTH < 0 THEN
         CONS_SCR.MSG = 'ERROR:' JSON_ERROR_TEXT()
       ELSE
@@ -3328,15 +3377,15 @@ _CONS_JSON_COMMAND: PROCEDURE EXPOSE CONS_SCR. CONS_DATA. CONS_HELP. JSON.
     END
     /* Process string escape characters. */
     WHEN COMMAND = 'ESCAPE' THEN DO
-      STR = JSON_ESCAPE(ARGA)
+      STR = JSON_ESCAPE(ARGS.1)
       CONS_SCR.MSG = 'Result:' STR
     END
     /* GET JSON from a URL. */
     WHEN COMMAND = 'GET' THEN DO
-      IF ARGA = '' THEN
+      IF ARGS.0 = 0 THEN
         RC = JSON_GET()
       ELSE
-        RC = JSON_GET(ARGA)
+        RC = JSON_GET(ARGS.1)
       IF RC < 0 THEN
         CONS_SCR.MSG = 'ERROR:' JSON_ERROR_TEXT()
       ELSE IF RC > 0 THEN
@@ -3349,18 +3398,18 @@ _CONS_JSON_COMMAND: PROCEDURE EXPOSE CONS_SCR. CONS_DATA. CONS_HELP. JSON.
     /* Home the screen in on the current pointer. */
     WHEN COMMAND = 'HOME' | COMMAND = 'GO' | COMMAND = 'G' THEN DO
       POINTER = JSON._PTR
-      IF COMMAND = 'GO' & ARGA \= '' THEN DO
-        POINTER = _JSON_PATH_RESOLVE(ARGA)
+      IF COMMAND = 'GO' & ARGS.1 \= '' THEN DO
+        POINTER = _JSON_PATH_RESOLVE(ARGS.1)
         IF POINTER < 0 THEN DO
           CONS_SCR.MSG = 'ERROR:' JSON_ERROR_TEXT()
           RETURN 'NO'
         END
         JSON._PTR = POINTER
-        ARGA = ''
+        ARGS.0 = 0
       END
 
-      IF ARGA \= '' THEN DO
-        POINTER = _JSON_PATH_RESOLVE(ARGA)
+      IF ARGS.1 \= '' THEN DO
+        POINTER = _JSON_PATH_RESOLVE(ARGS.1)
         IF POINTER <= 0 THEN DO
           CONS_SCR.MSG = JSON_ERROR_TEXT()
           RETURN 'NO'
@@ -3386,8 +3435,8 @@ _CONS_JSON_COMMAND: PROCEDURE EXPOSE CONS_SCR. CONS_DATA. CONS_HELP. JSON.
     WHEN ABBREV(COMMAND, 'IS') THEN DO
       IF COMMAND = 'IS' THEN DO
         /* The two word format: IS STRING */
-        NAME = UPPER(ARGA)
-        ARGA = ARGB
+        NAME = UPPER(ARGS.1)
+        ARGS.1 = ARGS.2
       END
       ELSE
         /* One word format: IS_STRING */
@@ -3404,7 +3453,7 @@ _CONS_JSON_COMMAND: PROCEDURE EXPOSE CONS_SCR. CONS_DATA. CONS_HELP. JSON.
         RETURN 'NO'
       END
 
-      INTERPRET 'CALL JSON_IS_' || NAME ARGA
+      INTERPRET 'CALL JSON_IS_' || NAME ARGS.1
       IF NAME \= 'TRUE' & NAME \= 'FALSE' & NAME \= 'NULL' THEN
         NAME = 'an' SUBSTR(NAME, 1, 1) || LOWER(SUBSTR(NAME, 2))
       IF RC < 0 THEN
@@ -3416,12 +3465,12 @@ _CONS_JSON_COMMAND: PROCEDURE EXPOSE CONS_SCR. CONS_DATA. CONS_HELP. JSON.
     END
     /* List of members. */
     WHEN COMMAND = 'LIST' THEN DO
-      IF ARGA = '' THEN
+      IF ARGS.0 = 0 THEN
         LIST = JSON_LIST()
-      ELSE IF ARGB = '' THEN
-        LIST = JSON_LIST(ARGA)
+      ELSE IF ARGS.0 = 1 THEN
+        LIST = JSON_LIST(ARGS.1)
       ELSE
-        LIST = JSON_LIST(ARGA, ARGB)
+        LIST = JSON_LIST(ARGS.1, ARGS.2)
       IF LIST < 0 THEN
         CONS_SCR.MSG = 'ERROR:' JSON_ERROR_TEXT()
       ELSE
@@ -3430,10 +3479,10 @@ _CONS_JSON_COMMAND: PROCEDURE EXPOSE CONS_SCR. CONS_DATA. CONS_HELP. JSON.
     END
     /* Move the pointer to the given member. */
     WHEN COMMAND = 'MEMBER' THEN DO
-      IF ARGA = '' THEN
+      IF ARGS.0 = 0 THEN
         NEW_INDX = JSON_MEMBER()
       ELSE
-        NEW_INDX = JSON_MEMBER(ARGA)
+        NEW_INDX = JSON_MEMBER(ARGS.1)
       IF NEW_INDX < 0 THEN
         CONS_SCR.MSG = 'ERROR!' JSON_ERROR_TEXT()
       ELSE
@@ -3451,10 +3500,10 @@ _CONS_JSON_COMMAND: PROCEDURE EXPOSE CONS_SCR. CONS_DATA. CONS_HELP. JSON.
 
     /* Name of the member at the pointer. */
     WHEN COMMAND = 'NAME' THEN DO
-      IF ARGA = '' THEN
+      IF ARGS.0 = 0 THEN
         NAME = JSON_NAME()
       ELSE
-        NAME = JSON_NAME(ARGA)
+        NAME = JSON_NAME(ARGS.1)
       IF NAME < 0 THEN
         CONS_SCR.MSG = 'ERROR!' JSON_ERROR_TEXT()
       ELSE
@@ -3462,12 +3511,12 @@ _CONS_JSON_COMMAND: PROCEDURE EXPOSE CONS_SCR. CONS_DATA. CONS_HELP. JSON.
     END
     /* Add an element to an object. */
     WHEN COMMAND = 'NEW' THEN DO
-      IF ARGA = '' THEN
+      IF ARGS.0 = 0 THEN
         NEW_INDX = JSON_NEW()
-      ELSE IF ARGB = '' THEN
-        NEW_INDX = JSON_NEW(ARGA)
+      ELSE IF ARGS.0 = 1 THEN
+        NEW_INDX = JSON_NEW(ARGS.1)
       ELSE
-        NEW_INDX = JSON_NEW(ARGA, ARGB)
+        NEW_INDX = JSON_NEW(ARGS.1, ARGS.2)
       IF NEW_INDX < 0 THEN
         CONS_SCR.MSG = 'ERROR:' JSON_ERROR_TEXT()
       ELSE
@@ -3475,17 +3524,17 @@ _CONS_JSON_COMMAND: PROCEDURE EXPOSE CONS_SCR. CONS_DATA. CONS_HELP. JSON.
       DO_RELOAD = 'YES'
     END
     /* Next array or object element. */
-    WHEN COMMAND = 'NEXT' | COMAND = 'N' THEN DO
-      IF ARGA = '' THEN
+    WHEN COMMAND = 'NEXT' | COMMAND = 'N' THEN DO
+      IF ARGS.0 = 0 THEN
         NEW_INDX = JSON_NEXT()
       ELSE
-        NEW_INDX = JSON_NEXT(ARGA)
+        NEW_INDX = JSON_NEXT(ARGS.1)
       IF NEW_INDX = 0 THEN
         CONS_SCR.MSG = 'Already on the last element.'
       ELSE IF JSON._ERRORCODE \= '' & JSON._ERRORCODE < 0 THEN
         CONS_SCR.MSG = 'ERROR:' JSON_ERROR_TEXT()
       ELSE DO
-        IF ARGA = '' THEN
+        IF ARGS.0 = 0 THEN
           CONS_SCR.MSG = 'New element index:' NEW_INDX
         ELSE
           CONS_SCR.MSG = 'New path:' NEW_INDX
@@ -3517,12 +3566,12 @@ _CONS_JSON_COMMAND: PROCEDURE EXPOSE CONS_SCR. CONS_DATA. CONS_HELP. JSON.
     END
     /* Get or set the pointer path. */
     WHEN COMMAND = 'PATH' THEN DO
-      IF ARGA = '' THEN DO
+      IF ARGS.0 = 0 THEN DO
         PATH = JSON_PATH()
         CONS_SCR.MSG = 'Path to current element:' PATH
       END
       ELSE DO
-        PATH = JSON_PATH(ARGA)
+        PATH = JSON_PATH(ARGS.1)
         IF DATATYPE(PATH) = 'NUM' & PATH < 0 THEN
           CONS_SCR.MSG = 'ERROR:' JSON_ERROR_TEXT()
         ELSE IF PATH = '.' THEN
@@ -3534,21 +3583,21 @@ _CONS_JSON_COMMAND: PROCEDURE EXPOSE CONS_SCR. CONS_DATA. CONS_HELP. JSON.
     END
     /* Pretty Print the JSON. */
     WHEN COMMAND = 'PRETTY' THEN DO
-      CALL _CONS_PRETTY ARGA
+      CALL _CONS_PRETTY ARGS.1
       DO_RELOAD = 'YES'
     END
     /* Previous array or object element. */
     WHEN COMMAND = 'PREV' | COMMAND = 'P' THEN DO
-      IF ARGA = '' THEN
+      IF ARGS.0 = 0 THEN
         NEW_INDX = JSON_PREV()
       ELSE
-        NEW_INDX = JSON_PREV(ARGA)
+        NEW_INDX = JSON_PREV(ARGS.1)
       IF NEW_INDX = 0 THEN
         CONS_SCR.MSG = 'Already on the first element.'
       ELSE IF JSON._ERRORCODE \= '' & JSON._ERRORCODE < 0 THEN
         CONS_SCR.MSG = 'ERROR:' JSON_ERROR_TEXT()
       ELSE DO
-        IF ARGA = '' THEN
+        IF ARGS.0 = 0 THEN
           CONS_SCR.MSG = 'New element index:' NEW_INDX
         ELSE
           CONS_SCR.MSG = 'New path:' NEW_INDX
@@ -3563,12 +3612,12 @@ _CONS_JSON_COMMAND: PROCEDURE EXPOSE CONS_SCR. CONS_DATA. CONS_HELP. JSON.
     END
     /* Set an elements type. */
     WHEN COMMAND = 'SET_TYPE' THEN DO
-      IF ARGA = '' THEN
+      IF ARGS.0 = 0 THEN
         RC = JSON_SET_TYPE()
-      ELSE IF ARGB = '' THEN
-        RC = JSON_SET_TYPE(ARGA)
+      ELSE IF ARGS.0 = 1 THEN
+        RC = JSON_SET_TYPE(ARGS.1)
       ELSE
-        RC = JSON_SET_TYPE(ARGA, ARGB)
+        RC = JSON_SET_TYPE(ARGS.1, ARGS.2)
       IF RC = '' THEN
         CONS_SCR.MSG = 'Type set to:' JSON_TYPE()
       ELSE IF RC < 0 THEN
@@ -3579,12 +3628,12 @@ _CONS_JSON_COMMAND: PROCEDURE EXPOSE CONS_SCR. CONS_DATA. CONS_HELP. JSON.
     END
     /* Set an elements value. */
     WHEN COMMAND = 'SET_VALUE' THEN DO
-      IF ARGA = '' THEN
+      IF ARGS.0 = 0 THEN
         RC = JSON_SET_VALUE()
-      ELSE IF ARGB = '' THEN
-        RC = JSON_SET_VALUE(ARGA)
+      ELSE IF ARGS.0 = 1 THEN
+        RC = JSON_SET_VALUE(ARGS.1)
       ELSE
-        RC = JSON_SET_VALUE(ARGA, ARGB)
+        RC = JSON_SET_VALUE(ARGS.1, ARGS.2)
       IF RC < 0 THEN
         CONS_SCR.MSG = 'ERROR:' JSON_ERROR_TEXT()
       ELSE
@@ -3595,8 +3644,8 @@ _CONS_JSON_COMMAND: PROCEDURE EXPOSE CONS_SCR. CONS_DATA. CONS_HELP. JSON.
     WHEN ABBREV(COMMAND, 'SET') THEN DO
       IF COMMAND = 'SET' THEN DO
         /* The two word format: SET STRING */
-        NAME = UPPER(ARGA)
-        ARGA = ARGB
+        NAME = UPPER(ARGS.1)
+        ARGS.1 = ARGS.2
       END
       ELSE
         /* One word format: SET_STRING */
@@ -3611,15 +3660,15 @@ _CONS_JSON_COMMAND: PROCEDURE EXPOSE CONS_SCR. CONS_DATA. CONS_HELP. JSON.
         CONS_SCR.MSG = 'Unknown command:' USER_INPUT
         RETURN 'NO'
       END
-      IF ARGA = '' THEN DO
+      IF ARGS.0 = 0 THEN DO
         OLD_TYPE = JSON_TYPE()
         INTERPRET 'CALL JSON_SET_' || NAME
         NEW_TYPE = JSON_TYPE()
       END
       ELSE DO
-        OLD_TYPE = JSON_TYPE(ARGA)
-        INTERPRET 'CALL JSON_SET_' || NAME ARGA
-        NEW_TYPE = JSON_TYPE(ARGA)
+        OLD_TYPE = JSON_TYPE(ARGS.1)
+        INTERPRET 'CALL JSON_SET_' || NAME ARGS.1
+        NEW_TYPE = JSON_TYPE(ARGS.1)
       END
       IF JSON._ERRORCODE \= '' & JSON._ERRORCODE < 0 THEN
         CONS_SCR.MSG = 'ERROR!' JSON_ERROR_TEXT()
@@ -3640,10 +3689,10 @@ _CONS_JSON_COMMAND: PROCEDURE EXPOSE CONS_SCR. CONS_DATA. CONS_HELP. JSON.
     END
     /* Type at the pointer. */
     WHEN COMMAND = 'TYPE' THEN DO
-      IF ARGA = '' THEN
+      IF ARGS.0 = 0 THEN
         TYPE = JSON_TYPE()
       ELSE
-        TYPE = JSON_TYPE(ARGA)
+        TYPE = JSON_TYPE(ARGS.1)
       IF JSON._ERRORCODE \= '' & JSON._ERRORCODE < 0 THEN
         CONS_SCR.MSG = 'ERROR!' JSON_ERROR_TEXT()
       ELSE
@@ -3651,10 +3700,10 @@ _CONS_JSON_COMMAND: PROCEDURE EXPOSE CONS_SCR. CONS_DATA. CONS_HELP. JSON.
     END
     /* Value at the pointer. */
     WHEN COMMAND = 'VALUE' THEN DO
-      IF ARGA = '' THEN
+      IF ARGS.0 = 0 THEN
         VALUE = JSON_VALUE()
       ELSE
-        VALUE = JSON_VALUE(ARGA)
+        VALUE = JSON_VALUE(ARGS.1)
       IF JSON._ERRORCODE \= '' & JSON._ERRORCODE < 0 THEN
         CONS_SCR.MSG = 'ERROR!' JSON_ERROR_TEXT()
       ELSE
@@ -3667,6 +3716,57 @@ _CONS_JSON_COMMAND: PROCEDURE EXPOSE CONS_SCR. CONS_DATA. CONS_HELP. JSON.
     END
   END
   RETURN DO_RELOAD
+
+_SPLIT_COMMAND: PROCEDURE EXPOSE ARGS. CONS_SCR.
+  USER_INPUT = ARG(1)
+  SPACE_POS = POS(' ', USER_INPUT)
+
+  /* Easy case, no args. */
+  IF SPACE_POS = 0 THEN
+    RETURN USER_INPUT
+
+  /* Strip off the command. */
+  COMMAND = SUBSTR(USER_INPUT, 1, SPACE_POS - 1)
+  USER_INPUT = STRIP(SUBSTR(USER_INPUT, SPACE_POS))
+
+  /* Process the args. */
+  DO WHILE LENGTH(USER_INPUT) > 0
+    CURRENT_ARG = ''
+
+    IF ABBREV(USER_INPUT, '"') | ABBREV(USER_INPUT, "'") THEN DO
+      /* The arg is quoted. */
+      END_QUOTE = _JSON_STRING_END(USER_INPUT)
+      IF END_QUOTE < 0 THEN DO
+        CONS_SCR.MSG = JSON_ERROR_TEXT()
+        RETURN ''
+      END
+      CURRENT_ARG = _JSON_STRING_EXTRACT(USER_INPUT, END_QUOTE)
+      USER_INPUT = STRIP(SUBSTR(USER_INPUT, END_QUOTE + 1))
+    END
+    ELSE DO
+      /* Not quoted. */
+      SPACE_POS = POS(' ', USER_INPUT)
+      IF SPACE_POS = 0 THEN DO
+        /* This is the last arg. */
+        CURRENT_ARG = USER_INPUT
+        USER_INPUT = ''
+      END
+      ELSE DO
+        /* There is still more. */
+        CURRENT_ARG = SUBSTR(USER_INPUT, 1, SPACE_POS)
+        USER_INPUT = STRIP(SUBSTR(USER_INPUT, SPACE_POS))
+      END
+    END
+
+    /* If there is an arg, save it. */
+    IF CURRENT_ARG \= '' THEN DO
+      INDX = ARGS.0 + 1
+      ARGS.0 = INDX 
+      ARGS.INDX = CURRENT_ARG
+    END
+  END
+
+  RETURN COMMAND
 
 /* JSON Console HELP ==================================================== */
 

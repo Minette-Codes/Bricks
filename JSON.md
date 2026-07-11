@@ -24,6 +24,8 @@ See the file [json-library.rexx](json-library.rexx) for including the library in
 * [Return values](#return-values)
 * [Types](#types)
 * [JSON Parser internals](#json-parser-internals)
+* [Tests](#tests)
+* [Files](#files)
 * [Screenshots](#screenshots)
 * [BOFH - JSON Example](#bofh---json-example)
 * [Changes](#changes)
@@ -41,7 +43,7 @@ There are several topics available.
 See the overview at the top of the help text.
 
 Additionally a DEMO is available that displays the Bricks metrics.
-The metrics display is modeled after `CEMT M`
+The metrics display is modeled after `CEMT M`.
 The metrics endpoint must be enabled in the [Bricks Configuration File](https://github.com/moshix/bricks_ts#configuration--brickscnf).
 Metrics are fetched from the URL <http://localhost:9000/metrics>.
 Adjust this URL in the function `_CONS_DEMO_LOAD()` if a different port is configured.
@@ -56,10 +58,7 @@ JSON can also be passed into the Transaction either from the command line or via
 Still to be completed.
 
 * Tests for the new `JSON_ADD_*` and `JSON_NEW_*` functions.
-* Change the test cases and results into one giant JSON blob.
-  Members are the test names.
 * More refinement of the help text.
-* Document the test details.
 * Expand the tests for more edge cases.
 * Properly parse and handle numbers.
   * Parsing numbers just grabs anything that isn't whitespace.
@@ -120,9 +119,11 @@ See the notes on `Paths` below.
 | JSON_NAME(MEMBER)   | Return the name for the given member name.                      |
 | JSON_NAME(PATH)     | Return the member name at the given path.                       |
 | JSON_NEXT()         | Move to the next element in an array or object.                 |
-|                     | Returns the new element index.                                  |
+|                     | Returns 1 if the pointer has been moved.                        |
 |                     | Returns 0 if the pointer was already at the last element.       |
+|                     | Returns 0 on error. For errors check JSON_ERROR_CODE()!         |
 | JSON_NEXT(PATH)     | Moves the pointer to the next element at the given path.        |
+|                     | Returns the new path on success.                                |
 | JSON_PATH()         | Returns the path to the current element.                        |
 | JSON_PATH(MEMBER)   | Move the pointer to the given member name.                      |
 | JSON_PATH(PATH)     | Move the pointer to the given path.                             |
@@ -132,11 +133,14 @@ See the notes on `Paths` below.
 | JSON_PRETTY()       | Pretty Print the JSON. The default indent is one character.     |
 | JSON_PRETTY(IDNENT) | Pretty Print the JSON. Indent the given number of spaces.       |
 | JSON_PREV()         | Move to the previous element in an array or object.             |
-|                     | Returns the new element index.                                  |
+|                     | Returns 1 if the pointer has been moved.                        |
 |                     | Returns 0 if the pointer was already at the first element.      |
+|                     | Returns 0 on error. For errors check JSON_ERROR_CODE()!         |
 | JSON_PREV(PATH)     | Moves the pointer to the previous element at the given path.    |
+|                     | Returns the new path on success.                                |
 | JSON_ROOT()         | Move the pointer to the JSON root.                              |
 | JSON_STRING()       | Returns the JSON converted back to a string.                    |
+| JSON_STRING(PATH)   | Converts the JSON starting at the given path to a string.       |
 | JSON_TYPE()         | Returns the Type for the current element.                       |
 |                     | See 'Types' below for details.                                  |
 |                     | Returns '' on error. For errors check JSON_ERROR_CODE()!        |
@@ -417,29 +421,6 @@ STR = STR || LEFT(JSON._PP.INDX, 80)
 END
 ```
 
-### JSON Tests
-
-The JSON library has a self test facility.
-The function `JSON_TESTS()` will load test from the file `runtime/tmp/json_tests.txt`.
-Each test is a line of self contained JSON specifying the test parameters.
-Each test contains JSON to be parsed, manipulated and verified.
-See the top of the test file for details on the test format.
-
-Note: Tests that are prefixed with `ERROR:` are expected failures.
-These tests verify functions fail in the expected manner on bad input.
-
-The test results are stored as strings in the STEM `JSON_TESTS`.
-Search for uses this STEM to see what to do with the contents.
-
-**TODO:** Add more documentation here.
-
-In the JSON Explorer Console the tests can be run using the command `TEST`.
-After the tests are run the results will be displayed with some basic formatting applied.
-The test name, error code, and pass/fail status are displayed on one line.
-The remaining test data is listed below the test name..
-Simple highlighting is applied to make specific bits stand out.
-See the screenshots below for an example of the test output.
-
 ## Return values
 
 Functions normally returns either a new value or 1 on success.
@@ -448,8 +429,11 @@ Use `JSON_ERROR_TEXT()` to get the text for the most recent error.
 Use `JSON_ERROR_CODE()` to get the most recent error code.
 0 is never used as an error.
 0 is only used by next and prev to indicate end of list reached.
-Note that `JSON_VALUE()` and `JSON_TYPE()` will return an empty string on error.
-Check `JSON_ERROR_CODE()` to see if these two failed.
+
+Note that these four functions do not return error codes.
+The functions `JSON_VALUE()` and `JSON_TYPE()` will return an empty string on error.
+The functions `JSON_NEXT()` and `JSON_PREV()` will return 0 on error.
+Check `JSON_ERROR_CODE()` to see if these four have failed.
 
 ### General error codes
 
@@ -648,6 +632,77 @@ Meta data about the JSON and internal state.
 | JSON._JSON      | The original JSON string.                   |
 | JSON._URL       | The URL passed to JSON_GET(URL).            |
 
+## Tests
+
+The JSON library has a self test facility.
+The function `JSON_TESTS()` will load test from the file `runtime/tmp/json_tests.json`.
+Each test is a line of self contained JSON specifying the test parameters.
+Each test contains JSON to be parsed, manipulated and verified.
+See the top of the test file for details on the test format.
+
+Note: Tests that are prefixed with `ERROR:` are expected failures.
+These tests verify functions fail in the expected manner on bad input.
+
+The test results are stored as strings in the STEM `JSON_TESTS`.
+Search for uses this STEM to see what to do with the contents.
+
+The test file contains an array of objects with the test details.
+Each test consists of the following members.
+Only the members `name` and `json` are required.
+All other members are optional.
+
+| Member          | Purpose                                                             |
+|-----------------|---------------------------------------------------------------------|
+| name            | The test name.                                                      |
+| json            | Test JSON text to be parsed.                                        |
+| rc              | Expected return code. See below.                                    |
+| error           | Either expected error text, false for no error, true for an error.  |
+| string          | The parsed JSON turned back to text.                                |
+| path            | A path to move the pointer to after parsing the JSON.               |
+| func            | A function to call after parsing.                                   |
+|                 | If a function is given then rc and error check the function result. |
+| arg1 & arg2     | Arguments to the function.                                          |
+| result          | Expected result of the function call. String or number.             |
+
+To simplify writing tests, for the members `json` and `string`, single quotes are replaced with double quotes.
+
+The member `rc` can be one of:
+
+* An integer to check for the exact value.
+* `true` to check for success. RC > 0
+* `false` to check for failure. RC < 0
+* `null` to accept anything other than -1. (This means I screwed up the code.)
+
+In the JSON Explorer Console the tests can be run using the command `TEST`.
+After the tests are run the results will be displayed with some basic formatting applied.
+The test name, error code, and pass/fail status are displayed on one line.
+The remaining test data is listed below the test name..
+Simple highlighting is applied to make specific bits stand out.
+See the screenshots below for an example of the test output.
+
+## Files
+
+The JSON library is contained in the file `json-library.rexx`.
+Include the contents of this file in your code to use the library.
+
+The JSON Explorer is made up of the following files:
+
+* `runtime/rexx/json.rexx` - The JSON Explorer Transaction code.
+* `runtime/tmp/json_tests.json` - Test cases.
+* `runtime/map/json1m.map` - MAP set file for Model 3 terminals.
+* `runtime/map/json1w.map` - MAP set file for Model 5 terminals.
+* `runtime/map/json1.map` - MAP set file for Model 2 terminals.
+* `runtime/map/json1l.map` - MAP set file for Model 4 terminals.
+
+Don't forget to add `JSON:rexx:json.rexx:USERS` to the file `runtime/transactions.conf`.
+
+The BOFH example is made up of the following files:
+
+* `runtime/rexx/bofh.rexx` - The BOFH Transaction code.
+* `runtime/map/bofh1.map` - The BOFH MAP.
+
+Don't forget to add `BOFH:rexx:bofh.rexx:USERS` to the file `runtime/transactions.conf`.
+
 ## Screenshots
 
 The initial view of the JSON Explorer.
@@ -683,3 +738,4 @@ See the site <https://bofh.bombeck.io/> for details.
 
 * 2026-07-05 - Moved the documentation out of the library and into this file.
 * 2026-07-09 - Fixed a few mistakes. Added functions for creating new elements of a given type and value. Improved the tests. Updated the documentation.
+* 2026-07-11 - More minor bug fixes. Changed test case file and result file proper JSON. Functions JSON_NEXT and JSON_PREV return proper booleans. (Check for errors using `JSON_ERROR_CODE()`.) Properly parse arguments to JSON commands in the console. The current page in the header is now an input field. Expanded documentation on the tests and moved it to a new section. Added a section for the various files `JSON` related files.
