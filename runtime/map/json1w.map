@@ -12,26 +12,26 @@ MAP JSONCONSOLE SIZE 27x132
   FIELD           AT 0 ,0   LEN 18  PROT COLOR=YELLOW         "JSON Explorer"
   INPUT FIND_TEXT AT 0 ,28  LEN 60  UNDERSCORE COLOR=WHITE
   STOP            AT 0 ,98
-  FIELD           AT 0 ,20  LEN 7   PROT COLOR=CYAN    "Search:"
+  FIELD           AT 0 ,20  LEN 7   PROT COLOR=CYAN           "Search:"
   INPUT SCROLL    AT 0 ,100 LEN 5   UNDERSCORE COLOR=WHITE
   STOP            AT 0 ,106
-  FIELD           AT 0 ,92  LEN 7   PROT COLOR=CYAN    "Scroll:"
+  FIELD           AT 0 ,92  LEN 7   PROT COLOR=CYAN           "Scroll:"
   INPUT CUR_PAGE  AT 0 ,114 LEN 5   UNDERSCORE COLOR=WHITE
   STOP            AT 0 ,120
-  FIELD           AT 0 ,108 LEN 5   PROT COLOR=CYAN    "Page:"
+  FIELD           AT 0 ,108 LEN 5   PROT COLOR=CYAN           "Page:"
   FIELD PAGE_CNT  AT 0 ,126 LEN 4   PROT COLOR=WHITE
-  FIELD           AT 0 ,120 LEN 4   PROT COLOR=CYAN    "Of:"
+  FIELD           AT 0 ,120 LEN 4   PROT COLOR=CYAN           "Of:"
 
   FIELD JTYPE     AT 1 ,6   LEN 10  PROT COLOR=WHITE
-  FIELD           AT 1 ,0   LEN 5   PROT COLOR=CYAN    "Type:"
+  FIELD           AT 1 ,0   LEN 5   PROT COLOR=CYAN           "Type:"
   FIELD JPATH     AT 1 ,28  LEN 60    PROT COLOR=WHITE
-  FIELD           AT 1 ,20  LEN 5   PROT COLOR=CYAN    "Path:"
+  FIELD           AT 1 ,20  LEN 5   PROT COLOR=CYAN           "Path:"
   FIELD JDEPTH    AT 1 ,100 LEN 4   PROT COLOR=WHITE
-  FIELD           AT 1 ,93  LEN 10  PROT COLOR=CYAN    "Depth:"
+  FIELD           AT 1 ,93  LEN 10  PROT COLOR=CYAN           "Depth:"
   FIELD JCOUNT    AT 1 ,114 LEN 4   PROT COLOR=WHITE
-  FIELD           AT 1 ,107 LEN 5   PROT COLOR=CYAN    "Count:"
+  FIELD           AT 1 ,107 LEN 5   PROT COLOR=CYAN           "Count:"
   FIELD JERRORC   AT 1 ,126 LEN 4   PROT COLOR=WHITE
-  FIELD           AT 1 ,120 LEN 5   PROT COLOR=CYAN    "RC:"
+  FIELD           AT 1 ,120 LEN 5   PROT COLOR=CYAN           "RC:"
 
   FIELD OUTPUT1   AT 2 ,0   LEN 130 PROT COLOR=BLUE
   FIELD OUTPUT2   AT 3 ,0   LEN 130 PROT COLOR=BLUE
@@ -71,15 +71,15 @@ MAP JSONHELP SIZE 27x132
   FIELD           AT 0 ,14  LEN 5   PROT COLOR=RED            "HELP!"
   INPUT FIND_TEXT AT 0 ,28  LEN 14  UNDERSCORE COLOR=WHITE
   STOP            AT 0 ,42
-  FIELD           AT 0 ,20  LEN 7   PROT COLOR=CYAN    "Search:"
+  FIELD           AT 0 ,20  LEN 7   PROT COLOR=CYAN           "Search:"
   INPUT SCROLL    AT 0 ,51  LEN 5   UNDERSCORE COLOR=WHITE
   STOP            AT 0 ,57
-  FIELD           AT 0 ,43  LEN 7   PROT COLOR=CYAN    "Scroll:"
+  FIELD           AT 0 ,43  LEN 7   PROT COLOR=CYAN           "Scroll:"
   INPUT CUR_PAGE  AT 0 ,63  LEN 5   UNDERSCORE COLOR=WHITE
   STOP            AT 0 ,72
-  FIELD           AT 0 ,57  LEN 5   PROT COLOR=CYAN    "Page:"
+  FIELD           AT 0 ,57  LEN 5   PROT COLOR=CYAN           "Page:"
   FIELD PAGE_CNT  AT 0 ,73  LEN 4   PROT COLOR=WHITE
-  FIELD           AT 0 ,69  LEN 4   PROT COLOR=CYAN    "Of:"
+  FIELD           AT 0 ,69  LEN 4   PROT COLOR=CYAN           "Of:"
 
   FIELD CUR_TOPIC AT 1 ,0   LEN 78  PROT COLOR=WHITE
 
@@ -122,12 +122,12 @@ MAP JSONPRETTY SIZE 27x132
   STOP            AT 0 ,98
   INPUT SCROLL    AT 0 ,100 LEN 5   UNDERSCORE COLOR=WHITE
   STOP            AT 0 ,106
-  FIELD           AT 0 ,92  LEN 7   PROT COLOR=CYAN    "Scroll:"
+  FIELD           AT 0 ,92  LEN 7   PROT COLOR=CYAN           "Scroll:"
   INPUT CUR_PAGE  AT 0 ,114 LEN 5   UNDERSCORE COLOR=WHITE
   STOP            AT 0 ,120
-  FIELD           AT 0 ,108 LEN 5   PROT COLOR=CYAN    "Page:"
+  FIELD           AT 0 ,108 LEN 5   PROT COLOR=CYAN           "Page:"
   FIELD PAGE_CNT  AT 0 ,126 LEN 4   PROT COLOR=WHITE
-  FIELD           AT 0 ,120 LEN 4   PROT COLOR=CYAN    "Of:"
+  FIELD           AT 0 ,120 LEN 4   PROT COLOR=CYAN           "Of:"
 
   FIELD OUTPUT1   AT 2 ,0   LEN 78  PROT COLOR=BLUE
   FIELD OUTPUT2   AT 3 ,0   LEN 78  PROT COLOR=BLUE
@@ -166,22 +166,22 @@ MAP JSONTESTS SIZE 27x132
   
   INPUT SCROLL    AT 0 ,42  LEN 5   UNDERSCORE COLOR=WHITE
   STOP            AT 0 ,48
-  FIELD           AT 0 ,34  LEN 7   PROT COLOR=CYAN    "Scroll:"
+  FIELD           AT 0 ,34  LEN 7   PROT COLOR=CYAN           "Scroll:"
   INPUT CUR_PAGE  AT 0 ,59  LEN 5   UNDERSCORE COLOR=WHITE
   STOP            AT 0 ,65
-  FIELD           AT 0 ,53  LEN 5   PROT COLOR=CYAN    "Page:"
+  FIELD           AT 0 ,53  LEN 5   PROT COLOR=CYAN           "Page:"
   FIELD PAGE_CNT  AT 0 ,74  LEN 4   PROT COLOR=WHITE
-  FIELD           AT 0 ,70  LEN 4   PROT COLOR=CYAN    "Of:"
+  FIELD           AT 0 ,70  LEN 4   PROT COLOR=CYAN           "Of:"
 
-  FIELD           AT 1 ,0   LEN 9   PROT COLOR=CYAN    "Test Name"
+  FIELD           AT 1 ,0   LEN 9   PROT COLOR=CYAN           "Test Name"
   FIELD TTOTAL    AT 1 ,42  LEN 4   PROT COLOR=WHITE
-  FIELD           AT 1 ,35  LEN 6   PROT COLOR=CYAN    "Total:"
+  FIELD           AT 1 ,35  LEN 6   PROT COLOR=CYAN           "Total:"
   FIELD TPASS     AT 1 ,59  LEN 4   PROT COLOR=WHITE
-  FIELD           AT 1 ,51  LEN 7   PROT COLOR=CYAN    "Passed:"
+  FIELD           AT 1 ,51  LEN 7   PROT COLOR=CYAN           "Passed:"
   FIELD TFAIL     AT 1 ,74  LEN 4   PROT COLOR=WHITE
-  FIELD           AT 1 ,66  LEN 7   PROT COLOR=CYAN    "Failed:"
-  FIELD           AT 1 ,120 LEN 2   PROT COLOR=CYAN    "RC"
-  FIELD           AT 1 ,124 LEN 6   PROT COLOR=CYAN    "Status"
+  FIELD           AT 1 ,66  LEN 7   PROT COLOR=CYAN           "Failed:"
+  FIELD           AT 1 ,120 LEN 2   PROT COLOR=CYAN           "RC"
+  FIELD           AT 1 ,124 LEN 6   PROT COLOR=CYAN           "Status"
 
   FIELD OUTPUT1   AT 2 ,0   LEN 78  PROT COLOR=BLUE
   FIELD OUTPUT2   AT 3 ,0   LEN 78  PROT COLOR=BLUE
@@ -219,77 +219,77 @@ MAP METRICSDEMO SIZE 24x80
   FIELD           AT 0 ,0   LEN 26  PROT COLOR=BLUE           "JSON DEMO - Bricks Metrics"
 
   FIELD USERID    AT 0 ,48  LEN 6   PROT COLOR=CYAN
-  FIELD           AT 0 ,43  LEN 5   PROT COLOR=CYAN    "USER="
+  FIELD           AT 0 ,43  LEN 5   PROT COLOR=CYAN           "USER="
   FIELD TERMID    AT 0 ,63  LEN 6   PROT COLOR=CYAN
-  FIELD           AT 0 ,56  LEN 7   PROT COLOR=CYAN    "| TERM="
+  FIELD           AT 0 ,56  LEN 7   PROT COLOR=CYAN           "| TERM="
   FIELD TIME      AT 0 ,71  LEN 8   PROT COLOR=CYAN
-  FIELD           AT 0 ,69  LEN 6   PROT COLOR=CYAN    "|"
+  FIELD           AT 0 ,69  LEN 6   PROT COLOR=CYAN           "|"
 
-  FIELD           AT 2 ,0   LEN 8   PROT COLOR=CYAN    "Process:"
+  FIELD           AT 2 ,0   LEN 8   PROT COLOR=CYAN           "Process:"
   FIELD UPTIME    AT 3 ,15  LEN 11  PROT COLOR=RED
-  FIELD           AT 3 ,0   LEN 6   PROT COLOR=BLUE    "Uptime"
+  FIELD           AT 3 ,0   LEN 6   PROT COLOR=BLUE           "Uptime"
   FIELD MEM_HEAP  AT 4 ,15  LEN 11  PROT COLOR=RED
-  FIELD           AT 4 ,0   LEN 13  PROT COLOR=BLUE    "Memory (heap)"
+  FIELD           AT 4 ,0   LEN 13  PROT COLOR=BLUE           "Memory (heap)"
   FIELD MEM_SYS   AT 5 ,15  LEN 11  PROT COLOR=RED
-  FIELD           AT 5 ,0   LEN 12  PROT COLOR=BLUE    "Memory (sys)"
+  FIELD           AT 5 ,0   LEN 12  PROT COLOR=BLUE           "Memory (sys)"
   FIELD MEM_OBJ   AT 6 ,14  LEN 10  PROT COLOR=RED
-  FIELD           AT 6 ,0   LEN 12  PROT COLOR=BLUE    "Heap objects"
+  FIELD           AT 6 ,0   LEN 12  PROT COLOR=BLUE           "Heap objects"
 
-  FIELD           AT 8 ,0   LEN 3   PROT COLOR=CYAN    "GC:"
+  FIELD           AT 8 ,0   LEN 3   PROT COLOR=CYAN           "GC:"
   FIELD GC_NUM    AT 9 ,15  LEN 11  PROT COLOR=RED
-  FIELD           AT 9 ,0   LEN 11  PROT COLOR=BLUE    "Collections"
+  FIELD           AT 9 ,0   LEN 11  PROT COLOR=BLUE           "Collections"
   FIELD GC_LAST   AT 10,15  LEN 11  PROT COLOR=RED
-  FIELD           AT 10,0   LEN 10  PROT COLOR=BLUE    "Last Pause"
+  FIELD           AT 10,0   LEN 10  PROT COLOR=BLUE           "Last Pause"
   FIELD GC_TOTAL  AT 11,15  LEN 11  PROT COLOR=RED
-  FIELD           AT 11,0   LEN 11  PROT COLOR=BLUE    "Total Pause"
+  FIELD           AT 11,0   LEN 11  PROT COLOR=BLUE           "Total Pause"
 
-  FIELD           AT 13,0   LEN 4   PROT COLOR=CYAN    "CPU:"
+  FIELD           AT 13,0   LEN 4   PROT COLOR=CYAN           "CPU:"
   FIELD CPU_USER  AT 14,15  LEN 11  PROT COLOR=RED
-  FIELD           AT 14,0   LEN 4   PROT COLOR=BLUE    "User"
+  FIELD           AT 14,0   LEN 4   PROT COLOR=BLUE           "User"
   FIELD CPU_SYS   AT 15,15  LEN 11  PROT COLOR=RED
-  FIELD           AT 15,0   LEN 3   PROT COLOR=BLUE    "SYS"
+  FIELD           AT 15,0   LEN 3   PROT COLOR=BLUE           "SYS"
 
-  FIELD           AT 17,0   LEN 8   PROT COLOR=CYAN    "Runtime:"
+  FIELD           AT 17,0   LEN 8   PROT COLOR=CYAN           "Runtime:"
   FIELD RUN_GOR   AT 18,15  LEN 11  PROT COLOR=RED
-  FIELD           AT 18,0   LEN 10  PROT COLOR=BLUE    "Goroutines"
+  FIELD           AT 18,0   LEN 10  PROT COLOR=BLUE           "Goroutines"
   FIELD RUN_CPUS  AT 19,15  LEN 11  PROT COLOR=RED
-  FIELD           AT 19,0   LEN 4   PROT COLOR=BLUE    "CPUs"
+  FIELD           AT 19,0   LEN 4   PROT COLOR=BLUE           "CPUs"
   FIELD RUN_GOV   AT 21,15  LEN 11  PROT COLOR=RED
-  FIELD           AT 21,0   LEN 10  PROT COLOR=BLUE    "GO Version"
+  FIELD           AT 21,0   LEN 10  PROT COLOR=BLUE           "GO Version"
 
-  FIELD           AT 2 ,30  LEN 9   PROT COLOR=CYAN    "Registry:"
+  FIELD           AT 2 ,30  LEN 9   PROT COLOR=CYAN           "Registry:"
   FIELD REG_TERM  AT 3 ,47  LEN 6   PROT COLOR=RED
-  FIELD           AT 3 ,30  LEN 16  PROT COLOR=BLUE    "Active Terminals"
+  FIELD           AT 3 ,30  LEN 16  PROT COLOR=BLUE           "Active Terminals"
   FIELD REG_SON   AT 4 ,47  LEN 6   PROT COLOR=RED
-  FIELD           AT 4 ,30  LEN 12  PROT COLOR=BLUE    "Active Users"
+  FIELD           AT 4 ,30  LEN 12  PROT COLOR=BLUE           "Active Users"
   FIELD REG_ATXN  AT 5 ,47  LEN 6   PROT COLOR=RED
-  FIELD           AT 5 ,30  LEN 12  PROT COLOR=BLUE    "Active Trans"
+  FIELD           AT 5 ,30  LEN 12  PROT COLOR=BLUE           "Active Trans"
   FIELD REG_FILE  AT 7 ,47  LEN 6   PROT COLOR=RED
-  FIELD           AT 7 ,30  LEN 11  PROT COLOR=BLUE    "Known Files"
+  FIELD           AT 7 ,30  LEN 11  PROT COLOR=BLUE           "Known Files"
   FIELD REG_ACPT  AT 9 ,47  LEN 6   PROT COLOR=RED
-  FIELD           AT 9 ,30  LEN 7   PROT COLOR=BLUE    "Accepts"
+  FIELD           AT 9 ,30  LEN 7   PROT COLOR=BLUE           "Accepts"
   FIELD REG_REJT  AT 10,47  LEN 6   PROT COLOR=RED
-  FIELD           AT 10,30  LEN 7   PROT COLOR=BLUE    "Rejects"
+  FIELD           AT 10,30  LEN 7   PROT COLOR=BLUE           "Rejects"
   FIELD REG_AS    AT 12,47  LEN 6   PROT COLOR=RED
-  FIELD           AT 12,30  LEN 12  PROT COLOR=BLUE    "Auth Success"
+  FIELD           AT 12,30  LEN 12  PROT COLOR=BLUE           "Auth Success"
   FIELD REG_AF    AT 13,47  LEN 6   PROT COLOR=RED
-  FIELD           AT 13,30  LEN 12  PROT COLOR=BLUE    "Auth Failure"
+  FIELD           AT 13,30  LEN 12  PROT COLOR=BLUE           "Auth Failure"
   FIELD REG_TTR   AT 15,47  LEN 6   PROT COLOR=RED
-  FIELD           AT 15,30  LEN 13  PROT COLOR=BLUE    "Total TXN Run"
+  FIELD           AT 15,30  LEN 13  PROT COLOR=BLUE           "Total TXN Run"
   FIELD REG_TTF   AT 16,47  LEN 6   PROT COLOR=RED
-  FIELD           AT 16,30  LEN 16  PROT COLOR=BLUE    "Total TXN Failed"
+  FIELD           AT 16,30  LEN 16  PROT COLOR=BLUE           "Total TXN Failed"
 
-  FIELD           AT 18,30  LEN 9   PROT COLOR=CYAN    "Server Date/Time:"
+  FIELD           AT 18,30  LEN 9   PROT COLOR=CYAN           "Server Date/Time:"
   FIELD WALL      AT 19,43  LEN 10  PROT COLOR=RED
-  FIELD           AT 19,30  LEN 10  PROT COLOR=BLUE    "Unix Epoch"
+  FIELD           AT 19,30  LEN 10  PROT COLOR=BLUE           "Unix Epoch"
   FIELD SDATE     AT 20,43  LEN 10  PROT COLOR=RED
-  FIELD           AT 20,30  LEN 10  PROT COLOR=BLUE    "Server Date"
+  FIELD           AT 20,30  LEN 10  PROT COLOR=BLUE           "Server Date"
   FIELD STIME     AT 21,45  LEN 8   PROT COLOR=RED
-  FIELD           AT 21,30  LEN 10  PROT COLOR=BLUE    "Server Time"
+  FIELD           AT 21,30  LEN 10  PROT COLOR=BLUE           "Server Time"
 
-  FIELD           AT 2 ,56  LEN 10  PROT COLOR=CYAN    "CICS Exec:"
+  FIELD           AT 2 ,56  LEN 10  PROT COLOR=CYAN           "CICS Exec:"
   FIELD CTOTAL    AT 3 ,68  LEN 8   PROT COLOR=RED
-  FIELD           AT 3 ,56  LEN 5   PROT COLOR=BLUE    "Total"
+  FIELD           AT 3 ,56  LEN 5   PROT COLOR=BLUE           "Total"
 
   FIELD CVERB1    AT 4 ,56  LEN 8   PROT COLOR=BLUE
   FIELD CVERB2    AT 5 ,56  LEN 8   PROT COLOR=BLUE

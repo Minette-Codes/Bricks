@@ -57,7 +57,7 @@ JSON_CLEAR: PROCEDURE EXPOSE JSON.
 
 /* Return the error text. */
 JSON_ERROR_TEXT: PROCEDURE EXPOSE JSON.
-  IF JSON._ERROR = '' THEN
+  IF JSON._ERROR = '' | JSON._ERROR = 'JSON._ERROR' THEN
     RETURN ''
   RETURN JSON._ERROR
 
@@ -717,6 +717,28 @@ JSON_ESCAPE: PROCEDURE
 
   RETURN NEW_STR
 
+/* Convert a single character type code to a string type name. */
+JSON_TYPE_STRING: PROCEDURE
+  IF ARG() < 1 THEN
+    RETURN _JSON_SET_ERROR("JSON_TYPE_STRING(TYPE) requires a type.", -20)
+
+  TYPE = UPPER(ARG(1))
+  IF TYPE = 'A' THEN
+    RETURN 'Array'
+  IF TYPE = 'F' THEN
+    RETURN 'false'
+  IF TYPE = 'N' THEN
+    RETURN 'Number'
+  IF TYPE = 'O' THEN
+    RETURN 'Object'
+  IF TYPE = 'S' THEN
+    RETURN 'String'
+  IF TYPE = 'T' THEN
+    RETURN 'true'
+  IF TYPE = 'U' THEN
+    RETURN 'null'
+  RETURN '?'
+
 /* Turn escaped characters in string to normal characters. */
 JSON_UNESCAPE: PROCEDURE
   IF ARG() < 1 THEN
@@ -765,27 +787,21 @@ JSON_UNESCAPE: PROCEDURE
   END
   RETURN NEW_STR
 
-/* Convert a single character type code to a string type name. */
-JSON_TYPE_STRING: PROCEDURE
+/* URL encode a string. */
+JSON_URL_ENCODE: PROCEDURE
   IF ARG() < 1 THEN
-    RETURN _JSON_SET_ERROR("JSON_TYPE_STRING(TYPE) requires a type.", -20)
-
-  TYPE = UPPER(ARG(1))
-  IF TYPE = 'A' THEN
-    RETURN 'Array'
-  IF TYPE = 'F' THEN
-    RETURN 'false'
-  IF TYPE = 'N' THEN
-    RETURN 'Number'
-  IF TYPE = 'O' THEN
-    RETURN 'Object'
-  IF TYPE = 'S' THEN
-    RETURN 'String'
-  IF TYPE = 'T' THEN
-    RETURN 'true'
-  IF TYPE = 'U' THEN
-    RETURN 'null'
-  RETURN '?'
+    RETURN _JSON_SET_ERROR("JSON_URL_ENCODE() requires a string.", -20)
+  STR = ARG(1)
+  NEW_STR = ''
+  SAFE = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~'
+  DO INDX = 1 TO LENGTH(STR)
+    CHR = SUBSTR(STR, INDX, 1)
+    IF POS(CHR, SAFE) > 0 THEN
+      NEW_STR = NEW_STR || CHR
+    ELSE
+      NEW_STR = NEW_STR || '%' || C2X(CHR)
+  END
+  RETURN NEW_STR
 
 /* JSON Internal Parsing ====================================== Private = */
 

@@ -97,61 +97,62 @@ element pointed to.
 This ins the main interface for exploring and examining the parsed JSON.
 See the notes on `Paths` below.
 
-| Function            | Description                                                     |
-|---------------------|-----------------------------------------------------------------|
-| JSON_CLEAR()        | Clears the JSON STEM.                                           |
-| JSON_COUNT()        | The number of elements in the current array or object.          |
-| JSON_COUNT(MEMBER)  | The number of elements in for the given member name.            |
-| JSON_COUNT(PATH)    | The number of elements in an array or object at the given path. |
-| JSON_DEPTH()        | Returns the depth the pointer is at. 1 is the root.             |
-| JSON_DEPTH(MEMBER)  | Returns the depth for the member with the given name.           |
-| JSON_DEPTH(PATH)    | Returns the depth at the given path.                            |
-| JSON_ERROR_TEXT()   | Returns most recent error text.                                 |
-| JSON_ERROR_CODE()   | Returns the most recent error code.                             |
-| JSON_GET(URL)       | Do an HTTP GET on the given URL and parse the resulting JSON.   |
-| JSON_LIST()         | Returns a list of members for the current object.               |
-| JSON_LIST(MEMBER)   | Returns a list of members for the given member name.            |
-| JSON_LIST(PATH)     | Returns a list of members for the given path.                   |
-| JSON_LIST(SEP)      | Returns the list with the given separator instead of a space.   |
-| JSON_LIST(MEMBR,SEP)| Returns the list for the given member using the separator.      |
-| JSON_LIST(PATH,SEP) | Returns the list for the given path using the separator.        |
-| JSON_MEMBER(MEMBER) | Move the pointer to the given member name.                      |
-| JSON_NAME()         | Return the name of the current member.                          |
-| JSON_NAME(MEMBER)   | Return the name for the given member name.                      |
-| JSON_NAME(PATH)     | Return the member name at the given path.                       |
-| JSON_NEXT()         | Move to the next element in an array or object.                 |
-|                     | Returns 1 if the pointer has been moved.                        |
-|                     | Returns 0 if the pointer was already at the last element.       |
-|                     | Returns 0 on error. For errors check JSON_ERROR_CODE()!         |
-| JSON_NEXT(PATH)     | Moves the pointer to the next element at the given path.        |
-|                     | Returns the new path on success.                                |
-| JSON_PATH()         | Returns the path to the current element.                        |
-| JSON_PATH(MEMBER)   | Move the pointer to the given member name.                      |
-| JSON_PATH(PATH)     | Move the pointer to the given path.                             |
-| JSON_PARENT()       | Moves the pointer to the parent of the current element.         |
-|                     | Returns the new depth.                                          |
-| JSON_PARSE_END()    | The position in the string parsing stopped.                     |
-| JSON_PRETTY()       | Pretty Print the JSON. The default indent is one character.     |
-| JSON_PRETTY(IDNENT) | Pretty Print the JSON. Indent the given number of spaces.       |
-| JSON_PREV()         | Move to the previous element in an array or object.             |
-|                     | Returns 1 if the pointer has been moved.                        |
-|                     | Returns 0 if the pointer was already at the first element.      |
-|                     | Returns 0 on error. For errors check JSON_ERROR_CODE()!         |
-| JSON_PREV(PATH)     | Moves the pointer to the previous element at the given path.    |
-|                     | Returns the new path on success.                                |
-| JSON_ROOT()         | Move the pointer to the JSON root.                              |
-| JSON_STRING()       | Returns the JSON converted back to a string.                    |
-| JSON_STRING(PATH)   | Converts the JSON starting at the given path to a string.       |
-| JSON_TYPE()         | Returns the Type for the current element.                       |
-|                     | See 'Types' below for details.                                  |
-|                     | Returns '' on error. For errors check JSON_ERROR_CODE()!        |
-| JSON_TYPE(MEMBER)   | Returns the Type for the given member name.                     |
-| JSON_TYPE(PATH)     | Returns the Type for the given path.                            |
-| JSON_VALUE()        | Return the value of the current element.                        |
-|                     | Does not work with arrays or objects.                           |
-|                     | Returns '' on error. For errors check JSON_ERROR_CODE()!        |
-| JSON_VALUE(MEMBER)  | Return the value for the given member name.                     |
-| JSON_VALUE(PATH)    | Return the value at the given path.                             |
+| Function             | Description                                                     |
+|----------------------|-----------------------------------------------------------------|
+| JSON_CLEAR()         | Clears the JSON STEM.                                           |
+| JSON_COUNT()         | The number of elements in the current array or object.          |
+| JSON_COUNT(MEMBER)   | The number of elements in for the given member name.            |
+| JSON_COUNT(PATH)     | The number of elements in an array or object at the given path. |
+| JSON_DEPTH()         | Returns the depth the pointer is at. 1 is the root.             |
+| JSON_DEPTH(MEMBER)   | Returns the depth for the member with the given name.           |
+| JSON_DEPTH(PATH)     | Returns the depth at the given path.                            |
+| JSON_ERROR_TEXT()    | Returns most recent error text.                                 |
+| JSON_ERROR_CODE()    | Returns the most recent error code.                             |
+| JSON_GET(URL)        | Do an HTTP GET on the given URL and parse the resulting JSON.   |
+| JSON_LIST()          | Returns a list of members for the current object.               |
+| JSON_LIST(MEMBER)    | Returns a list of members for the given member name.            |
+| JSON_LIST(PATH)      | Returns a list of members for the given path.                   |
+| JSON_LIST(SEP)       | Returns the list with the given separator instead of a space.   |
+| JSON_LIST(MEMBR,SEP) | Returns the list for the given member using the separator.      |
+| JSON_LIST(PATH,SEP)  | Returns the list for the given path using the separator.        |
+| JSON_MEMBER(MEMBER)  | Move the pointer to the given member name.                      |
+| JSON_NAME()          | Return the name of the current member.                          |
+| JSON_NAME(MEMBER)    | Return the name for the given member name.                      |
+| JSON_NAME(PATH)      | Return the member name at the given path.                       |
+| JSON_NEXT()          | Move to the next element in an array or object.                 |
+|                      | Returns 1 if the pointer has been moved.                        |
+|                      | Returns 0 if the pointer was already at the last element.       |
+|                      | Returns 0 on error. For errors check JSON_ERROR_CODE()!         |
+| JSON_NEXT(PATH)      | Moves the pointer to the next element at the given path.        |
+|                      | Returns the new path on success.                                |
+| JSON_PATH()          | Returns the path to the current element.                        |
+| JSON_PATH(MEMBER)    | Move the pointer to the given member name.                      |
+| JSON_PATH(PATH)      | Move the pointer to the given path.                             |
+| JSON_PARENT()        | Moves the pointer to the parent of the current element.         |
+|                      | Returns the new depth.                                          |
+| JSON_PARSE_END()     | The position in the string parsing stopped.                     |
+| JSON_PRETTY()        | Pretty Print the JSON. The default indent is one character.     |
+| JSON_PRETTY(IDNENT)  | Pretty Print the JSON. Indent the given number of spaces.       |
+| JSON_PREV()          | Move to the previous element in an array or object.             |
+|                      | Returns 1 if the pointer has been moved.                        |
+|                      | Returns 0 if the pointer was already at the first element.      |
+|                      | Returns 0 on error. For errors check JSON_ERROR_CODE()!         |
+| JSON_PREV(PATH)      | Moves the pointer to the previous element at the given path.    |
+|                      | Returns the new path on success.                                |
+| JSON_ROOT()          | Move the pointer to the JSON root.                              |
+| JSON_STRING()        | Returns the JSON converted back to a string.                    |
+| JSON_STRING(PATH)    | Converts the JSON starting at the given path to a string.       |
+| JSON_TYPE()          | Returns the Type for the current element.                       |
+|                      | See 'Types' below for details.                                  |
+|                      | Returns '' on error. For errors check JSON_ERROR_CODE()!        |
+| JSON_TYPE(MEMBER)    | Returns the Type for the given member name.                     |
+| JSON_TYPE(PATH)      | Returns the Type for the given path.                            |
+| JSON_URL_ENCODE(STR) | URL encode a string. Aka percent encode.                        |
+| JSON_VALUE()         | Return the value of the current element.                        |
+|                      | Does not work with arrays or objects.                           |
+|                      | Returns '' on error. For errors check JSON_ERROR_CODE()!        |
+| JSON_VALUE(MEMBER)   | Return the value for the given member name.                     |
+| JSON_VALUE(PATH)     | Return the value at the given path.                             |
 
 ### A note on paths
 
@@ -747,3 +748,4 @@ See the site <https://bofh.bombeck.io/> for details.
 * 2026-07-05 - Moved the documentation out of the library and into this file.
 * 2026-07-09 - Fixed a few mistakes. Added functions for creating new elements of a given type and value. Improved the tests. Updated the documentation.
 * 2026-07-11 - More minor bug fixes. Changed test case file and result file proper JSON. Functions JSON_NEXT and JSON_PREV return proper booleans. (Check for errors using `JSON_ERROR_CODE()`.) Properly parse arguments to JSON commands in the console. The current page in the header is now an input field. Expanded documentation on the tests and moved it to a new section. Added a section for the various files `JSON` related files. Rearranged the JSON code and split the library into three files, `json-library.rexx` for parsing and working with JSON, `json-permutation.rexx` for modifying JSON and `json-testing.rexx` for testing the library.
+* 2026-07-12 - Added the function `JSON_URL_ENCODE(STR)`. Fixed inconsistent formatting in the map files. Fixes a few mistakes.

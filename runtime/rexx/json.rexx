@@ -83,7 +83,7 @@ JSON_CLEAR: PROCEDURE EXPOSE JSON.
 
 /* Return the error text. */
 JSON_ERROR_TEXT: PROCEDURE EXPOSE JSON.
-  IF JSON._ERROR = '' THEN
+  IF JSON._ERROR = '' | JSON._ERROR = 'JSON._ERROR' THEN
     RETURN ''
   RETURN JSON._ERROR
 
@@ -743,6 +743,28 @@ JSON_ESCAPE: PROCEDURE
 
   RETURN NEW_STR
 
+/* Convert a single character type code to a string type name. */
+JSON_TYPE_STRING: PROCEDURE
+  IF ARG() < 1 THEN
+    RETURN _JSON_SET_ERROR("JSON_TYPE_STRING(TYPE) requires a type.", -20)
+
+  TYPE = UPPER(ARG(1))
+  IF TYPE = 'A' THEN
+    RETURN 'Array'
+  IF TYPE = 'F' THEN
+    RETURN 'false'
+  IF TYPE = 'N' THEN
+    RETURN 'Number'
+  IF TYPE = 'O' THEN
+    RETURN 'Object'
+  IF TYPE = 'S' THEN
+    RETURN 'String'
+  IF TYPE = 'T' THEN
+    RETURN 'true'
+  IF TYPE = 'U' THEN
+    RETURN 'null'
+  RETURN '?'
+
 /* Turn escaped characters in string to normal characters. */
 JSON_UNESCAPE: PROCEDURE
   IF ARG() < 1 THEN
@@ -791,27 +813,21 @@ JSON_UNESCAPE: PROCEDURE
   END
   RETURN NEW_STR
 
-/* Convert a single character type code to a string type name. */
-JSON_TYPE_STRING: PROCEDURE
+/* URL encode a string. */
+JSON_URL_ENCODE: PROCEDURE
   IF ARG() < 1 THEN
-    RETURN _JSON_SET_ERROR("JSON_TYPE_STRING(TYPE) requires a type.", -20)
-
-  TYPE = UPPER(ARG(1))
-  IF TYPE = 'A' THEN
-    RETURN 'Array'
-  IF TYPE = 'F' THEN
-    RETURN 'false'
-  IF TYPE = 'N' THEN
-    RETURN 'Number'
-  IF TYPE = 'O' THEN
-    RETURN 'Object'
-  IF TYPE = 'S' THEN
-    RETURN 'String'
-  IF TYPE = 'T' THEN
-    RETURN 'true'
-  IF TYPE = 'U' THEN
-    RETURN 'null'
-  RETURN '?'
+    RETURN _JSON_SET_ERROR("JSON_URL_ENCODE() requires a string.", -20)
+  STR = ARG(1)
+  NEW_STR = ''
+  SAFE = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~'
+  DO INDX = 1 TO LENGTH(STR)
+    CHR = SUBSTR(STR, INDX, 1)
+    IF POS(CHR, SAFE) > 0 THEN
+      NEW_STR = NEW_STR || CHR
+    ELSE
+      NEW_STR = NEW_STR || '%' || C2X(CHR)
+  END
+  RETURN NEW_STR
 
 /* JSON Internal Parsing ====================================== Private = */
 
@@ -2747,13 +2763,13 @@ JSON_CONSOLE: PROCEDURE EXPOSE JSON. JSON_TESTS.
   CONS_SCR.MSG = JSON._ERROR
 
   /* Start the main loop. */
-  CALL _JSON_CONSOLE_LOOP 'JSONCONSOLE'
+  CALL _CONS_LOOP 'JSONCONSOLE'
   RETURN
 
 /* Main loop for the JSON console, help, or any other set of data. */
 /* When changing data source some parameters should be preserved. */
 /* See _CONS_HELP for details. */
-_JSON_CONSOLE_LOOP: PROCEDURE EXPOSE CONS_DATA. CONS_SCR. CONS_HELP. JSON. JSON_TESTS.
+_CONS_LOOP: PROCEDURE EXPOSE CONS_DATA. CONS_SCR. CONS_HELP. JSON. JSON_TESTS.
   IF ARG() > 0 THEN
     CONSOLE_MAP = ARG(1)
   ELSE
@@ -2906,7 +2922,7 @@ _JSON_CONSOLE_LOOP: PROCEDURE EXPOSE CONS_DATA. CONS_SCR. CONS_HELP. JSON. JSON_
         END
         /* Scroll down. */
         WHEN COMMAND = 'DOWN' | COMMAND = 'D' THEN DO
-          /* Don't bother scrolling if all the Links fit on the screen. */
+          /* Don't bother scrolling if all the data fits on the screen. */
           IF CONS_DATA.0 > CONS_DATA.PER_PAGE THEN DO
             CONS_SCR.CUR_POS = CONS_SCR.CUR_POS + CONS_DATA.SCROLL_AMT
             IF CONS_SCR.CUR_POS > (CONS_DATA.0 - CONS_DATA.PER_PAGE) + 1 THEN
@@ -2975,7 +2991,7 @@ _JSON_CONSOLE_LOOP: PROCEDURE EXPOSE CONS_DATA. CONS_SCR. CONS_HELP. JSON. JSON_
         END
         /* Scroll up. */
         WHEN COMMAND = 'UP' | COMMAND = 'U' THEN DO
-          /* Don't bother scrolling if all the Links fit on the screen. */
+          /* Don't bother scrolling if all the data fit on the screen. */
           IF CONS_DATA.0 > CONS_DATA.PER_PAGE THEN DO
             CONS_SCR.CUR_POS = CONS_SCR.CUR_POS - CONS_DATA.SCROLL_AMT
             IF CONS_SCR.CUR_POS < 1 THEN
@@ -3556,10 +3572,7 @@ _CONS_JSON_COMMAND: PROCEDURE EXPOSE CONS_SCR. CONS_DATA. CONS_HELP. JSON.
       ELSE IF JSON._ERRORCODE \= '' & JSON._ERRORCODE < 0 THEN
         CONS_SCR.MSG = 'ERROR:' JSON_ERROR_TEXT()
       ELSE DO
-        IF ARGS.0 = 0 THEN
-          CONS_SCR.MSG = 'New element index:' NEW_INDX
-        ELSE
-          CONS_SCR.MSG = 'New path:' NEW_INDX
+        CONS_SCR.MSG = 'New path:' JSON_PATH()
       END
       DO_RELOAD = 'YES'
     END
@@ -3619,10 +3632,7 @@ _CONS_JSON_COMMAND: PROCEDURE EXPOSE CONS_SCR. CONS_DATA. CONS_HELP. JSON.
       ELSE IF JSON._ERRORCODE \= '' & JSON._ERRORCODE < 0 THEN
         CONS_SCR.MSG = 'ERROR:' JSON_ERROR_TEXT()
       ELSE DO
-        IF ARGS.0 = 0 THEN
-          CONS_SCR.MSG = 'New element index:' NEW_INDX
-        ELSE
-          CONS_SCR.MSG = 'New path:' NEW_INDX
+        CONS_SCR.MSG = 'New path:' JSON_PATH()
       END
       DO_RELOAD = 'YES'
     END
@@ -3817,7 +3827,7 @@ _CONS_HELP: PROCEDURE EXPOSE CONS_DATA. CONS_SCR. CONS_HELP. JSON.
   CALL _CONS_FILL_SCR
 
   /* Help loop. */
-  CALL _JSON_CONSOLE_LOOP 'JSONHELP'
+  CALL _CONS_LOOP 'JSONHELP'
 
   /* Restore state. */
   CONS_DATA.SOURCE      = SAVE.SOURCE
@@ -4317,7 +4327,7 @@ _CONS_TESTS: PROCEDURE EXPOSE CONS_DATA. CONS_SCR. CONS_HELP. JSON. JSON_TESTS.
   CALL _CONS_FILL_SCR
 
   /* Test result loop. */
-  CALL _JSON_CONSOLE_LOOP 'JSONTESTS'
+  CALL _CONS_LOOP 'JSONTESTS'
 
   /* Restore state. */
   CONS_DATA.SOURCE      = SAVE.SOURCE
@@ -4356,7 +4366,7 @@ _CONS_PRETTY: PROCEDURE EXPOSE CONS_DATA. CONS_SCR. CONS_HELP. JSON. JSON_TESTS.
   CALL _CONS_FILL_SCR
 
   /* Test result loop. */
-  CALL _JSON_CONSOLE_LOOP 'JSONPRETTY'
+  CALL _CONS_LOOP 'JSONPRETTY'
 
   /* Restore state. */
   CONS_DATA.SOURCE      = SAVE.SOURCE
