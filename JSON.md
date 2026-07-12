@@ -13,7 +13,7 @@ Or even be useful...
 Based on the JSON grammar found at <https://www.json.org/>.
 With the addition of both types of comments.
 
-See the file [json-library.rexx](json-library.rexx) for including the library in your code.
+See the files [json-library.rexx](json-library.rexx), [json-permutation.rexx](json-permutation.rexx) and [json-testing.rexx](json-testing.rexx) for including the library in your code.
 
 ## Contents
 
@@ -21,7 +21,8 @@ See the file [json-library.rexx](json-library.rexx) for including the library in
 * [TODO](#todo)
 * [Parsing JSON](#parsing-json)
 * [Working with parsed JSON](#working-with-parsed-json)
-* [Return values](#return-values)
+* [Modifying JSON](#json-permutation-interface)
+* [Return codes](#return-codes)
 * [Types](#types)
 * [JSON Parser internals](#json-parser-internals)
 * [Tests](#tests)
@@ -231,10 +232,13 @@ IF JSON_IS_ARRAY('.1.1') THEN
 | JSON_IS_NULL()       | Returns 1 if the current element is null.                |
 | JSON_IS_NULL(PATH)   | Returns 1 if the element at the given path is null.      |
 
-### JSON Permutation Interface
+## JSON Permutation Interface
 
 These functions modify the parsed JSON.
 They can also be used to build JSON from scratch after calling `JSON_CLEAR()`.
+
+The permutation code is contained in the file `json-permutation.rexx`.
+You only need to include this file if you will be building or modifying JSON.
 
 | Function                     | Description                                         |
 |------------------------------|-----------------------------------------------------|
@@ -396,13 +400,9 @@ The result is the following JSON:
 
 These functions are extras that could be useful.
 
-I recommend NOT including the `JSON_TESTS()` function in your code.
-Unless you actually intend to run the JSON tests in your code.
-
 | Function              | Description                                         |
 |-----------------------|-----------------------------------------------------|
 | JSON_ESCAPE(STR)      | Escapes special characters in STR. EG. '"'          |
-| JSON_TESTS            | Run the JSON tests in the file 'json_results.txt'.  |
 | JSON_TYPE_STRING(TYPE)| Convert a single character type to a string name.   |
 | JSON_UNESCAPE(STR)    | Processes any escaped characters in STR. Eg. '\"'   |
 
@@ -421,14 +421,14 @@ STR = STR || LEFT(JSON._PP.INDX, 80)
 END
 ```
 
-## Return values
+## Return codes
 
 Functions normally returns either a new value or 1 on success.
 If there is an error a negative value will be returned.
 Use `JSON_ERROR_TEXT()` to get the text for the most recent error.
 Use `JSON_ERROR_CODE()` to get the most recent error code.
 0 is never used as an error.
-0 is only used by next and prev to indicate end of list reached.
+0 is only used by next and prev to indicate there are no more elements.
 
 Note that these four functions do not return error codes.
 The functions `JSON_VALUE()` and `JSON_TYPE()` will return an empty string on error.
@@ -640,6 +640,9 @@ Each test is a line of self contained JSON specifying the test parameters.
 Each test contains JSON to be parsed, manipulated and verified.
 See the top of the test file for details on the test format.
 
+The testing code is contained in the file `json-testing.rexx`.
+If you do want to run the tests make sure to include the file `json-permutation.rexx`.
+
 Note: Tests that are prefixed with `ERROR:` are expected failures.
 These tests verify functions fail in the expected manner on bad input.
 
@@ -682,7 +685,12 @@ See the screenshots below for an example of the test output.
 
 ## Files
 
-The JSON library is contained in the file `json-library.rexx`.
+The JSON library is contained in the files:
+
+* `json-library.rexx` - The main library. Contains the code for parsing and examining JSON.
+* `json-permutation.rexx` - The code for modifying JSON. Only include this code if you want to modify JSON.
+* `json-testing.rexx` - Testing specific code. Only include this code if you want to run tests.
+
 Include the contents of this file in your code to use the library.
 
 The JSON Explorer is made up of the following files:
@@ -738,4 +746,4 @@ See the site <https://bofh.bombeck.io/> for details.
 
 * 2026-07-05 - Moved the documentation out of the library and into this file.
 * 2026-07-09 - Fixed a few mistakes. Added functions for creating new elements of a given type and value. Improved the tests. Updated the documentation.
-* 2026-07-11 - More minor bug fixes. Changed test case file and result file proper JSON. Functions JSON_NEXT and JSON_PREV return proper booleans. (Check for errors using `JSON_ERROR_CODE()`.) Properly parse arguments to JSON commands in the console. The current page in the header is now an input field. Expanded documentation on the tests and moved it to a new section. Added a section for the various files `JSON` related files.
+* 2026-07-11 - More minor bug fixes. Changed test case file and result file proper JSON. Functions JSON_NEXT and JSON_PREV return proper booleans. (Check for errors using `JSON_ERROR_CODE()`.) Properly parse arguments to JSON commands in the console. The current page in the header is now an input field. Expanded documentation on the tests and moved it to a new section. Added a section for the various files `JSON` related files. Rearranged the JSON code and split the library into three files, `json-library.rexx` for parsing and working with JSON, `json-permutation.rexx` for modifying JSON and `json-testing.rexx` for testing the library.
