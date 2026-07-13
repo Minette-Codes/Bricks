@@ -52,7 +52,8 @@ JSON_CLEAR: PROCEDURE EXPOSE JSON.
 
   /* Set the pointer to the root and set the type to null. */
   JSON._PTR = 'JSON'
-  CALL _JSON_SET_TYPE JSON._PTR, 'U'
+  JSON.TYPE = 'U'
+  JSON.VALUE = 'null'
   RETURN 1
 
 /* Return the error text. */
