@@ -13,6 +13,7 @@
 /*  -90 if the test file could not be read.                               */
 /*  -91 if the test variables name or json are missing.                   */
 JSON_TESTS: PROCEDURE EXPOSE JSON. JSON_TESTS.
+  CALL _JSON_CLEAR_ERROR
   JSON_TESTS. = ''
   TEST_FILE = 'json_tests.json'
   RESULT_FILE = 'json_results.json'

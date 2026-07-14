@@ -17,6 +17,7 @@
 /*  -24 if the path is invalid.                                           */
 /*  -26 if the member was not found.                                      */
 JSON_ADD: PROCEDURE EXPOSE JSON.
+  CALL _JSON_CLEAR_ERROR
   POINTER = JSON._PTR
 
   IF ARG() > 0 THEN DO
@@ -42,6 +43,7 @@ JSON_ADD: PROCEDURE EXPOSE JSON.
 /*  -24 if the path is invalid.                                           */
 /*  -26 if the member was not found.                                      */
 JSON_DELETE: PROCEDURE EXPOSE JSON.
+  CALL _JSON_CLEAR_ERROR
   POINTER = JSON._PTR
 
   IF ARG() > 0 THEN DO
@@ -96,6 +98,7 @@ JSON_DELETE: PROCEDURE EXPOSE JSON.
 /*  -24 if the path is invalid.                                           */
 /*  -26 if the member was not found.                                      */
 JSON_NEW: PROCEDURE EXPOSE JSON.
+  CALL _JSON_CLEAR_ERROR
   POINTER = JSON._PTR
 
   IF ARG() < 1 THEN
@@ -132,6 +135,7 @@ JSON_NEW: PROCEDURE EXPOSE JSON.
 /*  -24 if the path is invalid.                                           */
 /*  -26 if the member was not found.                                      */
 JSON_SET_TYPE: PROCEDURE EXPOSE JSON.
+  CALL _JSON_CLEAR_ERROR
   POINTER = JSON._PTR
   NEW_TYPE = UPPER(ARG(1))
 
@@ -169,6 +173,7 @@ JSON_SET_TYPE: PROCEDURE EXPOSE JSON.
 /*  -24 if the path is invalid.                                           */
 /*  -26 if the member was not found.                                      */
 JSON_SET_VALUE: PROCEDURE EXPOSE JSON.
+  CALL _JSON_CLEAR_ERROR
   POINTER = JSON._PTR
   NEW_VALUE = ARG(1)
 
@@ -211,6 +216,7 @@ JSON_SET_VALUE: PROCEDURE EXPOSE JSON.
 /*  -24 if the path is invalid.                                           */
 /*  -26 if the member was not found.                                      */
 JSON_ADD_ARRAY: PROCEDURE EXPOSE JSON.
+  CALL _JSON_CLEAR_ERROR
   POINTER = JSON._PTR
 
   IF ARG() > 0 THEN DO
@@ -235,6 +241,7 @@ JSON_ADD_ARRAY: PROCEDURE EXPOSE JSON.
 /*  -24 if the path is invalid.                                           */
 /*  -26 if the member was not found.                                      */
 JSON_ADD_OBJECT: PROCEDURE EXPOSE JSON.
+  CALL _JSON_CLEAR_ERROR
   POINTER = JSON._PTR
 
   IF ARG() > 0 THEN DO
@@ -260,6 +267,7 @@ JSON_ADD_OBJECT: PROCEDURE EXPOSE JSON.
 /*  -24 if the path is invalid.                                           */
 /*  -26 if the member was not found.                                      */
 JSON_ADD_STRING: PROCEDURE EXPOSE JSON.
+  CALL _JSON_CLEAR_ERROR
   POINTER = JSON._PTR
   VALUE = ARG(1)
 
@@ -290,6 +298,7 @@ JSON_ADD_STRING: PROCEDURE EXPOSE JSON.
 /*  -24 if the path is invalid.                                           */
 /*  -26 if the member was not found.                                      */
 JSON_ADD_NUMBER: PROCEDURE EXPOSE JSON.
+  CALL _JSON_CLEAR_ERROR
   POINTER = JSON._PTR
   VALUE = ARG(1)
 
@@ -319,6 +328,7 @@ JSON_ADD_NUMBER: PROCEDURE EXPOSE JSON.
 /*  -24 if the path is invalid.                                           */
 /*  -26 if the member was not found.                                      */
 JSON_ADD_TRUE: PROCEDURE EXPOSE JSON.
+  CALL _JSON_CLEAR_ERROR
   POINTER = JSON._PTR
 
   IF ARG() > 0 THEN DO
@@ -343,6 +353,7 @@ JSON_ADD_TRUE: PROCEDURE EXPOSE JSON.
 /*  -24 if the path is invalid.                                           */
 /*  -26 if the member was not found.                                      */
 JSON_ADD_FALSE: PROCEDURE EXPOSE JSON.
+  CALL _JSON_CLEAR_ERROR
   POINTER = JSON._PTR
 
   IF ARG() > 0 THEN DO
@@ -367,6 +378,7 @@ JSON_ADD_FALSE: PROCEDURE EXPOSE JSON.
 /*  -24 if the path is invalid.                                           */
 /*  -26 if the member was not found.                                      */
 JSON_ADD_NULL: PROCEDURE EXPOSE JSON.
+  CALL _JSON_CLEAR_ERROR
   POINTER = JSON._PTR
 
   IF ARG() > 0 THEN DO
@@ -392,6 +404,7 @@ JSON_ADD_NULL: PROCEDURE EXPOSE JSON.
 /*  -24 if the path is invalid.                                           */
 /*  -26 if the member was not found.                                      */
 JSON_NEW_ARRAY: PROCEDURE EXPOSE JSON.
+  CALL _JSON_CLEAR_ERROR
   POINTER = JSON._PTR
   NAME = ARG(1)
 
@@ -420,6 +433,7 @@ JSON_NEW_ARRAY: PROCEDURE EXPOSE JSON.
 /*  -24 if the path is invalid.                                           */
 /*  -26 if the member was not found.                                      */
 JSON_NEW_OBJECT: PROCEDURE EXPOSE JSON.
+  CALL _JSON_CLEAR_ERROR
   POINTER = JSON._PTR
   NAME = ARG(1)
 
@@ -449,6 +463,7 @@ JSON_NEW_OBJECT: PROCEDURE EXPOSE JSON.
 /*  -24 if the path is invalid.                                           */
 /*  -26 if the member was not found.                                      */
 JSON_NEW_STRING: PROCEDURE EXPOSE JSON.
+  CALL _JSON_CLEAR_ERROR
   POINTER = JSON._PTR
   NAME = ARG(1)
   VALUE = ARG(2)
@@ -482,6 +497,7 @@ JSON_NEW_STRING: PROCEDURE EXPOSE JSON.
 /*  -24 if the path is invalid.                                           */
 /*  -26 if the member was not found.                                      */
 JSON_NEW_NUMBER: PROCEDURE EXPOSE JSON.
+  CALL _JSON_CLEAR_ERROR
   POINTER = JSON._PTR
   NAME = ARG(1)
   VALUE = ARG(2)
@@ -514,6 +530,7 @@ JSON_NEW_NUMBER: PROCEDURE EXPOSE JSON.
 /*  -24 if the path is invalid.                                           */
 /*  -26 if the member was not found.                                      */
 JSON_NEW_TRUE: PROCEDURE EXPOSE JSON.
+  CALL _JSON_CLEAR_ERROR
   POINTER = JSON._PTR
   NAME = ARG(1)
 
@@ -542,6 +559,7 @@ JSON_NEW_TRUE: PROCEDURE EXPOSE JSON.
 /*  -24 if the path is invalid.                                           */
 /*  -26 if the member was not found.                                      */
 JSON_NEW_FALSE: PROCEDURE EXPOSE JSON.
+  CALL _JSON_CLEAR_ERROR
   POINTER = JSON._PTR
   NAME = ARG(1)
 
@@ -570,6 +588,7 @@ JSON_NEW_FALSE: PROCEDURE EXPOSE JSON.
 /*  -24 if the path is invalid.                                           */
 /*  -26 if the member was not found.                                      */
 JSON_NEW_NULL: PROCEDURE EXPOSE JSON.
+  CALL _JSON_CLEAR_ERROR
   POINTER = JSON._PTR
   NAME = ARG(1)
 
@@ -598,6 +617,7 @@ JSON_NEW_NULL: PROCEDURE EXPOSE JSON.
 /*  -24 if the path is invalid.                                           */
 /*  -26 if the member was not found.                                      */
 JSON_SET_ARRAY: PROCEDURE EXPOSE JSON.
+  CALL _JSON_CLEAR_ERROR
   POINTER = JSON._PTR
 
   IF ARG() > 0 THEN DO
@@ -620,6 +640,7 @@ JSON_SET_ARRAY: PROCEDURE EXPOSE JSON.
 /*  -24 if the path is invalid.                                           */
 /*  -26 if the member was not found.                                      */
 JSON_SET_OBJECT: PROCEDURE EXPOSE JSON.
+  CALL _JSON_CLEAR_ERROR
   POINTER = JSON._PTR
 
   IF ARG() > 0 THEN DO
@@ -643,6 +664,7 @@ JSON_SET_OBJECT: PROCEDURE EXPOSE JSON.
 /*  -24 if the path is invalid.                                           */
 /*  -26 if the member was not found.                                      */
 JSON_SET_STRING: PROCEDURE EXPOSE JSON.
+  CALL _JSON_CLEAR_ERROR
   POINTER = JSON._PTR
   NEW_VALUE = ARG(1)
 
@@ -683,6 +705,7 @@ JSON_SET_STRING: PROCEDURE EXPOSE JSON.
 /*  -24 if the path is invalid.                                           */
 /*  -26 if the member was not found.                                      */
 JSON_SET_NUMBER: PROCEDURE EXPOSE JSON.
+  CALL _JSON_CLEAR_ERROR
   POINTER = JSON._PTR
   NEW_VALUE = ARG(1)
 
@@ -712,6 +735,7 @@ JSON_SET_NUMBER: PROCEDURE EXPOSE JSON.
 /*  -24 if the path is invalid.                                           */
 /*  -26 if the member was not found.                                      */
 JSON_SET_TRUE: PROCEDURE EXPOSE JSON.
+  CALL _JSON_CLEAR_ERROR
   POINTER = JSON._PTR
 
   IF ARG() > 0 THEN DO
@@ -734,6 +758,7 @@ JSON_SET_TRUE: PROCEDURE EXPOSE JSON.
 /*  -24 if the path is invalid.                                           */
 /*  -26 if the member was not found.                                      */
 JSON_SET_FALSE: PROCEDURE EXPOSE JSON.
+  CALL _JSON_CLEAR_ERROR
   POINTER = JSON._PTR
 
   IF ARG() > 0 THEN DO
@@ -756,6 +781,7 @@ JSON_SET_FALSE: PROCEDURE EXPOSE JSON.
 /*  -24 if the path is invalid.                                           */
 /*  -26 if the member was not found.                                      */
 JSON_SET_NULL: PROCEDURE EXPOSE JSON.
+  CALL _JSON_CLEAR_ERROR
   POINTER = JSON._PTR
 
   IF ARG() > 0 THEN DO

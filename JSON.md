@@ -78,6 +78,22 @@ As this implies any extra JSON in the input is ignored.
 With the input `[true][false]` only `[true]` is parsed. Nothing more.
 See the table 'Parsing errors codes' for possible error return codes.
 
+An optional path can be given to parse the JSON into.
+This could be useful for working with multiple JSON objects at once.
+
+```rexx
+CALL JSON_PARSE '[]'
+CALL JSON_ADD
+CALL JSON_PARSE '.1', 'String'
+CALL JSON_STRING
+```
+
+Will have the folowing output:
+
+```text
+["String"]
+```
+
 ## Working with parsed JSON
 
 Working with the parsed JSON is a little more tricky.
@@ -132,6 +148,7 @@ See the notes on `Paths` below.
 |                      | Returns the new depth.                                          |
 | JSON_PARSE_END()     | The position in the string parsing stopped.                     |
 | JSON_PRETTY()        | Pretty Print the JSON. The default indent is one character.     |
+| JSON_PRETTY(PATH)    | Pretty Print the JSON starting at the given path.               |
 | JSON_PRETTY(IDNENT)  | Pretty Print the JSON. Indent the given number of spaces.       |
 | JSON_PREV()          | Move to the previous element in an array or object.             |
 |                      | Returns 1 if the pointer has been moved.                        |
@@ -749,3 +766,4 @@ See the site <https://bofh.bombeck.io/> for details.
 * 2026-07-09 - Fixed a few mistakes. Added functions for creating new elements of a given type and value. Improved the tests. Updated the documentation.
 * 2026-07-11 - More minor bug fixes. Changed test case file and result file proper JSON. Functions JSON_NEXT and JSON_PREV return proper booleans. (Check for errors using `JSON_ERROR_CODE()`.) Properly parse arguments to JSON commands in the console. The current page in the header is now an input field. Expanded documentation on the tests and moved it to a new section. Added a section for the various files `JSON` related files. Rearranged the JSON code and split the library into three files, `json-library.rexx` for parsing and working with JSON, `json-permutation.rexx` for modifying JSON and `json-testing.rexx` for testing the library.
 * 2026-07-12 - Added the function `JSON_URL_ENCODE(STR)`. Fixed inconsistent formatting in the map files. Fixes a few mistakes. Remove a dependency on `_JSON_SET_TYPE` in the parsing code. Consolidated the find text marker clearing.
+* 2026-07-14 - Clear the error code and error text. Now the error will always apply to the last JSON function executed. Changed `JSON_PARSE` to parse into a given path. `JSON_STRING` and `JSON_PRETTY` accept a path.

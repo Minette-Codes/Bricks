@@ -10,30 +10,40 @@
 /* Returns the position in the string parsing ended.                      */
 /*                                                                        */
 /* Arguments:                                                             */
-/*  REC     - The JSON string to parse.                                   */
+/*  POINTER - A path or member name to store the parsed JSON. Optional.   */
+/*  STRING  - The JSON string to parse.                                   */
 /*                                                                        */
 /* Returns:                                                               */
 /*  The position in the JSON string where parsing stopped.                */
 /*  -10 if there is nothing to parse or expected end of JSON.             */
 /*  Any other negative value from parsing.                                */
 JSON_PARSE: PROCEDURE EXPOSE JSON.
+  CALL _JSON_CLEAR_ERROR
   IF ARG() < 1 THEN
     RETURN _JSON_SET_ERROR('Nothing to parse.', -10)
-  REC = ARG(1)
 
-  /* Reset the JSON STEM. */
-  JSON. = ''
-  CALL JSON_CLEAR
+  /* If a pointer was given append to it. Otherwise start from scratch. */
+  IF ARG() > 1 THEN DO
+    POINTER = _JSON_PATH_RESOLVE(ARG(1), 'JSON_PARSE')
+    IF POINTER <= 0 THEN
+      RETURN POINTER
+    STRING = ARG(2)
+  END
+  ELSE DO
+    STRING = ARG(1)
+    CALL JSON_CLEAR
+    POINTER = JSON._PTR
+  END
 
   /* Save the JSON text and length. */
   /* Simplifies the parsing a bit. */
-  JSON._JSON = REC
-  JSON._LEN = LENGTH(REC)
+  JSON._JSON = STRING
+  JSON._LEN = LENGTH(STRING)
   IF JSON._LEN = 0 THEN
     RETURN _JSON_SET_ERROR('Nothing to parse.', -10)
 
   /* Do the parsing. */
-  INDX = _JSON_PARSE_ELEMENT('JSON', 1)
+  INDX = _JSON_PARSE_ELEMENT(POINTER, 1)
 
   /* Parsing error. */
   IF INDX < 0 THEN
@@ -51,6 +61,7 @@ JSON_CLEAR: PROCEDURE EXPOSE JSON.
   END
 
   /* Set the pointer to the root and set the type to null. */
+  JSON. = ''
   JSON._PTR = 'JSON'
   JSON.TYPE = 'U'
   JSON.VALUE = 'null'
@@ -80,6 +91,7 @@ JSON_ERROR_CODE: PROCEDURE EXPOSE JSON.
 /*  -31 Error opening a connection to the host in the URL.                */
 /*  -32 Error sending the HTTP request to the given URL.                  */
 JSON_GET: PROCEDURE EXPOSE JSON.
+  CALL _JSON_CLEAR_ERROR
   IF ARG() < 1 THEN
     IF JSON._URL = '' THEN
       RETURN _JSON_SET_ERROR('Nothing to get.', -20)
@@ -167,6 +179,7 @@ JSON_GET: PROCEDURE EXPOSE JSON.
 
 /* Return the position in the original JSON string where parsing stopped. */
 JSON_PARSE_END: PROCEDURE EXPOSE JSON.
+  CALL _JSON_CLEAR_ERROR
   RETURN JSON._END
 
 /* JSON Main Interface ========================================= Public = */
@@ -183,6 +196,7 @@ JSON_PARSE_END: PROCEDURE EXPOSE JSON.
 /*  -24 if the path is invalid.                                           */
 /*  -26 if the member was not found.                                      */
 JSON_COUNT: PROCEDURE EXPOSE JSON.
+  CALL _JSON_CLEAR_ERROR
   POINTER = JSON._PTR
 
   IF ARG() > 0 THEN DO
@@ -208,6 +222,7 @@ JSON_COUNT: PROCEDURE EXPOSE JSON.
 /*  -24 if the path is invalid.                                           */
 /*  -26 if the member was not found.                                      */
 JSON_DEPTH: PROCEDURE EXPOSE JSON.
+  CALL _JSON_CLEAR_ERROR
   POINTER = JSON._PTR
 
   IF ARG() > 0 THEN DO
@@ -230,6 +245,7 @@ JSON_DEPTH: PROCEDURE EXPOSE JSON.
 /*  -24 if the path is invalid.                                           */
 /*  -26 if the member was not found.                                      */
 JSON_LIST: PROCEDURE EXPOSE JSON.
+  CALL _JSON_CLEAR_ERROR
   SEP = ' '
   POINTER = JSON._PTR
 
@@ -276,6 +292,7 @@ JSON_LIST: PROCEDURE EXPOSE JSON.
 /*  -21 - The current element is an object.                               */
 /*  -26 - The member is not found.                                        */
 JSON_MEMBER: PROCEDURE EXPOSE JSON.
+  CALL _JSON_CLEAR_ERROR
   IF ARG() < 1 | ARG(1) = '' THEN
     RETURN _JSON_SET_ERROR('JSON_MEMBER() requires an member name.', -20)
   MEMBER = ARG(1)
@@ -302,6 +319,7 @@ JSON_MEMBER: PROCEDURE EXPOSE JSON.
 /*  -24 if the path is invalid.                                           */
 /*  -26 if the member is not found.                                       */
 JSON_NAME: PROCEDURE EXPOSE JSON.
+  CALL _JSON_CLEAR_ERROR
   POINTER = JSON._PTR
 
   IF ARG() > 0 THEN DO
@@ -329,6 +347,7 @@ JSON_NAME: PROCEDURE EXPOSE JSON.
 /*  -24 if the path is invalid.                                           */
 /*  -26 if the member was not found.                                      */
 JSON_NEXT: PROCEDURE EXPOSE JSON.
+  CALL _JSON_CLEAR_ERROR
   POINTER = JSON._PTR
   MODE = 'PTR'
 
@@ -377,6 +396,7 @@ JSON_NEXT: PROCEDURE EXPOSE JSON.
 /*  -24 if the path is invalid.                                           */
 /*  -26 if the member was not found.                                      */
 JSON_PATH: PROCEDURE EXPOSE JSON.
+  CALL _JSON_CLEAR_ERROR
   POINTER = JSON._PTR
 
   IF ARG() > 0 THEN DO
@@ -398,6 +418,7 @@ JSON_PATH: PROCEDURE EXPOSE JSON.
 /*  The new depth. 1 is for the root level.                               */
 /*  -22 if already at the root level.                                     */
 JSON_PARENT: PROCEDURE EXPOSE JSON.
+  CALL _JSON_CLEAR_ERROR
   IF JSON._PTR = 'JSON' THEN
     RETURN _JSON_SET_ERROR('JSON_PARENT() Already at the root', -22)
   JSON._PTR = SUBSTR(JSON._PTR, 1, LASTPOS('.', JSON._PTR) - 1)
@@ -408,11 +429,25 @@ JSON_PARENT: PROCEDURE EXPOSE JSON.
 /* From there it is up to you to make use of it. */
 /*                                                                        */
 /* Arguments:                                                             */
+/*  POINTER - A path or member name to get the type for. Optional.        */
 /*  INDENT  - The number of characters to indent each element.            */
 /*            Defaults to 1. Optional.                                    */
+/* Returns:                                                               */
+/*  1 on success. */
+/*  -24 if the path is invalid.                                           */
 JSON_PRETTY: PROCEDURE EXPOSE JSON.
+  CALL _JSON_CLEAR_ERROR
   INDENT = 1
-  IF ARG() > 0 & ARG(1) \= '' THEN
+  POINTER = 'JSON'
+
+  IF ARG() > 1 THEN DO
+    POINTER = _JSON_PATH_RESOLVE(ARG(1), 'JSON_STRING')
+    IF POINTER <= 0 THEN
+      RETURN POINTER
+    IF ARG(2) \= '' THEN
+      INDENT = ARG(2)
+  END
+  ELSE IF ARG() > 0 & ARG(1) \= '' THEN
     INDENT = ARG(1)
 
   /* Clear any previous pretty print data. */
@@ -423,7 +458,7 @@ JSON_PRETTY: PROCEDURE EXPOSE JSON.
   END
 
   JSON._PP.0 = 0
-  RETURN _JSON_PP_ELEMENT('JSON', 0, INDENT)
+  RETURN _JSON_PP_ELEMENT(POINTER, 0, INDENT)
 
 /* Move the pointer to the previous element in an array.                  */
 /*                                                                        */
@@ -434,6 +469,7 @@ JSON_PRETTY: PROCEDURE EXPOSE JSON.
 /*  -24 if the path is invalid.                                           */
 /*  -26 if the member was not found.                                      */
 JSON_PREV: PROCEDURE EXPOSE JSON.
+  CALL _JSON_CLEAR_ERROR
   POINTER = JSON._PTR
   MODE = 'PTR'
 
@@ -476,6 +512,7 @@ JSON_PREV: PROCEDURE EXPOSE JSON.
 /* Returns:                                                               */
 /*  1 for success.                                                        */
 JSON_ROOT: PROCEDURE EXPOSE JSON.
+  CALL _JSON_CLEAR_ERROR
   JSON._PTR = 'JSON'
   RETURN 1
 
@@ -486,11 +523,13 @@ JSON_ROOT: PROCEDURE EXPOSE JSON.
 /*                                                                        */
 /* Returns:                                                               */
 /*  A string representation of the parsed JSON.                           */
+/*  Returns '' if there is an error.                                      */
 JSON_STRING: PROCEDURE EXPOSE JSON.
+  CALL _JSON_CLEAR_ERROR
   POINTER = 'JSON'
 
   IF ARG() > 0 THEN DO
-    POINTER = _JSON_PATH_RESOLVE(ARG(1), 'JSON_TYPE')
+    POINTER = _JSON_PATH_RESOLVE(ARG(1), 'JSON_STRING')
     IF POINTER <= 0 THEN
       RETURN ''
   END
@@ -506,6 +545,7 @@ JSON_STRING: PROCEDURE EXPOSE JSON.
 /*  The element type. See the table Types: above.                         */
 /*  Returns '' if there is an error.                                      */
 JSON_TYPE: PROCEDURE EXPOSE JSON.
+  CALL _JSON_CLEAR_ERROR
   POINTER = JSON._PTR
 
   IF ARG() > 0 THEN DO
@@ -525,6 +565,7 @@ JSON_TYPE: PROCEDURE EXPOSE JSON.
 /*  The value of the current element or path.                             */
 /*  Returns '' if there is an error.                                      */
 JSON_VALUE: PROCEDURE EXPOSE JSON.
+  CALL _JSON_CLEAR_ERROR
   POINTER = JSON._PTR
 
   IF ARG() > 0 THEN DO
@@ -556,6 +597,7 @@ JSON_VALUE: PROCEDURE EXPOSE JSON.
 /*  -24 if the path is invalid.                                           */
 /*  -26 if the member was not found.                                      */
 JSON_IS_ARRAY: PROCEDURE EXPOSE JSON.
+  CALL _JSON_CLEAR_ERROR
   POINTER = JSON._PTR
 
   IF ARG() > 0 THEN DO
@@ -576,6 +618,7 @@ JSON_IS_ARRAY: PROCEDURE EXPOSE JSON.
 /*  -24 if the path is invalid.                                           */
 /*  -26 if the member was not found.                                      */
 JSON_IS_OBJECT: PROCEDURE EXPOSE JSON.
+  CALL _JSON_CLEAR_ERROR
   POINTER = JSON._PTR
 
   IF ARG() > 0 THEN DO
@@ -596,6 +639,7 @@ JSON_IS_OBJECT: PROCEDURE EXPOSE JSON.
 /*  -24 if the path is invalid.                                           */
 /*  -26 if the member was not found.                                      */
 JSON_IS_NUMBER: PROCEDURE EXPOSE JSON.
+  CALL _JSON_CLEAR_ERROR
   POINTER = JSON._PTR
 
   IF ARG() > 0 THEN DO
@@ -616,6 +660,7 @@ JSON_IS_NUMBER: PROCEDURE EXPOSE JSON.
 /*  -24 if the path is invalid.                                           */
 /*  -26 if the member was not found.                                      */
 JSON_IS_STRING: PROCEDURE EXPOSE JSON.
+  CALL _JSON_CLEAR_ERROR
   POINTER = JSON._PTR
 
   IF ARG() > 0 THEN DO
@@ -636,6 +681,7 @@ JSON_IS_STRING: PROCEDURE EXPOSE JSON.
 /*  -24 if the path is invalid.                                           */
 /*  -26 if the member was not found.                                      */
 JSON_IS_TRUE: PROCEDURE EXPOSE JSON.
+  CALL _JSON_CLEAR_ERROR
   POINTER = JSON._PTR
 
   IF ARG() > 0 THEN DO
@@ -656,6 +702,7 @@ JSON_IS_TRUE: PROCEDURE EXPOSE JSON.
 /*  -24 if the path is invalid.                                           */
 /*  -26 if the member was not found.                                      */
 JSON_IS_FALSE: PROCEDURE EXPOSE JSON.
+  CALL _JSON_CLEAR_ERROR
   POINTER = JSON._PTR
 
   IF ARG() > 0 THEN DO
@@ -676,6 +723,7 @@ JSON_IS_FALSE: PROCEDURE EXPOSE JSON.
 /*  -24 if the path is invalid.                                           */
 /*  -26 if the member was not found.                                      */
 JSON_IS_NULL: PROCEDURE EXPOSE JSON.
+  CALL _JSON_CLEAR_ERROR
   POINTER = JSON._PTR
 
   IF ARG() > 0 THEN DO
@@ -690,6 +738,7 @@ JSON_IS_NULL: PROCEDURE EXPOSE JSON.
 
 /* Escape special characters in a string. */
 JSON_ESCAPE: PROCEDURE
+  CALL _JSON_CLEAR_ERROR
   IF ARG() < 1 THEN
     RETURN _JSON_SET_ERROR("JSON_ESCAPE() requires a string.", -20)
   STR = ARG(1)
@@ -720,6 +769,7 @@ JSON_ESCAPE: PROCEDURE
 
 /* Convert a single character type code to a string type name. */
 JSON_TYPE_STRING: PROCEDURE
+  CALL _JSON_CLEAR_ERROR
   IF ARG() < 1 THEN
     RETURN _JSON_SET_ERROR("JSON_TYPE_STRING(TYPE) requires a type.", -20)
 
@@ -742,6 +792,7 @@ JSON_TYPE_STRING: PROCEDURE
 
 /* Turn escaped characters in string to normal characters. */
 JSON_UNESCAPE: PROCEDURE
+  CALL _JSON_CLEAR_ERROR
   IF ARG() < 1 THEN
     RETURN _JSON_SET_ERROR("JSON_UNESCAPE() requires a string.", -20)
 
@@ -790,6 +841,7 @@ JSON_UNESCAPE: PROCEDURE
 
 /* URL encode a string. */
 JSON_URL_ENCODE: PROCEDURE
+  CALL _JSON_CLEAR_ERROR
   IF ARG() < 1 THEN
     RETURN _JSON_SET_ERROR("JSON_URL_ENCODE() requires a string.", -20)
   STR = ARG(1)
@@ -1308,6 +1360,12 @@ _JSON_PP_PUSH: PROCEDURE EXPOSE JSON.
   RETURN INDX
 
 /* JSON Private Utilities ===================================== Private = */
+
+/* Clear the error code and text.                                         */
+_JSON_CLEAR_ERROR: PROCEDURE EXPOSE JSON.
+  DROP JSON._ERROR
+  DROP JSON._ERRORCODE
+  RETURN 1
 
 /* Search the object at the given pointer for a member name.              */
 /*                                                                        */
