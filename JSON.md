@@ -58,7 +58,6 @@ JSON can also be passed into the Transaction either from the command line or via
 
 Still to be completed.
 
-* Tests for the new `JSON_ADD_*` and `JSON_NEW_*` functions.
 * More refinement of the help text.
 * Expand the tests for more edge cases.
 * Properly parse and handle numbers.
@@ -125,6 +124,8 @@ See the notes on `Paths` below.
 | JSON_ERROR_TEXT()    | Returns most recent error text.                                 |
 | JSON_ERROR_CODE()    | Returns the most recent error code.                             |
 | JSON_GET(URL)        | Do an HTTP GET on the given URL and parse the resulting JSON.   |
+| JSON_INDEX()         | Returns the index # of the current element.                     |
+| JSON_INDEX(PATH)     | Returns the index # of the given path.                          |
 | JSON_LIST()          | Returns a list of members for the current object.               |
 | JSON_LIST(MEMBER)    | Returns a list of members for the given member name.            |
 | JSON_LIST(PATH)      | Returns a list of members for the given path.                   |
@@ -767,3 +768,5 @@ See the site <https://bofh.bombeck.io/> for details.
 * 2026-07-11 - More minor bug fixes. Changed test case file and result file proper JSON. Functions JSON_NEXT and JSON_PREV return proper booleans. (Check for errors using `JSON_ERROR_CODE()`.) Properly parse arguments to JSON commands in the console. The current page in the header is now an input field. Expanded documentation on the tests and moved it to a new section. Added a section for the various files `JSON` related files. Rearranged the JSON code and split the library into three files, `json-library.rexx` for parsing and working with JSON, `json-permutation.rexx` for modifying JSON and `json-testing.rexx` for testing the library.
 * 2026-07-12 - Added the function `JSON_URL_ENCODE(STR)`. Fixed inconsistent formatting in the map files. Fixes a few mistakes. Remove a dependency on `_JSON_SET_TYPE` in the parsing code. Consolidated the find text marker clearing.
 * 2026-07-14 - Clear the error code and error text. Now the error will always apply to the last JSON function executed. Changed `JSON_PARSE` to parse into a given path. `JSON_STRING` and `JSON_PRETTY` accept a path.
+* 2026-07-15 - Update the pretty printing function to handle args a bit better. Added `JSON_INDEX()` for returning the index number for an element. Added the commands `EDIT` and `NEW` in test mode for editing and creating test cases.
+* 2026-07-16 - Updates the tests to add section headers. Added tests for the new `JSON_ADD_*` and `JSON_NEW_*` functions. Group tests for errors together. Added section headings for the tests results. Fixed return values for the `JSON_ADD_*` and `JSON_NEW_*` functions.

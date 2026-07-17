@@ -3,6 +3,7 @@
 /* This is only the testing part of the JSON library.                     */
 /* This does not include the parsing or permutation code.                 */
 /* See the files 'json-library.rexx' 'json-permutation.rexx'.             */
+/* To run the tests all three parts of the library are required.          */
 
 /* JSON Testing ================================================ Public = */
 
@@ -14,6 +15,10 @@
 /*  -91 if the test variables name or json are missing.                   */
 JSON_TESTS: PROCEDURE EXPOSE JSON. JSON_TESTS.
   CALL _JSON_CLEAR_ERROR
+  DO TAIL OVER JSON_TESTS
+    INTERPRET 'DROP JSON_TESTS.' || TAIL
+  END
+
   JSON_TESTS. = ''
   TEST_FILE = 'json_tests.json'
   RESULT_FILE = 'json_results.json'
@@ -35,7 +40,7 @@ JSON_TESTS: PROCEDURE EXPOSE JSON. JSON_TESTS.
       RETURN _JSON_SET_ERROR('JSON_TESTS() Test file "' || TEST_FILE || '" does not exist. RC:' EIBRESP, -90)
     ELSE IF EIBRESP \= 0 THEN
       RETURN _JSON_SET_ERROR('JSON_TESTS() Unable to read tests. RC:' EIBRESP, -90)
-      
+
     /* Skip comments. and blank lines. */
     REC = STRIP(REC)
     IF LENGTH(REC) = 0 | SUBSTR(REC, 1, 2) = '//' THEN
@@ -56,19 +61,30 @@ JSON_TESTS: PROCEDURE EXPOSE JSON. JSON_TESTS.
 
   /* Process the test cases. */
   EXEC CICS WRITEQ TD QUEUE(RESULT_FILE) FROM("[") END-EXEC
-  DO WHILE JSON_NEXT()
-    /* Skip strings, they are used as comments. */
-    IF \JSON_IS_OBJECT() THEN
-      ITERATE
+  DO FOREVER
+    /* Strings that start with '#' are added to the results as a section. */
+    IF JSON_IS_STRING() & SUBSTR(JSON_VALUE(), 1, 1) = '#' THEN DO
+      INDX = JSON_TESTS.TOTAL + 1
+      JSON_TESTS.TOTAL = INDX
+      JSON_TESTS.INDX.SECTION = JSON_VALUE()
+    END
 
-    /* Execute the test. */
-    JSON_TESTS.TOTAL = JSON_TESTS.TOTAL + 1
-    RESULT_JSON = _JSON_TEST_CASE(JSON_STRING(JSON_PATH()))
-    IF JSON_TESTS.CODE < 0 THEN
-      RETURN _JSON_SET_ERROR(JSON_TESTS.ERROR, JSON_TESTS.CODE)
+    /* Skip anything that is not an object. */
+    IF JSON_IS_OBJECT() THEN DO
+      /* Execute the test. */
+      JSON_TESTS.TOTAL = JSON_TESTS.TOTAL + 1
+      RESULT_JSON = _JSON_TEST_CASE(JSON_STRING(JSON_PATH()))
+      IF JSON_TESTS.CODE < 0 THEN
+        RETURN _JSON_SET_ERROR(JSON_TESTS.ERROR, JSON_TESTS.CODE)
 
-    RESULT_JSON = RESULT_JSON || ','
-    EXEC CICS WRITEQ TD QUEUE(RESULT_FILE) FROM(RESULT_JSON) END-EXEC
+      /* Write the results. */
+      RESULT_JSON = RESULT_JSON || ','
+      EXEC CICS WRITEQ TD QUEUE(RESULT_FILE) FROM(RESULT_JSON) END-EXEC
+    END
+
+    /* More? */
+    IF \JSON_NEXT() THEN
+      LEAVE
   END
   EXEC CICS WRITEQ TD QUEUE(RESULT_FILE) FROM("]") END-EXEC
 
@@ -97,7 +113,7 @@ _JSON_TEST_CASE: PROCEDURE EXPOSE JSON_TESTS.
     JSON_TESTS.ERROR = 'JSON_TESTS() Unable parse the test. Error:' JSON._ERROR 'Test:' TEST_JSON
     JSON_TESTS.CODE = -90
     RETURN ''
-  END 
+  END
 
   /* Get the variables we care about. */
   TEST_NAME       = JSON_VALUE('.name')
@@ -123,6 +139,8 @@ _JSON_TEST_CASE: PROCEDURE EXPOSE JSON_TESTS.
   TEST_ARG1_TYPE  = JSON_TYPE('.arg1')
   TEST_ARG2       = JSON_VALUE('.arg2')
   TEST_ARG2_TYPE  = JSON_TYPE('.arg2')
+  TEST_ARG3       = JSON_VALUE('.arg3')
+  TEST_ARG3_TYPE  = JSON_TYPE('.arg3')
   TEST_RESULT     = JSON_VALUE('.result')
 
   /* Parse the test JSON. */
@@ -144,8 +162,11 @@ _JSON_TEST_CASE: PROCEDURE EXPOSE JSON_TESTS.
     TEST_FUNC = 'CALL' TEST_FUNC
     IF TEST_ARG1_TYPE \= '' THEN DO
       TEST_FUNC = TEST_FUNC '"' || JSON_ESCAPE(TEST_ARG1) || '"'
-      IF TEST_ARG2_TYPE \= '' THEN
+      IF TEST_ARG2_TYPE \= '' THEN DO
         TEST_FUNC = TEST_FUNC || ', "' || JSON_ESCAPE(TEST_ARG2) || '"'
+        IF TEST_ARG3_TYPE \= '' THEN
+          TEST_FUNC = TEST_FUNC || ', "' || JSON_ESCAPE(TEST_ARG3) || '"'
+      END
     END
     INTERPRET TEST_FUNC
     FUNC_RESULT = RESULT

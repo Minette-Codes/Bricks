@@ -225,9 +225,13 @@ JSON_ADD_ARRAY: PROCEDURE EXPOSE JSON.
       RETURN POINTER
   END
 
+  TYPE = VALUE(POINTER || '.TYPE')
+  IF TYPE \= 'A' THEN
+    RETURN _JSON_SET_ERROR('JSON_ADD_ARRAY() requires an array.', -21)
+
   /* Setup the new element. */
   INDX = _JSON_ADD(POINTER)
-  RETURN _JSON_SET_TYPE(POINTER || '.' || INDX, 'A')
+  CALL _JSON_SET_TYPE POINTER || '.' || INDX, 'A'
   RETURN INDX
 
 /* Adds a new object element to an array.                                 */
@@ -250,9 +254,13 @@ JSON_ADD_OBJECT: PROCEDURE EXPOSE JSON.
       RETURN POINTER
   END
 
+  TYPE = VALUE(POINTER || '.TYPE')
+  IF TYPE \= 'A' THEN
+    RETURN _JSON_SET_ERROR('JSON_ADD_OBJECT() requires an array.', -21)
+
   /* Setup the new element. */
   INDX = _JSON_ADD(POINTER)
-  RETURN _JSON_SET_TYPE(POINTER || '.' || INDX, 'O')
+  CALL _JSON_SET_TYPE POINTER || '.' || INDX, 'O'
   RETURN INDX
 
 /* Adds a new string to an array.                                         */
@@ -279,6 +287,10 @@ JSON_ADD_STRING: PROCEDURE EXPOSE JSON.
       RETURN POINTER
     VALUE = ARG(2)
   END
+
+  TYPE = VALUE(POINTER || '.TYPE')
+  IF TYPE \= 'A' THEN
+    RETURN _JSON_SET_ERROR('JSON_ADD_STRING() requires an array.', -21)
 
   /* Setup the new element. */
   INDX = _JSON_ADD(POINTER)
@@ -311,6 +323,10 @@ JSON_ADD_NUMBER: PROCEDURE EXPOSE JSON.
     VALUE = ARG(2)
   END
 
+  TYPE = VALUE(POINTER || '.TYPE')
+  IF TYPE \= 'A' THEN
+    RETURN _JSON_SET_ERROR('JSON_ADD_NUMBER() requires an array.', -21)
+
   /* Setup the new element. */
   INDX = _JSON_ADD(POINTER)
   CALL VALUE POINTER || '.' || INDX || '.TYPE', 'N'
@@ -337,9 +353,13 @@ JSON_ADD_TRUE: PROCEDURE EXPOSE JSON.
       RETURN POINTER
   END
 
+  TYPE = VALUE(POINTER || '.TYPE')
+  IF TYPE \= 'A' THEN
+    RETURN _JSON_SET_ERROR('JSON_ADD_TRUE() requires an array.', -21)
+
   /* Setup the new element. */
   INDX = _JSON_ADD(POINTER)
-  RETURN _JSON_SET_TYPE(POINTER || '.' || INDX, 'T')
+  CALL _JSON_SET_TYPE POINTER || '.' || INDX, 'T'
   RETURN INDX
 
 /* Adds a new false element to an array.                                  */
@@ -362,9 +382,13 @@ JSON_ADD_FALSE: PROCEDURE EXPOSE JSON.
       RETURN POINTER
   END
 
+  TYPE = VALUE(POINTER || '.TYPE')
+  IF TYPE \= 'A' THEN
+    RETURN _JSON_SET_ERROR('JSON_ADD_FALSE() requires an array.', -21)
+
   /* Setup the new element. */
   INDX = _JSON_ADD(POINTER)
-  RETURN _JSON_SET_TYPE(POINTER || '.' || INDX, 'F')
+  CALL _JSON_SET_TYPE POINTER || '.' || INDX, 'F'
   RETURN INDX
 
 /* Adds a new null element to an array.                                   */
@@ -387,9 +411,13 @@ JSON_ADD_NULL: PROCEDURE EXPOSE JSON.
       RETURN POINTER
   END
 
+  TYPE = VALUE(POINTER || '.TYPE')
+  IF TYPE \= 'A' THEN
+    RETURN _JSON_SET_ERROR('JSON_ADD_NULL() requires an array.', -21)
+
   /* Setup the new element. */
   INDX = _JSON_ADD(POINTER)
-  RETURN _JSON_SET_TYPE(POINTER || '.' || INDX, 'U')
+  CALL _JSON_SET_TYPE POINTER || '.' || INDX, 'U'
   RETURN INDX
 
 /* Adds a new array element to an object.                                 */
@@ -417,9 +445,14 @@ JSON_NEW_ARRAY: PROCEDURE EXPOSE JSON.
     NAME = ARG(2)
   END
 
+  TYPE = VALUE(POINTER || '.TYPE')
+  IF TYPE \= 'O' THEN
+    RETURN _JSON_SET_ERROR('JSON_NEW_ARRAY() requires an object', -21)
+
   /* Setup the new element. */
   INDX = _JSON_NEW(POINTER, NAME)
-  RETURN _JSON_SET_TYPE(POINTER || '.' || INDX, 'A')
+  CALL _JSON_SET_TYPE POINTER || '.' || INDX, 'A'
+  RETURN INDX
 
 /* Adds a new object element to an object.                                */
 /*                                                                        */
@@ -446,9 +479,14 @@ JSON_NEW_OBJECT: PROCEDURE EXPOSE JSON.
     NAME = ARG(2)
   END
 
+  TYPE = VALUE(POINTER || '.TYPE')
+  IF TYPE \= 'O' THEN
+    RETURN _JSON_SET_ERROR('JSON_NEW_OBJECT() requires an object', -21)
+
   /* Setup the new element. */
   INDX = _JSON_NEW(POINTER, NAME)
-  RETURN _JSON_SET_TYPE(POINTER || '.' || INDX, 'O')
+  CALL _JSON_SET_TYPE POINTER || '.' || INDX, 'O'
+  RETURN INDX
 
 /* Adds a new string element to an object.                                */
 /*                                                                        */
@@ -477,6 +515,10 @@ JSON_NEW_STRING: PROCEDURE EXPOSE JSON.
     NAME = ARG(2)
     VALUE = ARG(3)
   END
+
+  TYPE = VALUE(POINTER || '.TYPE')
+  IF TYPE \= 'O' THEN
+    RETURN _JSON_SET_ERROR('JSON_NEW_STRING() requires an object', -21)
 
   /* Setup the new element. */
   INDX = _JSON_NEW(POINTER, NAME)
@@ -512,6 +554,10 @@ JSON_NEW_NUMBER: PROCEDURE EXPOSE JSON.
     VALUE = ARG(3)
   END
 
+  TYPE = VALUE(POINTER || '.TYPE')
+  IF TYPE \= 'O' THEN
+    RETURN _JSON_SET_ERROR('JSON_NEW_NUMBER() requires an object', -21)
+
   /* Setup the new element. */
   INDX = _JSON_NEW(POINTER, NAME)
   CALL VALUE POINTER || '.' || INDX || '.TYPE', 'N'
@@ -543,9 +589,14 @@ JSON_NEW_TRUE: PROCEDURE EXPOSE JSON.
     NAME = ARG(2)
   END
 
+  TYPE = VALUE(POINTER || '.TYPE')
+  IF TYPE \= 'O' THEN
+    RETURN _JSON_SET_ERROR('JSON_NEW_TRUE() requires an object', -21)
+
   /* Setup the new element. */
   INDX = _JSON_NEW(POINTER, NAME)
-  RETURN _JSON_SET_TYPE(POINTER || '.' || INDX, 'T')
+  CALL _JSON_SET_TYPE POINTER || '.' || INDX, 'T'
+  RETURN INDX
 
 /* Adds a new false element to an object.                                 */
 /*                                                                        */
@@ -572,9 +623,14 @@ JSON_NEW_FALSE: PROCEDURE EXPOSE JSON.
     NAME = ARG(2)
   END
 
+  TYPE = VALUE(POINTER || '.TYPE')
+  IF TYPE \= 'O' THEN
+    RETURN _JSON_SET_ERROR('JSON_NEW_FALSE() requires an object', -21)
+
   /* Setup the new element. */
   INDX = _JSON_NEW(POINTER, NAME)
-  RETURN _JSON_SET_TYPE(POINTER || '.' || INDX, 'F')
+  CALL _JSON_SET_TYPE POINTER || '.' || INDX, 'F'
+  RETURN INDX
 
 /* Adds a new null element to an object.                                  */
 /*                                                                        */
@@ -601,9 +657,14 @@ JSON_NEW_NULL: PROCEDURE EXPOSE JSON.
     NAME = ARG(2)
   END
 
+  TYPE = VALUE(POINTER || '.TYPE')
+  IF TYPE \= 'O' THEN
+    RETURN _JSON_SET_ERROR('JSON_NEW_NULL() requires an object', -21)
+
   /* Setup the new element. */
   INDX = _JSON_NEW(POINTER, NAME)
-  RETURN _JSON_SET_TYPE(POINTER || '.' || INDX, 'N')
+  CALL _JSON_SET_TYPE POINTER || '.' || INDX, 'N'
+  RETURN INDX
 
 /* Set the current element type to array.                                 */
 /*                                                                        */

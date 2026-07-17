@@ -233,6 +233,34 @@ JSON_DEPTH: PROCEDURE EXPOSE JSON.
 
   RETURN COUNTSTR('.', POINTER) + 1
 
+/* Returns the index number of the current element, or the path.          */
+/* Or at a given path.                                                    */
+/*                                                                        */
+/* Arguments:                                                             */
+/*  POINTER - A path or member name to get the index for. Optional.       */
+/*                                                                        */
+/* Returns:                                                               */
+/*  The element index number.                                             */
+/*  -21 if the current element is not an array or object.                 */
+/*  -24 if the path is invalid.                                           */
+/*  -26 if the member was not found.                                      */
+JSON_INDEX: PROCEDURE EXPOSE JSON.
+  CALL _JSON_CLEAR_ERROR
+  POINTER = JSON._PTR
+
+  IF ARG() > 0 THEN DO
+    POINTER = _JSON_PATH_RESOLVE(ARG(1), 'JSON_INDEX')
+    IF POINTER <= 0 THEN
+      RETURN POINTER
+  END
+
+  PARENT = SUBSTR(POINTER, 1, LASTPOS('.', POINTER) - 1)
+  PARENT_TYPE = VALUE(PARENT || '.TYPE')
+  IF PARENT_TYPE \= 'A' & PARENT_TYPE \= 'O' THEN
+    RETURN _JSON_SET_ERROR('JSON_INDEX() requires an array or object.', -21)
+
+  RETURN SUBSTR(POINTER, LASTPOS('.', POINTER) + 1)
+
 /* Return a list of members in the current object.                        */
 /* If no separator is specified the default is space.                     */
 /*                                                                        */
@@ -430,8 +458,11 @@ JSON_PARENT: PROCEDURE EXPOSE JSON.
 /*                                                                        */
 /* Arguments:                                                             */
 /*  POINTER - A path or member name to get the type for. Optional.        */
+/*            The path should start with a period '.' or a plus '+'.      */
+/*            Otherwise a single argument is assumed to be the INDENT.    */
 /*  INDENT  - The number of characters to indent each element.            */
 /*            Defaults to 1. Optional.                                    */
+/*                                                                        */
 /* Returns:                                                               */
 /*  1 on success. */
 /*  -24 if the path is invalid.                                           */
@@ -440,15 +471,22 @@ JSON_PRETTY: PROCEDURE EXPOSE JSON.
   INDENT = 1
   POINTER = 'JSON'
 
-  IF ARG() > 1 THEN DO
+  IF ARG() = 2 THEN DO
     POINTER = _JSON_PATH_RESOLVE(ARG(1), 'JSON_STRING')
     IF POINTER <= 0 THEN
       RETURN POINTER
     IF ARG(2) \= '' THEN
       INDENT = ARG(2)
   END
-  ELSE IF ARG() > 0 & ARG(1) \= '' THEN
-    INDENT = ARG(1)
+  ELSE IF ARG() = 1 THEN DO
+    IF ABBREV(ARG(1), '.') THEN DO
+      POINTER = _JSON_PATH_RESOLVE(ARG(1), 'JSON_STRING')
+      IF POINTER <= 0 THEN
+        RETURN POINTER
+    END
+    ELSE IF ARG(1) \= '' THEN
+      INDENT = ARG(1)
+  END
 
   /* Clear any previous pretty print data. */
   IF JSON._PP.0 \= '' THEN DO
@@ -1327,7 +1365,7 @@ _JSON_PP_OBJECT: PROCEDURE EXPOSE JSON.
     IF POS(TYPE, "NTFU") > 0 THEN
       /* Numbers, booleans and null on the same line as the member name. */
       CALL _JSON_PP_PUSH MEMBER ||,
-        VALUE(POINTER || '.' || INDX || '.VALUE') || ELEMENT_TAIL, INDENT + 1, SHIFT
+        ' ' || VALUE(POINTER || '.' || INDX || '.VALUE') || ELEMENT_TAIL, INDENT + 1, SHIFT
     ELSE IF TYPE = 'S' THEN
       /* Strings on the same line as the member name. */
       CALL _JSON_PP_PUSH MEMBER ||,

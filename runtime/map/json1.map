@@ -1,10 +1,11 @@
 * JSON -- JSON Explorer.
 * Maps in this set:
-*   JSONCONSOLE - The JSON Explorer Console.
-*   JSONHELP    - Display the JSON Explorer help test.
-*   JSONPRETTY  - Display Pretty Printed JSON.
-*   METRICSDEMO - The JSON Demo to display Bricks metrics.
-*   JSONTESTS   - Display the result of running the tests.
+*   JSONCONSOLE   - The JSON Explorer Console.
+*   JSONHELP      - Display the JSON Explorer help test.
+*   JSONPRETTY    - Display Pretty Printed JSON.
+*   JSONTESTS     - Display the result of running the tests.
+*   JSONTESTEDIT  - Edit one of the JSON tests.
+*   METRICSDEMO   - The JSON Demo to display Bricks metrics.
 
 MAPSET JSON1
 
@@ -60,7 +61,7 @@ MAP JSONCONSOLE SIZE 24x80
   INPUT MSG       AT 22,0   LEN 79  PROT COLOR=RED
   FIELD           AT 23,0   LEN 78  PROT COLOR=BLUE           "F1=Help  F2=Find  F3=Exit  F4=Recall  F5=Refresh  F7/8=Up/Down  F6/9=Top/Bot"
   CURSOR          AT OPTION
-ENDMAP
+ENDMAP * JSONCONSOLE
 
 MAP JSONHELP SIZE 24x80
   FIELD           AT 0 ,0   LEN 13  PROT COLOR=YELLOW         "JSON Explorer"
@@ -106,7 +107,7 @@ MAP JSONHELP SIZE 24x80
   INPUT MSG       AT 22,0   LEN 79  PROT COLOR=RED
   FIELD           AT 23,0   LEN 78  PROT COLOR=BLUE           "F1=Help  F2=Find  F3=Exit  F4=Recall              F7/8=Up/Down  F6/9=Top/Bot"
   CURSOR          AT OPTION
-ENDMAP
+ENDMAP * JSONHELP
 
 MAP JSONPRETTY SIZE 24x80
   FIELD           AT 0 ,0   LEN 13  PROT COLOR=YELLOW         "JSON Explorer"
@@ -150,7 +151,7 @@ MAP JSONPRETTY SIZE 24x80
   INPUT MSG       AT 22,0   LEN 79  PROT COLOR=RED
   FIELD           AT 23,0   LEN 78  PROT COLOR=BLUE           "F1=Help  F2=Find  F3=Exit  F4=Recall              F7/8=Up/Down  F6/9=Top/Bot"
   CURSOR          AT OPTION
-ENDMAP
+ENDMAP * JSONPRETTY
 
 MAP JSONTESTS SIZE 24x80
   FIELD           AT 0 ,0   LEN 10  PROT COLOR=YELLOW         "JSON Tests"
@@ -201,7 +202,65 @@ MAP JSONTESTS SIZE 24x80
   INPUT MSG       AT 22,0   LEN 79  PROT COLOR=RED
   FIELD           AT 23,0   LEN 78  PROT COLOR=BLUE           "F1=Help  F2=Find  F3=Exit  F4=Recall  F5=Details  F7/8=Up/Down  F6/9=Top/Bot"
   CURSOR          AT OPTION
-ENDMAP
+ENDMAP * JSONTESTS
+
+MAP JSONTESTEDIT SIZE 24x80
+  FIELD           AT 0 ,0   LEN 10  PROT COLOR=YELLOW         "JSON Test Edit"
+  FIELD           AT 0 ,38  LEN 37  PROT COLOR=WHITE          "Validation is not performed on input."
+  
+  FIELD           AT 2 ,0   LEN 5   PROT COLOR=CYAN           "Name:"
+  INPUT TNAME     AT 2 ,13  LEN 65  UNDERSCORE COLOR=WHITE
+  STOP            AT 2 ,79
+
+  FIELD           AT 4 ,0   LEN 5   PROT COLOR=CYAN           "JSON:"
+  INPUT TJSON1    AT 4 ,13  LEN 65  UNDERSCORE COLOR=WHITE
+  STOP            AT 4 ,79
+  INPUT TJSON2    AT 6 ,13  LEN 65  UNDERSCORE COLOR=WHITE
+  STOP            AT 6 ,79
+  INPUT TJSON3    AT 8 ,13  LEN 65  UNDERSCORE COLOR=WHITE
+  STOP            AT 8 ,79
+
+  FIELD           AT 10,0   LEN 3   PROT COLOR=CYAN           "RC:"
+  INPUT TRC       AT 10,13  LEN 10  UNDERSCORE COLOR=WHITE
+  STOP            AT 10,24
+  FIELD           AT 10,30  LEN 32  PROT COLOR=WHITE          "(An integer for an exact match.)"
+  FIELD           AT 11,30  LEN 48  PROT COLOR=WHITE          "(True for success, > 0. False for failure, < 0.)"
+
+  FIELD           AT 12,0   LEN 6   PROT COLOR=CYAN           "Error:"
+  INPUT TERROR    AT 12,13  LEN 65  UNDERSCORE COLOR=WHITE
+  STOP            AT 12,79
+
+  FIELD           AT 14,0   LEN 7   PROT COLOR=CYAN           "String:"
+  INPUT TSTRING   AT 14,13  LEN 65  UNDERSCORE COLOR=WHITE
+  STOP            AT 14,79
+
+  FIELD           AT 16,0   LEN 5   PROT COLOR=CYAN           "Path:"
+  INPUT TPATH     AT 16,13  LEN 65  UNDERSCORE COLOR=WHITE
+  STOP            AT 16,79
+
+  FIELD           AT 18,0   LEN 9   PROT COLOR=CYAN           "Function:"
+  INPUT TFUNC     AT 18,13  LEN 65  UNDERSCORE COLOR=WHITE
+  STOP            AT 18,79
+
+  FIELD           AT 19,0   LEN 4   PROT COLOR=CYAN           "Args"
+  FIELD           AT 19,13  LEN 2   PROT COLOR=CYAN           "1:"
+  INPUT TARG1     AT 19,16  LEN 15  UNDERSCORE COLOR=WHITE
+  STOP            AT 19,32
+  FIELD           AT 19,37  LEN 2   PROT COLOR=CYAN           "2:"
+  INPUT TARG2     AT 19,40  LEN 15  UNDERSCORE COLOR=WHITE
+  STOP            AT 19,55
+  FIELD           AT 19,60  LEN 2   PROT COLOR=CYAN           "3:"
+  INPUT TARG3     AT 19,63  LEN 15  UNDERSCORE COLOR=WHITE
+  STOP            AT 19,79
+
+  FIELD           AT 21,0   LEN 7   PROT COLOR=CYAN           "Result:"
+  INPUT TRESULT   AT 21,13  LEN 65  UNDERSCORE COLOR=WHITE
+  STOP            AT 21,79
+
+  INPUT MSG       AT 22,0   LEN 79  PROT COLOR=RED
+  FIELD           AT 23,0   LEN 78  PROT COLOR=BLUE           "ENTER=Save  F3=Cancel"
+  CURSOR          AT TNAME
+ENDMAP * JSONTESTEDIT
 
 MAP METRICSDEMO SIZE 24x80
   FIELD           AT 0 ,0   LEN 26  PROT COLOR=BLUE           "JSON DEMO - Bricks Metrics"
@@ -320,4 +379,4 @@ MAP METRICSDEMO SIZE 24x80
   INPUT MSG       AT 22,0   LEN 79  PROT COLOR=RED
   FIELD           AT 23,0   LEN 78  PROT COLOR=BLUE           "ENTER=Refresh  PF3=Exit  PF5=Refresh"
   CURSOR          AT 23,79
-ENDMAP
+ENDMAP * METRICSDEMO

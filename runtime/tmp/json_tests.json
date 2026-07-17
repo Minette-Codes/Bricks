@@ -24,9 +24,9 @@
   "  null to accept anything other than -1. (This means I screwed up the code.)",
   "",
   "Strings are ignored and intended for comments.",
+  "Strings starting with a '#' will be displayed in the test results.",
   "",
-  "Exercise the parsing interface.",
-  "",
+  "# Exercise the parsing interface.",
   {
     "name": "Simple object.",
     "json": "{'T':true}",
@@ -181,6 +181,8 @@
     "error": false,
     "string": "[true]"
   },
+  "",
+  "# Parsing errors.",
   {
     "name": "ERROR: Invalid JSON.",
     "json": "invalid",
@@ -238,8 +240,7 @@
     "string": "[true]"
   },
   "",
-  "Main interface.",
-  "",
+  "# Main interface.",
   {
     "name": "Function: JSON_CLEAR()",
     "json": "true",
@@ -288,15 +289,6 @@
     "result": "3"
   },
   {
-    "name": "ERROR: Function: JSON_COUNT() - Not Array or Object.",
-    "json": "null",
-    "rc": false,
-    "error": true,
-    "string": "null",
-    "func": "JSON_COUNT",
-    "result": -21
-  },
-  {
     "name": "Function: JSON_DEPTH()",
     "json": "[true]",
     "rc": 0,
@@ -325,6 +317,36 @@
     "func": "JSON_DEPTH",
     "arg1": ".1.path",
     "result": "3"
+  },
+  {
+    "name": "Function: JSON_INDEX()",
+    "json": "[true]",
+    "rc": 0,
+    "error": false,
+    "string": "[true]",
+    "path": ".1",
+    "func": "JSON_INDEX",
+    "result": "1"
+  },
+  {
+    "name": "Function: JSON_INDEX(MEMBER)",
+    "json": "{'member':true}",
+    "rc": 0,
+    "error": false,
+    "string": "{'member':true}",
+    "func": "JSON_INDEX",
+    "arg1": "member",
+    "result": "1"
+  },
+  {
+    "name": "Function: JSON_INDEX(PATH)",
+    "json": "[{'path':false}]",
+    "rc": 0,
+    "error": false,
+    "string": "[{'path':false}]",
+    "func": "JSON_INDEX",
+    "arg1": ".1.path",
+    "result": "1"
   },
   {
     "name": "Function: JSON_LIST()",
@@ -367,15 +389,6 @@
     "result": "A=B"
   },
   {
-    "name": "ERROR: Function: JSON_LIST() - Not Array or Object.",
-    "json": "null",
-    "rc": false,
-    "error": true,
-    "string": "null",
-    "func": "JSON_LIST",
-    "result": -21
-  },
-  {
     "name": "Function: JSON_MEMBER(MEMBER)",
     "json": "{'member':true}",
     "rc": 0,
@@ -384,45 +397,6 @@
     "func": "JSON_MEMBER",
     "arg1": "member",
     "result": "1"
-  },
-  {
-    "name": "ERROR: Function: JSON_MEMBER(MEMBER) - Member not found.",
-    "json": "{'member':true}",
-    "rc": false,
-    "error": true,
-    "string": "{'member':true}",
-    "func": "JSON_MEMBER",
-    "arg1": "no",
-    "result": -26
-  },
-  {
-    "name": "ERROR: Function: JSON_MEMBER(MEMBER) - Not an object.",
-    "json": "[false]",
-    "rc": false,
-    "error": true,
-    "string": "[false]",
-    "func": "JSON_MEMBER",
-    "arg1": "no",
-    "result": -21
-  },
-  {
-    "name": "ERROR: Function: JSON_MEMBER() - No member given.",
-    "json": "{'member':true}",
-    "rc": false,
-    "error": true,
-    "string": "{'member':true}",
-    "func": "JSON_MEMBER",
-    "result": -20
-  },
-  {
-    "name": "ERROR: Function: JSON_MEMBER() - Blank member.",
-    "json": "{'member':true}",
-    "rc": false,
-    "error": true,
-    "string": "{'member':true}",
-    "func": "JSON_MEMBER",
-    "arg1": "",
-    "result": -20
   },
   {
     "name": "Function: JSON_NAME()",
@@ -453,16 +427,6 @@
     "func": "JSON_NAME",
     "arg1": ".1.path",
     "result": "path"
-  },
-  {
-    "name": "ERROR: Function: JSON_NAME() - Not Array or Object.",
-    "json": "[null]",
-    "rc": false,
-    "error": true,
-    "string": "[null]",
-    "func": "JSON_NAME",
-    "arg1": ".1",
-    "result": -21
   },
   {
     "name": "Function: JSON_NEXT() - First element.",
@@ -503,15 +467,6 @@
     "func": "JSON_NEXT",
     "arg1": ".4",
     "result": "0"
-  },
-  {
-    "name": "ERROR: Function: JSON_NEXT() - Not Array or Object.",
-    "json": "null",
-    "rc": false,
-    "error": true,
-    "string": "null",
-    "func": "JSON_NEXT",
-    "result": -21
   },
   {
     "name": "Function: JSON_PATH() - Root.",
@@ -573,36 +528,6 @@
     "result": ".1"
   },
   {
-    "name": "ERROR: Function: JSON_PATH(MEMBER) - Invalid member.",
-    "json": "{'no':true}",
-    "rc": -26,
-    "error": true,
-    "string": "{'no':true}",
-    "func": "JSON_PATH",
-    "arg1": "member",
-    "result": "-26"
-  },
-  {
-    "name": "ERROR: Function: JSON_PATH(PATH) - Invalid element.",
-    "json": "[{'no':false}]",
-    "rc": -25,
-    "error": true,
-    "string": "[{'no':false}]",
-    "func": "JSON_PATH",
-    "arg1": ".1.2",
-    "result": "-25"
-  },
-  {
-    "name": "ERROR: Function: JSON_PATH(PATH) - Invalid path.",
-    "json": "[{'no':false}]",
-    "rc": -24,
-    "error": true,
-    "string": "[{'no':false}]",
-    "func": "JSON_PATH",
-    "arg1": "",
-    "result": "-24"
-  },
-  {
     "name": "Function: JSON_PARENT() - 1 level deep.",
     "json": "[null]",
     "rc": 0,
@@ -611,15 +536,6 @@
     "path": ".1",
     "func": "JSON_PARENT",
     "result": "1"
-  },
-  {
-    "name": "ERROR: Function: JSON_PARENT() - At root.",
-    "json": "null",
-    "rc": -22,
-    "error": true,
-    "string": "null",
-    "func": "JSON_PARENT",
-    "result": "-22"
   },
   {
     "name": "Function: JSON_PARSE_END()",
@@ -678,15 +594,6 @@
     "func": "JSON_PREV",
     "arg1": ".1",
     "result": "0"
-  },
-  {
-    "name": "ERROR: Function: JSON_PREV() - Not Array or Object.",
-    "json": "null",
-    "rc": false,
-    "error": true,
-    "string": "null",
-    "func": "JSON_PREV",
-    "result": -21
   },
   {
     "name": "Function: JSON_ROOT()",
@@ -804,8 +711,133 @@
     "result": "false"
   },
   "",
-  "Shortcuts for type checking.",
+  "# Main interface errors.",
+  {
+    "name": "ERROR: Function: JSON_COUNT() - Not Array or Object.",
+    "json": "null",
+    "rc": false,
+    "error": true,
+    "string": "null",
+    "func": "JSON_COUNT",
+    "result": -21
+  },
+  {
+    "name": "ERROR: Function: JSON_LIST() - Not Array or Object.",
+    "json": "null",
+    "rc": false,
+    "error": true,
+    "string": "null",
+    "func": "JSON_LIST",
+    "result": -21
+  },
+  {
+    "name": "ERROR: Function: JSON_MEMBER(MEMBER) - Member not found.",
+    "json": "{'member':true}",
+    "rc": false,
+    "error": true,
+    "string": "{'member':true}",
+    "func": "JSON_MEMBER",
+    "arg1": "no",
+    "result": -26
+  },
+  {
+    "name": "ERROR: Function: JSON_MEMBER(MEMBER) - Not an object.",
+    "json": "[false]",
+    "rc": false,
+    "error": true,
+    "string": "[false]",
+    "func": "JSON_MEMBER",
+    "arg1": "no",
+    "result": -21
+  },
+  {
+    "name": "ERROR: Function: JSON_MEMBER() - No member given.",
+    "json": "{'member':true}",
+    "rc": false,
+    "error": true,
+    "string": "{'member':true}",
+    "func": "JSON_MEMBER",
+    "result": -20
+  },
+  {
+    "name": "ERROR: Function: JSON_MEMBER() - Blank member.",
+    "json": "{'member':true}",
+    "rc": false,
+    "error": true,
+    "string": "{'member':true}",
+    "func": "JSON_MEMBER",
+    "arg1": "",
+    "result": -20
+  },
+  {
+    "name": "ERROR: Function: JSON_NAME() - Not Array or Object.",
+    "json": "[null]",
+    "rc": false,
+    "error": true,
+    "string": "[null]",
+    "func": "JSON_NAME",
+    "arg1": ".1",
+    "result": -21
+  },
+  {
+    "name": "ERROR: Function: JSON_NEXT() - Not Array or Object.",
+    "json": "null",
+    "rc": false,
+    "error": true,
+    "string": "null",
+    "func": "JSON_NEXT",
+    "result": -21
+  },
+  {
+    "name": "ERROR: Function: JSON_PATH(MEMBER) - Invalid member.",
+    "json": "{'no':true}",
+    "rc": -26,
+    "error": true,
+    "string": "{'no':true}",
+    "func": "JSON_PATH",
+    "arg1": "member",
+    "result": "-26"
+  },
+  {
+    "name": "ERROR: Function: JSON_PATH(PATH) - Invalid element.",
+    "json": "[{'no':false}]",
+    "rc": -25,
+    "error": true,
+    "string": "[{'no':false}]",
+    "func": "JSON_PATH",
+    "arg1": ".1.2",
+    "result": "-25"
+  },
+  {
+    "name": "ERROR: Function: JSON_PATH(PATH) - Invalid path.",
+    "json": "[{'no':false}]",
+    "rc": -24,
+    "error": true,
+    "string": "[{'no':false}]",
+    "func": "JSON_PATH",
+    "arg1": "",
+    "result": "-24"
+  },
+  {
+    "name": "ERROR: Function: JSON_PARENT() - At root.",
+    "json": "null",
+    "rc": -22,
+    "error": true,
+    "string": "null",
+    "func": "JSON_PARENT",
+    "result": "-22"
+  },
+  {
+    "name": "ERROR: Function: JSON_PREV() - Not Array or Object.",
+    "json": "null",
+    "rc": false,
+    "error": true,
+    "string": "null",
+    "func": "JSON_PREV",
+    "result": -21
+  },
   "",
+  "# Shortcuts for type checking.",
   {
     "name": "Function: JSON_IS_ARRAY() - Array.",
     "json": "[null]",
@@ -1073,8 +1105,7 @@
     "result": "0"
   },
   "",
-  "Permutation interface.",
-  "",
+  "# Permutation interface.",
   {
     "name": "Function: JSON_ADD()",
     "json": "[1,2]",
@@ -1083,25 +1114,6 @@
     "string": "[1,2,null]",
     "func": "JSON_ADD",
     "result": "3"
-  },
-  {
-    "name": "ERROR: Function: JSON_ADD() - Root is not an array.",
-    "json": "null",
-    "rc": false,
-    "error": true,
-    "string": "null",
-    "func": "JSON_ADD",
-    "result": "-21"
-  },
-  {
-    "name": "ERROR: Function: JSON_ADD() - Not an array.",
-    "json": "{'A':null}",
-    "rc": false,
-    "error": true,
-    "string": "{'A':null}",
-    "path": ".1",
-    "func": "JSON_ADD",
-    "result": "-21"
   },
   {
     "name": "Function: JSON_NEW(NAME)",
@@ -1114,17 +1126,6 @@
     "result": "2"
   },
   {
-    "name": "Function: JSON_NEW(NAME) - Blank name.",
-    "json": "{'A':null}",
-    "rc": false,
-    "error": true,
-    "string": "{'A':null}",
-    "path": ".1",
-    "func": "JSON_NEW",
-    "arg1": "",
-    "result": "-20"
-  },
-  {
     "name": "Function: JSON_NEW() - Root",
     "json": "{'A':null}",
     "rc": 0,
@@ -1133,17 +1134,6 @@
     "func": "JSON_NEW",
     "arg1": "B",
     "result": "2"
-  },
-  {
-    "name": "ERROR: Function: JSON_NEW() - Not an object.",
-    "json": "[1,2]",
-    "rc": false,
-    "error": true,
-    "string": "[1,2]",
-    "path": ".1",
-    "func": "JSON_NEW",
-    "arg1": "B",
-    "result": "-21"
   },
   {
     "name": "Function: JSON_DELETE()",
@@ -1295,25 +1285,6 @@
     "result": "T"
   },
   {
-    "name": "ERROR: Function: JSON_SET_TYPE() - Missing type.",
-    "json": "null",
-    "rc": false,
-    "error": true,
-    "string": "",
-    "func": "JSON_SET_TYPE",
-    "result": "-20"
-  },
-  {
-    "name": "ERROR: Function: JSON_SET_TYPE() - Invalid type.",
-    "json": "null",
-    "rc": false,
-    "error": true,
-    "string": "",
-    "func": "JSON_SET_TYPE",
-    "arg1": "Z",
-    "result": "-21"
-  },
-  {
     "name": "Function: JSON_SET_VALUE(VALUE) - Number.",
     "json": "1234",
     "rc": 0,
@@ -1344,6 +1315,68 @@
     "arg2": "Another",
     "result": "1"
   },
+  "",
+  "# Permutation interface errors.",
+  {
+    "name": "ERROR: Function: JSON_ADD() - Root is not an array.",
+    "json": "null",
+    "rc": false,
+    "error": true,
+    "string": "null",
+    "func": "JSON_ADD",
+    "result": "-21"
+  },
+  {
+    "name": "ERROR: Function: JSON_ADD() - Not an array.",
+    "json": "{'A':null}",
+    "rc": false,
+    "error": true,
+    "string": "{'A':null}",
+    "path": ".1",
+    "func": "JSON_ADD",
+    "result": "-21"
+  },
+  {
+    "name": "ERROR: Function: JSON_NEW(NAME) - Blank name.",
+    "json": "{'A':null}",
+    "rc": false,
+    "error": true,
+    "string": "{'A':null}",
+    "path": ".1",
+    "func": "JSON_NEW",
+    "arg1": "",
+    "result": "-20"
+  },
+  {
+    "name": "ERROR: Function: JSON_NEW() - Not an object.",
+    "json": "[1,2]",
+    "rc": false,
+    "error": true,
+    "string": "[1,2]",
+    "path": ".1",
+    "func": "JSON_NEW",
+    "arg1": "B",
+    "result": "-21"
+  },
+  {
+    "name": "ERROR: Function: JSON_SET_TYPE() - Missing type.",
+    "json": "null",
+    "rc": false,
+    "error": true,
+    "string": "",
+    "func": "JSON_SET_TYPE",
+    "result": "-20"
+  },
+  {
+    "name": "ERROR: Function: JSON_SET_TYPE() - Invalid type.",
+    "json": "null",
+    "rc": false,
+    "error": true,
+    "string": "",
+    "func": "JSON_SET_TYPE",
+    "arg1": "Z",
+    "result": "-21"
+  },
   {
     "name": "ERROR: Function: JSON_SET_VALUE() - Missing value.",
     "json": "null",
@@ -1372,8 +1405,7 @@
     "result": "-20"
   },
   "",
-  "Shortcuts for setting the type and value at once.",
-  "",
+  "# Shortcuts for setting the type and value at once.",
   {
     "name": "Function: JSON_SET_ARRAY()",
     "json": "'String'",
@@ -1415,15 +1447,6 @@
     "result": "S"
   },
   {
-    "name": "ERROR: Function: JSON_SET_NUMBER(VALUE) - Missing value.",
-    "json": "'String'",
-    "rc": false,
-    "error": true,
-    "string": "'String'",
-    "func": "JSON_SET_NUMBER",
-    "result": "-20"
-  },
-  {
     "name": "Function: JSON_SET_STRING(VALUE)",
     "json": "1234",
     "rc": 0,
@@ -1443,15 +1466,6 @@
     "arg1": ".1",
     "arg2": "String",
     "result": "N"
-  },
-  {
-    "name": "ERROR: Function: JSON_SET_STRING(VALUE) - Missing value.",
-    "json": "1234",
-    "rc": false,
-    "error": true,
-    "string": "1234",
-    "func": "JSON_SET_STRING",
-    "result": "-20"
   },
   {
     "name": "Function: JSON_SET_TRUE()",
@@ -1511,8 +1525,317 @@
     "result": "S"
   },
   "",
-  "Utilities.",
+  "# Type and Value shortcut errors.",
+  {
+    "name": "ERROR: Function: JSON_SET_NUMBER(VALUE) - Missing value.",
+    "json": "'String'",
+    "rc": false,
+    "error": true,
+    "string": "'String'",
+    "func": "JSON_SET_NUMBER",
+    "result": "-20"
+  },
+  {
+    "name": "ERROR: Function: JSON_SET_STRING(VALUE) - Missing value.",
+    "json": "1234",
+    "rc": false,
+    "error": true,
+    "string": "1234",
+    "func": "JSON_SET_STRING",
+    "result": "-20"
+  },
   "",
+  "# Shortcuts for adding to an array or hash..",
+  {
+    "name": "Function: JSON_ADD_ARRAY()",
+    "json": "[]",
+    "rc": 0,
+    "error": false,
+    "string": "[[]]",
+    "func": "JSON_ADD_ARRAY",
+    "result": "1"
+  },
+  {
+    "name": "Function: JSON_ADD_ARRAY(PATH)",
+    "json": "[[]]",
+    "rc": 0,
+    "error": false,
+    "string": "[[[]]]",
+    "func": "JSON_ADD_ARRAY",
+    "arg1": ".1",
+    "result": "1"
+  },
+  {
+    "name": "Function: JSON_ADD_OBJECT()",
+    "json": "[]",
+    "rc": 0,
+    "error": false,
+    "string": "[{}]",
+    "func": "JSON_ADD_OBJECT",
+    "result": "1"
+  },
+  {
+    "name": "Function: JSON_ADD_OBJECT(PATH)",
+    "json": "[[]]",
+    "rc": 0,
+    "error": false,
+    "string": "[[{}]]",
+    "func": "JSON_ADD_OBJECT",
+    "arg1": ".1",
+    "result": "1"
+  },
+  {
+    "name": "Function: JSON_ADD_STRING()",
+    "json": "[]",
+    "rc": 0,
+    "error": false,
+    "string": "['String']",
+    "func": "JSON_ADD_STRING",
+    "arg1": "String",
+    "result": "1"
+  },
+  {
+    "name": "Function: JSON_ADD_STRING(PATH)",
+    "json": "[[]]",
+    "rc": 0,
+    "error": false,
+    "string": "[['String']]",
+    "func": "JSON_ADD_STRING",
+    "arg1": ".1",
+    "arg2": "String",
+    "result": "1"
+  },
+  {
+    "name": "Function: JSON_ADD_NUMBER()",
+    "json": "[]",
+    "rc": 0,
+    "error": false,
+    "string": "[123]",
+    "func": "JSON_ADD_NUMBER",
+    "arg1": 123,
+    "result": "1"
+  },
+  {
+    "name": "Function: JSON_ADD_NUMBER(PATH)",
+    "json": "[[]]",
+    "rc": 0,
+    "error": false,
+    "string": "[[123]]",
+    "func": "JSON_ADD_NUMBER",
+    "arg1": ".1",
+    "arg2": 123,
+    "result": "1"
+  },
+  {
+    "name": "Function: JSON_ADD_TRUE()",
+    "json": "[]",
+    "rc": 0,
+    "error": false,
+    "string": "[true]",
+    "func": "JSON_ADD_TRUE",
+    "result": "1"
+  },
+  {
+    "name": "Function: JSON_ADD_TRUE(PATH)",
+    "json": "[[]]",
+    "rc": 0,
+    "error": false,
+    "string": "[[true]]",
+    "func": "JSON_ADD_TRUE",
+    "arg1": ".1",
+    "result": "1"
+  },
+  {
+    "name": "Function: JSON_ADD_FALSE()",
+    "json": "[]",
+    "rc": 0,
+    "error": false,
+    "string": "[false]",
+    "func": "JSON_ADD_FALSE",
+    "result": "1"
+  },
+  {
+    "name": "Function: JSON_ADD_FALSE(PATH)",
+    "json": "[[]]",
+    "rc": 0,
+    "error": false,
+    "string": "[[false]]",
+    "func": "JSON_ADD_FALSE",
+    "arg1": ".1",
+    "result": "1"
+  },
+  {
+    "name": "Function: JSON_ADD_NULL()",
+    "json": "[]",
+    "rc": 0,
+    "error": false,
+    "string": "[null]",
+    "func": "JSON_ADD_NULL",
+    "result": "1"
+  },
+  {
+    "name": "Function: JSON_ADD_NULL(PATH)",
+    "json": "[[]]",
+    "rc": 0,
+    "error": false,
+    "string": "[[null]]",
+    "func": "JSON_ADD_NULL",
+    "arg1": ".1",
+    "result": "1"
+  },
+  {
+    "name": "Function: JSON_NEW_ARRAY()",
+    "json": "{}",
+    "rc": 0,
+    "error": false,
+    "string": "{'member':[]}",
+    "func": "JSON_NEW_ARRAY",
+    "arg1": "member",
+    "result": "1"
+  },
+  {
+    "name": "Function: JSON_NEW_ARRAY(PATH)",
+    "json": "[{}]",
+    "rc": 0,
+    "error": false,
+    "string": "[{'member':[]}]",
+    "func": "JSON_NEW_ARRAY",
+    "arg1": ".1",
+    "arg2": "member",
+    "result": "1"
+  },
+  {
+    "name": "Function: JSON_NEW_OBJECT()",
+    "json": "{}",
+    "rc": 0,
+    "error": false,
+    "string": "{'member':{}}",
+    "func": "JSON_NEW_OBJECT",
+    "arg1": "member",
+    "result": "1"
+  },
+  {
+    "name": "Function: JSON_NEW_OBJECT(PATH)",
+    "json": "[{}]",
+    "rc": 0,
+    "error": false,
+    "string": "[{'member':{}}]",
+    "func": "JSON_NEW_OBJECT",
+    "arg1": ".1",
+    "arg2": "member",
+    "result": "1"
+  },
+  {
+    "name": "Function: JSON_NEW_STRING()",
+    "json": "{}",
+    "rc": 0,
+    "error": false,
+    "string": "{'member':'String'}",
+    "func": "JSON_NEW_STRING",
+    "arg1": "member",
+    "arg2": "String",
+    "result": "1"
+  },
+  {
+    "name": "Function: JSON_NEW_STRING(PATH)",
+    "json": "[{}]",
+    "rc": 0,
+    "error": false,
+    "string": "[{'member':'String'}]",
+    "func": "JSON_NEW_STRING",
+    "arg1": ".1",
+    "arg2": "member",
+    "arg3": "String",
+    "result": "1"
+  },
+  {
+    "name": "Function: JSON_NEW_NUMBER()",
+    "json": "{}",
+    "rc": 0,
+    "error": false,
+    "string": "{'member':123}",
+    "func": "JSON_NEW_NUMBER",
+    "arg1": "member",
+    "arg2": "123",
+    "result": "1"
+  },
+  {
+    "name": "Function: JSON_NEW_NUMBER(PATH)",
+    "json": "[{}]",
+    "rc": 0,
+    "error": false,
+    "string": "[{'member':123}]",
+    "func": "JSON_NEW_NUMBER",
+    "arg1": ".1",
+    "arg2": "member",
+    "arg3": "123",
+    "result": "1"
+  },
+  {
+    "name": "Function: JSON_NEW_TRUE()",
+    "json": "{}",
+    "rc": 0,
+    "error": false,
+    "string": "{'member':true}",
+    "func": "JSON_NEW_TRUE",
+    "arg1": "member",
+    "result": "1"
+  },
+  {
+    "name": "Function: JSON_NEW_TRUE(PATH)",
+    "json": "[{}]",
+    "rc": 0,
+    "error": false,
+    "string": "[{'member':true}]",
+    "func": "JSON_NEW_TRUE",
+    "arg1": ".1",
+    "arg2": "member",
+    "result": "1"
+  },
+  {
+    "name": "Function: JSON_NEW_FALSE()",
+    "json": "{}",
+    "rc": 0,
+    "error": false,
+    "string": "{'member':false}",
+    "func": "JSON_NEW_FALSE",
+    "arg1": "member",
+    "result": "1"
+  },
+  {
+    "name": "Function: JSON_NEW_FALSE(PATH)",
+    "json": "[{}]",
+    "rc": 0,
+    "error": false,
+    "string": "[{'member':false}]",
+    "func": "JSON_NEW_FALSE",
+    "arg1": ".1",
+    "arg2": "member",
+    "result": "1"
+  },
+  {
+    "name": "Function: JSON_NEW_NULL()",
+    "json": "{}",
+    "rc": 0,
+    "error": false,
+    "string": "{'member':null}",
+    "func": "JSON_NEW_NULL",
+    "arg1": "member",
+    "result": "1"
+  },
+  {
+    "name": "Function: JSON_NEW_NULL(PATH)",
+    "json": "[{}]",
+    "rc": 0,
+    "error": false,
+    "string": "[{'member':null}]",
+    "func": "JSON_NEW_NULL",
+    "arg1": ".1",
+    "arg2": "member",
+    "result": "1"
+  },
+  "",
+  "# Utilities.",
   {
     "name": "Function: JSON_TYPE_STRING() - A - Array.",
     "json": "null",

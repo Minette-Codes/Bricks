@@ -259,6 +259,34 @@ JSON_DEPTH: PROCEDURE EXPOSE JSON.
 
   RETURN COUNTSTR('.', POINTER) + 1
 
+/* Returns the index number of the current element, or the path.          */
+/* Or at a given path.                                                    */
+/*                                                                        */
+/* Arguments:                                                             */
+/*  POINTER - A path or member name to get the index for. Optional.       */
+/*                                                                        */
+/* Returns:                                                               */
+/*  The element index number.                                             */
+/*  -21 if the current element is not an array or object.                 */
+/*  -24 if the path is invalid.                                           */
+/*  -26 if the member was not found.                                      */
+JSON_INDEX: PROCEDURE EXPOSE JSON.
+  CALL _JSON_CLEAR_ERROR
+  POINTER = JSON._PTR
+
+  IF ARG() > 0 THEN DO
+    POINTER = _JSON_PATH_RESOLVE(ARG(1), 'JSON_INDEX')
+    IF POINTER <= 0 THEN
+      RETURN POINTER
+  END
+
+  PARENT = SUBSTR(POINTER, 1, LASTPOS('.', POINTER) - 1)
+  PARENT_TYPE = VALUE(PARENT || '.TYPE')
+  IF PARENT_TYPE \= 'A' & PARENT_TYPE \= 'O' THEN
+    RETURN _JSON_SET_ERROR('JSON_INDEX() requires an array or object.', -21)
+
+  RETURN SUBSTR(POINTER, LASTPOS('.', POINTER) + 1)
+
 /* Return a list of members in the current object.                        */
 /* If no separator is specified the default is space.                     */
 /*                                                                        */
@@ -456,8 +484,11 @@ JSON_PARENT: PROCEDURE EXPOSE JSON.
 /*                                                                        */
 /* Arguments:                                                             */
 /*  POINTER - A path or member name to get the type for. Optional.        */
+/*            The path should start with a period '.' or a plus '+'.      */
+/*            Otherwise a single argument is assumed to be the INDENT.    */
 /*  INDENT  - The number of characters to indent each element.            */
 /*            Defaults to 1. Optional.                                    */
+/*                                                                        */
 /* Returns:                                                               */
 /*  1 on success. */
 /*  -24 if the path is invalid.                                           */
@@ -466,15 +497,22 @@ JSON_PRETTY: PROCEDURE EXPOSE JSON.
   INDENT = 1
   POINTER = 'JSON'
 
-  IF ARG() > 1 THEN DO
+  IF ARG() = 2 THEN DO
     POINTER = _JSON_PATH_RESOLVE(ARG(1), 'JSON_STRING')
     IF POINTER <= 0 THEN
       RETURN POINTER
     IF ARG(2) \= '' THEN
       INDENT = ARG(2)
   END
-  ELSE IF ARG() > 0 & ARG(1) \= '' THEN
-    INDENT = ARG(1)
+  ELSE IF ARG() = 1 THEN DO
+    IF ABBREV(ARG(1), '.') THEN DO
+      POINTER = _JSON_PATH_RESOLVE(ARG(1), 'JSON_STRING')
+      IF POINTER <= 0 THEN
+        RETURN POINTER
+    END
+    ELSE IF ARG(1) \= '' THEN
+      INDENT = ARG(1)
+  END
 
   /* Clear any previous pretty print data. */
   IF JSON._PP.0 \= '' THEN DO
@@ -1353,7 +1391,7 @@ _JSON_PP_OBJECT: PROCEDURE EXPOSE JSON.
     IF POS(TYPE, "NTFU") > 0 THEN
       /* Numbers, booleans and null on the same line as the member name. */
       CALL _JSON_PP_PUSH MEMBER ||,
-        VALUE(POINTER || '.' || INDX || '.VALUE') || ELEMENT_TAIL, INDENT + 1, SHIFT
+        ' ' || VALUE(POINTER || '.' || INDX || '.VALUE') || ELEMENT_TAIL, INDENT + 1, SHIFT
     ELSE IF TYPE = 'S' THEN
       /* Strings on the same line as the member name. */
       CALL _JSON_PP_PUSH MEMBER ||,
@@ -1849,9 +1887,13 @@ JSON_ADD_ARRAY: PROCEDURE EXPOSE JSON.
       RETURN POINTER
   END
 
+  TYPE = VALUE(POINTER || '.TYPE')
+  IF TYPE \= 'A' THEN
+    RETURN _JSON_SET_ERROR('JSON_ADD_ARRAY() requires an array.', -21)
+
   /* Setup the new element. */
   INDX = _JSON_ADD(POINTER)
-  RETURN _JSON_SET_TYPE(POINTER || '.' || INDX, 'A')
+  CALL _JSON_SET_TYPE POINTER || '.' || INDX, 'A'
   RETURN INDX
 
 /* Adds a new object element to an array.                                 */
@@ -1874,9 +1916,13 @@ JSON_ADD_OBJECT: PROCEDURE EXPOSE JSON.
       RETURN POINTER
   END
 
+  TYPE = VALUE(POINTER || '.TYPE')
+  IF TYPE \= 'A' THEN
+    RETURN _JSON_SET_ERROR('JSON_ADD_OBJECT() requires an array.', -21)
+
   /* Setup the new element. */
   INDX = _JSON_ADD(POINTER)
-  RETURN _JSON_SET_TYPE(POINTER || '.' || INDX, 'O')
+  CALL _JSON_SET_TYPE POINTER || '.' || INDX, 'O'
   RETURN INDX
 
 /* Adds a new string to an array.                                         */
@@ -1903,6 +1949,10 @@ JSON_ADD_STRING: PROCEDURE EXPOSE JSON.
       RETURN POINTER
     VALUE = ARG(2)
   END
+
+  TYPE = VALUE(POINTER || '.TYPE')
+  IF TYPE \= 'A' THEN
+    RETURN _JSON_SET_ERROR('JSON_ADD_STRING() requires an array.', -21)
 
   /* Setup the new element. */
   INDX = _JSON_ADD(POINTER)
@@ -1935,6 +1985,10 @@ JSON_ADD_NUMBER: PROCEDURE EXPOSE JSON.
     VALUE = ARG(2)
   END
 
+  TYPE = VALUE(POINTER || '.TYPE')
+  IF TYPE \= 'A' THEN
+    RETURN _JSON_SET_ERROR('JSON_ADD_NUMBER() requires an array.', -21)
+
   /* Setup the new element. */
   INDX = _JSON_ADD(POINTER)
   CALL VALUE POINTER || '.' || INDX || '.TYPE', 'N'
@@ -1961,9 +2015,13 @@ JSON_ADD_TRUE: PROCEDURE EXPOSE JSON.
       RETURN POINTER
   END
 
+  TYPE = VALUE(POINTER || '.TYPE')
+  IF TYPE \= 'A' THEN
+    RETURN _JSON_SET_ERROR('JSON_ADD_TRUE() requires an array.', -21)
+
   /* Setup the new element. */
   INDX = _JSON_ADD(POINTER)
-  RETURN _JSON_SET_TYPE(POINTER || '.' || INDX, 'T')
+  CALL _JSON_SET_TYPE POINTER || '.' || INDX, 'T'
   RETURN INDX
 
 /* Adds a new false element to an array.                                  */
@@ -1986,9 +2044,13 @@ JSON_ADD_FALSE: PROCEDURE EXPOSE JSON.
       RETURN POINTER
   END
 
+  TYPE = VALUE(POINTER || '.TYPE')
+  IF TYPE \= 'A' THEN
+    RETURN _JSON_SET_ERROR('JSON_ADD_FALSE() requires an array.', -21)
+
   /* Setup the new element. */
   INDX = _JSON_ADD(POINTER)
-  RETURN _JSON_SET_TYPE(POINTER || '.' || INDX, 'F')
+  CALL _JSON_SET_TYPE POINTER || '.' || INDX, 'F'
   RETURN INDX
 
 /* Adds a new null element to an array.                                   */
@@ -2011,9 +2073,13 @@ JSON_ADD_NULL: PROCEDURE EXPOSE JSON.
       RETURN POINTER
   END
 
+  TYPE = VALUE(POINTER || '.TYPE')
+  IF TYPE \= 'A' THEN
+    RETURN _JSON_SET_ERROR('JSON_ADD_NULL() requires an array.', -21)
+
   /* Setup the new element. */
   INDX = _JSON_ADD(POINTER)
-  RETURN _JSON_SET_TYPE(POINTER || '.' || INDX, 'U')
+  CALL _JSON_SET_TYPE POINTER || '.' || INDX, 'U'
   RETURN INDX
 
 /* Adds a new array element to an object.                                 */
@@ -2041,9 +2107,14 @@ JSON_NEW_ARRAY: PROCEDURE EXPOSE JSON.
     NAME = ARG(2)
   END
 
+  TYPE = VALUE(POINTER || '.TYPE')
+  IF TYPE \= 'O' THEN
+    RETURN _JSON_SET_ERROR('JSON_NEW_ARRAY() requires an object', -21)
+
   /* Setup the new element. */
   INDX = _JSON_NEW(POINTER, NAME)
-  RETURN _JSON_SET_TYPE(POINTER || '.' || INDX, 'A')
+  CALL _JSON_SET_TYPE POINTER || '.' || INDX, 'A'
+  RETURN INDX
 
 /* Adds a new object element to an object.                                */
 /*                                                                        */
@@ -2070,9 +2141,14 @@ JSON_NEW_OBJECT: PROCEDURE EXPOSE JSON.
     NAME = ARG(2)
   END
 
+  TYPE = VALUE(POINTER || '.TYPE')
+  IF TYPE \= 'O' THEN
+    RETURN _JSON_SET_ERROR('JSON_NEW_OBJECT() requires an object', -21)
+
   /* Setup the new element. */
   INDX = _JSON_NEW(POINTER, NAME)
-  RETURN _JSON_SET_TYPE(POINTER || '.' || INDX, 'O')
+  CALL _JSON_SET_TYPE POINTER || '.' || INDX, 'O'
+  RETURN INDX
 
 /* Adds a new string element to an object.                                */
 /*                                                                        */
@@ -2101,6 +2177,10 @@ JSON_NEW_STRING: PROCEDURE EXPOSE JSON.
     NAME = ARG(2)
     VALUE = ARG(3)
   END
+
+  TYPE = VALUE(POINTER || '.TYPE')
+  IF TYPE \= 'O' THEN
+    RETURN _JSON_SET_ERROR('JSON_NEW_STRING() requires an object', -21)
 
   /* Setup the new element. */
   INDX = _JSON_NEW(POINTER, NAME)
@@ -2136,6 +2216,10 @@ JSON_NEW_NUMBER: PROCEDURE EXPOSE JSON.
     VALUE = ARG(3)
   END
 
+  TYPE = VALUE(POINTER || '.TYPE')
+  IF TYPE \= 'O' THEN
+    RETURN _JSON_SET_ERROR('JSON_NEW_NUMBER() requires an object', -21)
+
   /* Setup the new element. */
   INDX = _JSON_NEW(POINTER, NAME)
   CALL VALUE POINTER || '.' || INDX || '.TYPE', 'N'
@@ -2167,9 +2251,14 @@ JSON_NEW_TRUE: PROCEDURE EXPOSE JSON.
     NAME = ARG(2)
   END
 
+  TYPE = VALUE(POINTER || '.TYPE')
+  IF TYPE \= 'O' THEN
+    RETURN _JSON_SET_ERROR('JSON_NEW_TRUE() requires an object', -21)
+
   /* Setup the new element. */
   INDX = _JSON_NEW(POINTER, NAME)
-  RETURN _JSON_SET_TYPE(POINTER || '.' || INDX, 'T')
+  CALL _JSON_SET_TYPE POINTER || '.' || INDX, 'T'
+  RETURN INDX
 
 /* Adds a new false element to an object.                                 */
 /*                                                                        */
@@ -2196,9 +2285,14 @@ JSON_NEW_FALSE: PROCEDURE EXPOSE JSON.
     NAME = ARG(2)
   END
 
+  TYPE = VALUE(POINTER || '.TYPE')
+  IF TYPE \= 'O' THEN
+    RETURN _JSON_SET_ERROR('JSON_NEW_FALSE() requires an object', -21)
+
   /* Setup the new element. */
   INDX = _JSON_NEW(POINTER, NAME)
-  RETURN _JSON_SET_TYPE(POINTER || '.' || INDX, 'F')
+  CALL _JSON_SET_TYPE POINTER || '.' || INDX, 'F'
+  RETURN INDX
 
 /* Adds a new null element to an object.                                  */
 /*                                                                        */
@@ -2225,9 +2319,14 @@ JSON_NEW_NULL: PROCEDURE EXPOSE JSON.
     NAME = ARG(2)
   END
 
+  TYPE = VALUE(POINTER || '.TYPE')
+  IF TYPE \= 'O' THEN
+    RETURN _JSON_SET_ERROR('JSON_NEW_NULL() requires an object', -21)
+
   /* Setup the new element. */
   INDX = _JSON_NEW(POINTER, NAME)
-  RETURN _JSON_SET_TYPE(POINTER || '.' || INDX, 'N')
+  CALL _JSON_SET_TYPE POINTER || '.' || INDX, 'N'
+  RETURN INDX
 
 /* Set the current element type to array.                                 */
 /*                                                                        */
@@ -2547,6 +2646,7 @@ _JSON_RENUMBER: PROCEDURE EXPOSE JSON.
 /* This is only the testing part of the JSON library.                     */
 /* This does not include the parsing or permutation code.                 */
 /* See the files 'json-library.rexx' 'json-permutation.rexx'.             */
+/* To run the tests all three parts of the library are required.          */
 
 /* JSON Testing ================================================ Public = */
 
@@ -2558,6 +2658,10 @@ _JSON_RENUMBER: PROCEDURE EXPOSE JSON.
 /*  -91 if the test variables name or json are missing.                   */
 JSON_TESTS: PROCEDURE EXPOSE JSON. JSON_TESTS.
   CALL _JSON_CLEAR_ERROR
+  DO TAIL OVER JSON_TESTS
+    INTERPRET 'DROP JSON_TESTS.' || TAIL
+  END
+
   JSON_TESTS. = ''
   TEST_FILE = 'json_tests.json'
   RESULT_FILE = 'json_results.json'
@@ -2579,7 +2683,7 @@ JSON_TESTS: PROCEDURE EXPOSE JSON. JSON_TESTS.
       RETURN _JSON_SET_ERROR('JSON_TESTS() Test file "' || TEST_FILE || '" does not exist. RC:' EIBRESP, -90)
     ELSE IF EIBRESP \= 0 THEN
       RETURN _JSON_SET_ERROR('JSON_TESTS() Unable to read tests. RC:' EIBRESP, -90)
-      
+
     /* Skip comments. and blank lines. */
     REC = STRIP(REC)
     IF LENGTH(REC) = 0 | SUBSTR(REC, 1, 2) = '//' THEN
@@ -2600,19 +2704,30 @@ JSON_TESTS: PROCEDURE EXPOSE JSON. JSON_TESTS.
 
   /* Process the test cases. */
   EXEC CICS WRITEQ TD QUEUE(RESULT_FILE) FROM("[") END-EXEC
-  DO WHILE JSON_NEXT()
-    /* Skip strings, they are used as comments. */
-    IF \JSON_IS_OBJECT() THEN
-      ITERATE
+  DO FOREVER
+    /* Strings that start with '#' are added to the results as a section. */
+    IF JSON_IS_STRING() & SUBSTR(JSON_VALUE(), 1, 1) = '#' THEN DO
+      INDX = JSON_TESTS.TOTAL + 1
+      JSON_TESTS.TOTAL = INDX
+      JSON_TESTS.INDX.SECTION = JSON_VALUE()
+    END
 
-    /* Execute the test. */
-    JSON_TESTS.TOTAL = JSON_TESTS.TOTAL + 1
-    RESULT_JSON = _JSON_TEST_CASE(JSON_STRING(JSON_PATH()))
-    IF JSON_TESTS.CODE < 0 THEN
-      RETURN _JSON_SET_ERROR(JSON_TESTS.ERROR, JSON_TESTS.CODE)
+    /* Skip anything that is not an object. */
+    IF JSON_IS_OBJECT() THEN DO
+      /* Execute the test. */
+      JSON_TESTS.TOTAL = JSON_TESTS.TOTAL + 1
+      RESULT_JSON = _JSON_TEST_CASE(JSON_STRING(JSON_PATH()))
+      IF JSON_TESTS.CODE < 0 THEN
+        RETURN _JSON_SET_ERROR(JSON_TESTS.ERROR, JSON_TESTS.CODE)
 
-    RESULT_JSON = RESULT_JSON || ','
-    EXEC CICS WRITEQ TD QUEUE(RESULT_FILE) FROM(RESULT_JSON) END-EXEC
+      /* Write the results. */
+      RESULT_JSON = RESULT_JSON || ','
+      EXEC CICS WRITEQ TD QUEUE(RESULT_FILE) FROM(RESULT_JSON) END-EXEC
+    END
+
+    /* More? */
+    IF \JSON_NEXT() THEN
+      LEAVE
   END
   EXEC CICS WRITEQ TD QUEUE(RESULT_FILE) FROM("]") END-EXEC
 
@@ -2641,7 +2756,7 @@ _JSON_TEST_CASE: PROCEDURE EXPOSE JSON_TESTS.
     JSON_TESTS.ERROR = 'JSON_TESTS() Unable parse the test. Error:' JSON._ERROR 'Test:' TEST_JSON
     JSON_TESTS.CODE = -90
     RETURN ''
-  END 
+  END
 
   /* Get the variables we care about. */
   TEST_NAME       = JSON_VALUE('.name')
@@ -2667,6 +2782,8 @@ _JSON_TEST_CASE: PROCEDURE EXPOSE JSON_TESTS.
   TEST_ARG1_TYPE  = JSON_TYPE('.arg1')
   TEST_ARG2       = JSON_VALUE('.arg2')
   TEST_ARG2_TYPE  = JSON_TYPE('.arg2')
+  TEST_ARG3       = JSON_VALUE('.arg3')
+  TEST_ARG3_TYPE  = JSON_TYPE('.arg3')
   TEST_RESULT     = JSON_VALUE('.result')
 
   /* Parse the test JSON. */
@@ -2688,8 +2805,11 @@ _JSON_TEST_CASE: PROCEDURE EXPOSE JSON_TESTS.
     TEST_FUNC = 'CALL' TEST_FUNC
     IF TEST_ARG1_TYPE \= '' THEN DO
       TEST_FUNC = TEST_FUNC '"' || JSON_ESCAPE(TEST_ARG1) || '"'
-      IF TEST_ARG2_TYPE \= '' THEN
+      IF TEST_ARG2_TYPE \= '' THEN DO
         TEST_FUNC = TEST_FUNC || ', "' || JSON_ESCAPE(TEST_ARG2) || '"'
+        IF TEST_ARG3_TYPE \= '' THEN
+          TEST_FUNC = TEST_FUNC || ', "' || JSON_ESCAPE(TEST_ARG3) || '"'
+      END
     END
     INTERPRET TEST_FUNC
     FUNC_RESULT = RESULT
@@ -3009,6 +3129,11 @@ _CONS_LOOP: PROCEDURE EXPOSE CONS_DATA. CONS_SCR. CONS_HELP. JSON. JSON_TESTS.
               CONS_SCR.CUR_POS = (CONS_DATA.0 - CONS_DATA.PER_PAGE) + 1
           END
         END
+        /* Edit a test. */
+        WHEN CONS_DATA.SOURCE = 'TEST' & COMMAND = 'EDIT' THEN DO
+          /* TODO: Handle this better. */
+          CALL _CONS_TEST_EDIT ARGS
+        END
         /* Exit. */
         WHEN COMMAND = 'EXIT' | COMMAND = 'E' | COMMAND = 'BYE' THEN DO
           EXIT
@@ -3033,6 +3158,11 @@ _CONS_LOOP: PROCEDURE EXPOSE CONS_DATA. CONS_SCR. CONS_HELP. JSON. JSON_TESTS.
         WHEN COMMAND = 'LOCATE' | COMMAND = 'L' THEN DO
           IF ARGS \= '' THEN
             CONS_SCR.CUR_POS = ARGS
+        END
+        /* Create a new test. */
+        WHEN CONS_DATA.SOURCE = 'TEST' & COMMAND = 'NEW' THEN DO
+          /* TODO: Handle this better. */
+          CALL _CONS_TEST_EDIT
         END
         /* Quit. */
         WHEN COMMAND = 'QUIT' | COMMAND = 'Q' THEN DO
@@ -3141,18 +3271,25 @@ _CONS_SCROLL_UPDATE: PROCEDURE EXPOSE CONS_DATA. CONS_SCR.
 /* Load data into CONS_DATA from the desired source. */
 _CONS_DATA_LOAD: PROCEDURE EXPOSE CONS_DATA. CONS_HELP. JSON. JSON_TESTS.
   /* Clean any old markers. */
-  CALL _CONS_FIND_CLEAR
+  DO TAIL OVER CONS_DATA.
+    IF ABBREV(TAIL, 'FOUND') | ABBREV(TAIL, 'WRAPPED') THEN
+      INTERPRET 'DROP CONS_DATA.' || TAIL
+  END
   CONS_DATA.0 = 0
 
   IF CONS_DATA.SOURCE = 'JSON' THEN DO
     /* Parsed JSON. */
     CALL _CONS_DATA_LOAD_JSON
-
-    /* Meta data. */
+    /* Add the meta data after the parsed JSON. */
     DO TAIL OVER JSON.
-      IF ABBREV(TAIL, '_') THEN
-      CALL _CONS_DATA_LOAD_PUSH 'JSON.' || TAIL '=' JSON.TAIL
+      IF ABBREV(TAIL, '_') & \ABBREV(TAIl, '_PP') THEN
+        CALL _CONS_DATA_LOAD_PUSH 'JSON.' || TAIL '=' JSON.TAIL
     END
+    /* And pretty print data at the very bottom. */
+    IF JSON._PP.0 \= '' THEN
+      DO INDX = 0 TO JSON._PP.0
+        CALL _CONS_DATA_LOAD_PUSH 'JSON._PP.' || INDX '=' JSON._PP.INDX
+      END
   END
   ELSE IF CONS_DATA.SOURCE = 'PRETTY' THEN
     /* Pretty Printed JSON. */
@@ -3197,6 +3334,15 @@ _CONS_DATA_LOAD_JSON: PROCEDURE EXPOSE CONS_DATA. JSON.
 /* Loads the test results in a more readable format. */
 _CONS_DATA_LOAD_TEST: PROCEDURE EXPOSE CONS_DATA. JSON_TESTS.
   DO INDX = 1 TO JSON_TESTS.TOTAL
+    /* Indluce sections as-ins. */
+    IF JSON_TESTS.INDX.SECTION \= '' THEN DO
+      CALL _CONS_DATA_LOAD_PUSH JSON_TESTS.INDX.SECTION
+      IF CONS_DATA.SHOW_DETAIL = 'YES' THEN DO
+      CALL _CONS_DATA_LOAD_PUSH ''
+      END
+      ITERATE INDX
+    END
+
     /* Format the test header to fit the screen. */
     RC = JSON_TESTS.INDX.CODE
     IF RC >= 0 THEN
@@ -3209,15 +3355,15 @@ _CONS_DATA_LOAD_TEST: PROCEDURE EXPOSE CONS_DATA. JSON_TESTS.
 
     /* Display details? */
     IF CONS_DATA.SHOW_DETAIL = 'YES' | JSON_TESTS.INDX.STATUS = 'FAIL' THEN DO
-      CALL _CONS_DATA_LOAD_PUSH 'JSON:   ' || JSON_TESTS.INDX.JSON
+      CALL _CONS_DATA_LOAD_PUSH     'JSON:     ' || JSON_TESTS.INDX.JSON
       IF JSON_TESTS.INDX.STRING \= '' THEN
-        CALL _CONS_DATA_LOAD_PUSH 'String: ' || JSON_TESTS.INDX.STRING
+        CALL _CONS_DATA_LOAD_PUSH   'String:   ' || JSON_TESTS.INDX.STRING
       IF JSON_TESTS.INDX.ERROR \= '' THEN
-        CALL _CONS_DATA_LOAD_PUSH 'Error:' JSON_TESTS.INDX.ERROR
+        CALL _CONS_DATA_LOAD_PUSH   'Error:    ' || JSON_TESTS.INDX.ERROR
       IF JSON_TESTS.INDX.FUNC \= '' THEN
-        CALL _CONS_DATA_LOAD_PUSH 'Function:' JSON_TESTS.INDX.FUNC
+        CALL _CONS_DATA_LOAD_PUSH   'Function: ' || JSON_TESTS.INDX.FUNC
       IF JSON_TESTS.INDX.FRESULT \= '' THEN
-        CALL _CONS_DATA_LOAD_PUSH 'Result:' JSON_TESTS.INDX.FRESULT
+        CALL _CONS_DATA_LOAD_PUSH   'Result:   ' || JSON_TESTS.INDX.FRESULT
       IF JSON_TESTS.INDX.MESSAGE \= '' THEN
         CALL _CONS_DATA_LOAD_PUSH JSON_TESTS.INDX.MESSAGE
       CALL _CONS_DATA_LOAD_PUSH ''
@@ -3355,14 +3501,18 @@ _CONS_FILL_SCR: PROCEDURE EXPOSE CONS_SCR. CONS_DATA. JSON.
       ROW_DATA = CONS_DATA.INDX
       COLOR = ''
 
+      /* Determine the row color */
       IF CONS_DATA.FOUND.INDX = 'YES' THEN
         COLOR = 'CYAN'      /* Search text. */
       ELSE IF CONS_DATA.WRAPPED.INDX = 'YES' THEN
         COLOR = 'YELLOW'    /* Wrapped. */
-      ELSE IF ABBREV(ROW_DATA, 'JSON._') THEN
-        COLOR = 'GREEN'     /* Meta data. */
-      ELSE IF JSON._PTR \= 'JSON' & ABBREV(ROW_DATA, JSON._PTR) THEN
-        COLOR = 'PINK'      /* Current path. But not at the root. */
+      ELSE IF CONS_DATA.SOURCE = 'JSON' THEN DO
+        /* Highlight JSON data. */
+        IF ABBREV(ROW_DATA, 'JSON._') THEN
+          COLOR = 'GREEN'     /* Meta data. */
+        ELSE IF JSON._PTR \= 'JSON' & ABBREV(ROW_DATA, JSON._PTR) THEN
+          COLOR = 'PINK'      /* Current path. But not at the root. */
+        END
       ELSE IF CONS_DATA.SOURCE = 'HELP' THEN DO
         /* Highlighting for help text. */
         MARKER = SUBSTR(ROW_DATA, 1, 1)
@@ -3380,7 +3530,9 @@ _CONS_FILL_SCR: PROCEDURE EXPOSE CONS_SCR. CONS_DATA. JSON.
       ELSE IF CONS_DATA.SOURCE = 'TEST' THEN DO
         /* Highlighting for test results. */
         STATUS = SUBSTR(ROW_DATA, LENGTH(ROW_DATA) - 4)
-        IF STATUS = 'PASS' THEN
+        IF ABBREV(ROW_DATA, '#') THEN
+          COLOR = 'WHITE'
+        ELSE IF STATUS = 'PASS' THEN
           COLOR = 'GREEN'
         ELSE IF STATUS = 'FAIL' THEN
           COLOR = 'RED'
@@ -3549,6 +3701,17 @@ _CONS_JSON_COMMAND: PROCEDURE EXPOSE CONS_SCR. CONS_DATA. CONS_HELP. JSON.
       END
       DO_RELOAD = 'YES'
     END
+    /* Element index. */
+    WHEN COMMAND = 'INDEX' THEN DO
+      IF ARGS.0 = 0 THEN
+        INDX = JSON_INDEX()
+      ELSE
+        INDX = JSON_INDEX(ARGS.1)
+      IF INDX < 0 THEN
+        CONS_SCR.MSG = 'ERROR:' JSON_ERROR_TEXT()
+      ELSE
+        CONS_SCR.MSG = 'Index:' INDX
+    END
     /* Is this a specific type? */
     WHEN ABBREV(COMMAND, 'IS') THEN DO
       IF COMMAND = 'IS' THEN DO
@@ -3704,7 +3867,12 @@ _CONS_JSON_COMMAND: PROCEDURE EXPOSE CONS_SCR. CONS_DATA. CONS_HELP. JSON.
     END
     /* Pretty Print the JSON. */
     WHEN COMMAND = 'PRETTY' THEN DO
-      CALL _CONS_PRETTY ARGS.1, ARGS.2
+      IF ARGS.0 = 0 THEN
+        CALL _CONS_PRETTY
+      ELSE IF ARGS.0 = 1 THEN
+        CALL _CONS_PRETTY ARGS.1
+      ELSE
+        CALL _CONS_PRETTY ARGS.1, ARGS.2
       DO_RELOAD = 'YES'
     END
     /* Previous array or object element. */
@@ -3884,7 +4052,7 @@ _SPLIT_COMMAND: PROCEDURE EXPOSE ARGS. CONS_SCR.
     /* If there is an arg, save it. */
     IF CURRENT_ARG \= '' THEN DO
       INDX = ARGS.0 + 1
-      ARGS.0 = INDX 
+      ARGS.0 = INDX
       ARGS.INDX = CURRENT_ARG
     END
   END
@@ -4134,6 +4302,15 @@ _CONS_LOAD_HELP: PROCEDURE EXPOSE CONS_HELP.
   CALL _CONS_LOAD_HELP_PUSH 'Can also be used without the underscore. For example:'
   CALL _CONS_LOAD_HELP_PUSH '@ SET STRING .1 "String?"'
   CALL _CONS_LOAD_HELP_PUSH ''
+  CALL _CONS_LOAD_HELP_PUSH 'These commands are used for creating and editing test cases.'
+  CALL _CONS_LOAD_HELP_PUSH 'These are only valid while in the test mode.'
+  CALL _CONS_LOAD_HELP_PUSH 'As in you need to run "TEST" before these will be available.'
+  CALL _CONS_LOAD_HELP_PUSH 'To delete a test you will need to edit the file:'
+  CALL _CONS_LOAD_HELP_PUSH '@ runtime/tmp/json_tests.json'
+  CALL _CONS_LOAD_HELP_PUSH ''
+  CALL _CONS_LOAD_HELP_PUSH '* EDIT NAME - Edit an existing test.'
+  CALL _CONS_LOAD_HELP_PUSH '* NEW       - Creates a new test.'
+  CALL _CONS_LOAD_HELP_PUSH ''
   CALL _CONS_LOAD_HELP_PUSH '# Paths - Notes on using paths.'
   CALL _CONS_LOAD_HELP_PUSH ''
   CALL _CONS_LOAD_HELP_PUSH 'Paths start with a period "." or plus "+" and contain indexes or member'
@@ -4380,6 +4557,14 @@ _CONS_LOAD_HELP: PROCEDURE EXPOSE CONS_HELP.
   CALL _CONS_LOAD_HELP_PUSH '* RED      Take note. This might be important.'
   CALL _CONS_LOAD_HELP_PUSH '* WHITE    Topic header. Separates sections.'
   CALL _CONS_LOAD_HELP_PUSH ''
+  CALL _CONS_LOAD_HELP_PUSH 'Colors specific to Tests:'
+  CALL _CONS_LOAD_HELP_PUSH '* WHITE    Section header.'
+  CALL _CONS_LOAD_HELP_PUSH '* GREEN    Test passd.'
+  CALL _CONS_LOAD_HELP_PUSH '* RED      Test failed.'
+  CALL _CONS_LOAD_HELP_PUSH '* BLUE     Test JSON and String.'
+  CALL _CONS_LOAD_HELP_PUSH '* PINK     Error text.'
+  CALL _CONS_LOAD_HELP_PUSH '* YELLOW   Expected test output.'
+  CALL _CONS_LOAD_HELP_PUSH ''
   CALL _CONS_LOAD_HELP_PUSH 'Press PF6 to return to the top.'
   RETURN
 
@@ -4430,6 +4615,172 @@ _CONS_TESTS: PROCEDURE EXPOSE CONS_DATA. CONS_SCR. CONS_HELP. JSON. JSON_TESTS.
     CALL _CONS_FIND '', 'NO'
   RETURN 1
 
+/* Edit a JSON Test Case. */
+_CONS_TEST_EDIT: PROCEDURE EXPOSE CONS_DATA. CONS_SCR. JSON.
+  TEST_FILE = 'json_tests.json'
+  IF ARG() > 0 THEN
+    TEST_NAME = ARG(1)
+  ELSE
+    TEST_NAME = ''
+  TEST_ID = 0
+  TEST_JSON = ''
+
+  /* Is the test name quoted? */
+  IF ABBREV(TEST_NAME, '"') | ABBREV(TEST_NAME, "'") THEN DO
+    END_QUOTE = _JSON_STRING_END(TEST_NAME)
+    IF END_QUOTE < 0 THEN DO
+      CONS_SCR.MSG = JSON_ERROR_TEXT()
+      RETURN END_QUOTE
+    END
+    TEST_NAME = _JSON_STRING_EXTRACT(TEST_NAME, END_QUOTE)
+  END
+
+  /* If a test name is given search for it. */
+  IF TEST_NAME \= '' THEN DO
+    CALL JSON_PATH '.1'
+    DO FOREVER
+      IF JSON_IS_OBJECT() THEN
+        /* Does the test name match? */
+        IF JSON_VALUE('+name') = TEST_NAME THEN
+          TEST_ID = JSON_INDEX()
+      IF TEST_ID > 0 THEN
+        LEAVE
+
+      /* More? */
+      IF \JSON_NEXT() THEN
+        LEAVE
+    END
+    IF TEST_ID > 0 THEN
+      TEST_JSON = JSON_STRING('.' || TEST_ID)
+    ELSE DO
+      CONS_SCR.MSG = 'Unable to locate the test:' TEST_NAME
+      RETURN 0
+    END
+  END
+
+  /* Start the edit loop. */
+  NEW_JSON =_CONS_TEST_EDIT_LOOP(TEST_JSON)
+
+  /* Nothing returned, nothing to do. */
+  IF NEW_JSON = '' THEN
+    RETURN 0
+
+  /* Save the new/edited test back to the test JSON */
+  CALL JSON_PATH '.'
+  IF TEST_ID = 0 THEN DO
+    /* Create a new test. */
+    INDX = JSON_ADD()
+    RC = JSON_PARSE('.' || INDX, NEW_JSON)
+      IF RC < 0 THEN
+        RETURN RC
+  END
+  ELSE DO
+    /* Update the test. */
+    RC = JSON_PARSE('.' || TEST_ID, NEW_JSON)
+      IF RC < 0 THEN
+        RETURN RC
+  END
+
+  /* Save the test JSON back to the test file. */
+  EXEC CICS DELETEQ TD QUEUE(TEST_FILE) END-EXEC
+  CALL JSON_PRETTY
+  DO INDX = 1 TO JSON._PP.0
+    OUTPUT = JSON._PP.INDX
+    EXEC CICS WRITEQ TD QUEUE(TEST_FILE) FROM(OUTPUT) END-EXEC
+  END
+
+  RETURN 1
+
+/* Test case edit loop. */
+_CONS_TEST_EDIT_LOOP: PROCEDURE EXPOSE CONS_DATA. CONS_SCR.
+  IF ARG() > 0 THEN
+    TEST_JSON = ARG(1)
+  ELSE
+    TEST_JSON = ''
+
+  /* Screen interface. */
+  TEST_SCR. = ''
+
+  /* Load the JSON into the screen, if any was provided. */
+  IF TEST_JSON \= '' THEN DO
+    RC = JSON_PARSE(TEST_JSON)
+    IF RC < 0 THEN DO
+      CONS_SCR.MSG = JSON_ERROR_TEXT()
+      RETURN ''
+    END
+    TEST_SCR.TNAME    = JSON_VALUE('.name')
+    TEST_SCR.TRC      = JSON_VALUE('.rc')
+    TEST_SCR.TERROR   = JSON_VALUE('.error')
+    TEST_SCR.TSTRING  = JSON_VALUE('.string')
+    TEST_SCR.TPATH    = JSON_VALUE('.path')
+    TEST_SCR.TFUNC    = JSON_VALUE('.func')
+    TEST_SCR.TARG1    = JSON_VALUE('.arg1')
+    TEST_SCR.TARG2    = JSON_VALUE('.arg2')
+    TEST_SCR.TARG3    = JSON_VALUE('.arg3')
+    TEST_SCR.TRESULT  = JSON_VALUE('.result')
+    CASE_JSON         = JSON_VALUE('.json')
+    TEST_SCR.TJSON1   = SUBSTR(CASE_JSON, 1, 50)
+    TEST_SCR.TJSON2   = SUBSTR(CASE_JSON, 51, 100)
+    TEST_SCR.TJSON3   = SUBSTR(CASE_JSON, 101, 150)
+  END
+
+  DO FOREVER
+    EXEC CICS CONVERSE MAP('JSONTESTEDIT') MAPSET(CONS_DATA.MAPSET) FROM(TEST_SCR.) INTO(TEST_SCR.) ERASE END-EXEC
+
+    /* Handle the AID keys. */
+    AID = C2X(EIBAID)
+    SELECT
+      /* Exit. */
+      WHEN AID = 'F3' THEN DO
+        RETURN ''
+      END
+      /* Exit. */
+      WHEN AID = '7C' THEN DO /* PF12 */
+        EXIT
+      END
+      OTHERWISE NOP
+    END
+
+    /* Done when ENTER is pressed. */
+    IF AID = '7D' THEN
+      LEAVE
+  END
+
+  /* Turn the user input into JSON. */
+  CALL JSON_CLEAR
+  CALL JSON_SET_OBJECT
+  CALL JSON_NEW_STRING 'name',   TEST_SCR.TNAME
+  CALL JSON_NEW_STRING 'json',   TEST_SCR.TJSON1 || TEST_SCR.TJSON2  || TEST_SCR.TJSON3
+  IF UPPER(TEST_SCR.TRC) = 'TRUE' THEN
+    CALL JSON_NEW_TRUE 'rc'
+  ELSE IF UPPER(TEST_SCR.TRC) = 'FALSE' THEN
+    CALL JSON_NEW_FALSE 'rc'
+  ELSE IF UPPER(TEST_SCR.TRC) = 'NULL' THEN
+    CALL JSON_NEW_NULL 'rc'
+  ELSE IF DATATYPE(TEST_SCR.TRC, 'N') THEN
+    CALL JSON_NEW_NUMBER 'rc',     TEST_SCR.TRC
+  ELSE IF TEST_SCR.TRC \= '' THEN
+    CALL JSON_NEW_STRING 'rc',     TEST_SCR.TRC
+  IF UPPER(TEST_SCR.TERROR) = 'TRUE' THEN
+    CALL JSON_NEW_TRUE 'error'
+  ELSE IF UPPER(TEST_SCR.TERROR) = 'FALSE' THEN
+    CALL JSON_NEW_FALSE 'error'
+  ELSE IF TEST_SCR.TERROR \= '' THEN
+    CALL JSON_NEW_STRING 'error',  TEST_SCR.TERROR
+  IF TEST_SCR.TSTRING \= '' THEN CALL JSON_NEW_STRING 'string', TEST_SCR.TSTRING
+  IF TEST_SCR.TPATH   \= '' THEN CALL JSON_NEW_STRING 'path',   TEST_SCR.TPATH
+  IF TEST_SCR.TFUNC   \= '' THEN CALL JSON_NEW_STRING 'func',   TEST_SCR.TFUNC
+  IF TEST_SCR.TARG1   \= '' THEN CALL JSON_NEW_STRING 'arg1',   TEST_SCR.TARG1
+  IF TEST_SCR.TARG2   \= '' THEN CALL JSON_NEW_STRING 'arg2',   TEST_SCR.TARG2
+  IF TEST_SCR.TARG3   \= '' THEN CALL JSON_NEW_STRING 'arg3',   TEST_SCR.TARG3
+  IF DATATYPE(TEST_SCR.TRESULT, 'N') THEN
+    CALL JSON_NEW_NUMBER 'result', TEST_SCR.TRESULT
+  ELSE IF TEST_SCR.TRESULT \= '' THEN
+    CALL JSON_NEW_STRING 'result', TEST_SCR.TRESULT
+
+  /* Return the JSON as a string. */
+  RETURN JSON_STRING()
+
 /* JSON Pretty Print ==================================================== */
 
 /* Run the JSON Tests then display the result. */
@@ -4443,7 +4794,12 @@ _CONS_PRETTY: PROCEDURE EXPOSE CONS_DATA. CONS_SCR. CONS_HELP. JSON. JSON_TESTS.
   SAVE.SCROLL_AMT = CONS_DATA.SCROLL_AMT
 
   /* Pretty print the parsed JSON. */
-  RC = JSON_PRETTY(ARG(1), ARG(2))
+  IF ARG() = 0 THEN
+    RC = JSON_PRETTY()
+  ELSE IF ARG() = 1 THEN
+    RC = JSON_PRETTY(ARG(1))
+  ELSE
+    RC = JSON_PRETTY(ARG(1), ARG(2))
   IF RC < 0 THEN
     RETURN RC
 
@@ -4453,7 +4809,7 @@ _CONS_PRETTY: PROCEDURE EXPOSE CONS_DATA. CONS_SCR. CONS_HELP. JSON. JSON_TESTS.
   CALL _CONS_DATA_LOAD
   CALL _CONS_FILL_SCR
 
-  /* Test result loop. */
+  /* Pretty Print result loop. */
   CALL _CONS_LOOP 'JSONPRETTY'
 
   /* Restore state. */
